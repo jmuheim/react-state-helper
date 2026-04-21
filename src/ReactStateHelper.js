@@ -1,4 +1,5 @@
-export class ReactStateHelper {
+// Copy and paste the following code into MobileCoach EXCEPT the last line `export { ... }`!
+class ReactStateHelper {
   #state;
 
   static fromString(json) {
@@ -52,3 +53,6 @@ export class ReactStateHelper {
     return this.#state.suggestionSeen === true;
   }
 }
+
+// Ignore this line when copying into MobileCoach!
+export { ReactStateHelper };
