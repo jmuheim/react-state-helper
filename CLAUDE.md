@@ -47,24 +47,4 @@ o // Will be returned at the end of the script
 
 ## Copy-pasting into MobileCoach
 
-Remove these two lines from ReactStateHelper.js before pasting:
-- The `// Remove the export line below...` comment and the `class` line becomes just `class ReactStateHelper {`
-- The final `export { ReactStateHelper };` line
-
-Typical MobileCoach script using ReactStateHelper:
-
-```js
-// 1. Paste ReactStateHelper class definition here (without export lines)
-
-// 2. Load state from a MobileCoach variable, manipulate it, write it back
-const helper = ReactStateHelper.fromString($stateJson);
-helper.markTaskCompleted('chapter1', 'video');
-
-let o = {};
-o = {
-  stateJson: helper.toString(),         // → $stateJson
-  progress:  helper.getProgress(),      // → $progress
-  goodEnough: helper.isGoodEnough(),    // → $goodEnough
-};
-o
-```
+Copy the full contents of `src/ReactStateHelper.js` into MobileCoach and uncomment the template at the bottom of the file.

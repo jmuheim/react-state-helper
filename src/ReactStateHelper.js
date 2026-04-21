@@ -95,7 +95,7 @@ class ReactStateHelper {
 globalThis.ReactStateHelper = ReactStateHelper;
 
 // UNCOMMENT FROM HERE when copy+pasting to MobileCoach!
-// const helper = ReactStateHelper.fromString($stateJson);
+// const helper = ReactStateHelper.fromString('$stateJson');
 // helper.markTaskCompleted('chapter1', 'video');
 // let o = {
 //   stateJson: helper.toString() // Saved to MobileCoach as $stateJson
