@@ -1,22 +1,19 @@
+// ReactStateHelper, see https://github.com/jmuheim/react-state-helper
+
 // Copy and paste the following code into MobileCoach and uncomment the code at the end!
 class ReactStateHelper {
   #state;
 
-  static fromString(json) {
+  static initDefaultState() {
     const helper = new ReactStateHelper();
-    helper.#state = ReactStateHelper.#initOrLoadExistingState(json);
+    helper.#state = this.initialState();
     return helper;
   }
 
-  static #initOrLoadExistingState(json) {
-    // String content available, restore saved state!
-    if (json && json.trim()) {
-      return JSON.parse(json);
-
-    // Very first app start: no string content available, so start fresh with the default state!
-    } else {
-      return ReactStateHelper.initialState();
-    }
+  static loadExistingState(json) {
+    const helper = new ReactStateHelper();
+    helper.#state = JSON.parse(json);
+    return helper;
   }
 
   static initialState() {
@@ -102,12 +99,29 @@ class ReactStateHelper {
 
 globalThis.ReactStateHelper = ReactStateHelper;
 
-// UNCOMMENT FROM HERE when copy+pasting to MobileCoach!
-// const helper = ReactStateHelper.fromString('$jsStateHelperJson');
-// const result = eval(`helper.$jsStateHelperCmd`); // e.g. $jsStateHelperCmd = "isTaskCompleted('bouMgt', 'sayNo')"
-// let o = {
-//   jsStateHelperJson:   helper.toString(),  // Saved to MobileCoach as $jsStateHelperJson
-//   jsStateHelperResult: result              // Saved to MobileCoach as $jsStateHelperResult
-// };
-// o
-// UNCOMMENT UNTIL HERE when copy+pasting to MobileCoach!
+// The following code should only be executed inside MobileCoach!
+//
+// For this we examine `process`, which is a Node.js global absent in MobileCoach.
+if (typeof process === 'undefined') {
+  // $jsStateHelperJson is a MobileCoach variable interpolated into this script before execution.
+  // It holds the serialized state from the previous run, or empty string on the very first run.
+  const jsStateHelperJson = '$jsStateHelperJson';
+
+  // Initialises the helper with the state from the previous run (if existing);
+  // otherwise with the default state (fresh start of the app).
+  const helper = jsStateHelperJson ? ReactStateHelper.loadExistingState(jsStateHelperJson) : ReactStateHelper.initDefaultState();
+
+  // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
+  // - $jsStateHelperCmd = "isTaskCompleted('bouMgt', 'sayNo')"
+  // - $jsStateHelperCmd = "markTaskCompleted('bouMgt', 'sayNo')"
+  // - $jsStateHelperCmd = "countCompletedInModule('bouMgt')"
+  // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
+  // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
+  const result = eval(`helper.$jsStateHelperCmd`);
+
+  let o = {
+    jsStateHelperJson:   helper.toString(),  // Saved to MobileCoach as $jsStateHelperJson
+    jsStateHelperResult: result              // Saved to MobileCoach as $jsStateHelperResult
+  };
+  o
+}

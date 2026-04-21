@@ -5,17 +5,19 @@ describe('ReactStateHelper', () => {
   let helper;
 
   beforeEach(() => {
-    helper = ReactStateHelper.fromString('');
+    helper = ReactStateHelper.initDefaultState();
   });
 
-  describe('fromString', () => {
-    it('initializes default state when given an empty string', () => {
+  describe('initDefaultState', () => {
+    it('initializes the default state', () => {
       expect(helper.toString()).toBe(JSON.stringify(ReactStateHelper.initialState()));
     });
+  });
 
+  describe('loadExistingState', () => {
     it('loads persisted state from JSON', () => {
       helper.markTaskCompleted('bouMgt', 'rolCha');
-      const restored = ReactStateHelper.fromString(helper.toString());
+      const restored = ReactStateHelper.loadExistingState(helper.toString());
       expect(restored.isTaskCompleted('bouMgt', 'rolCha')).toBe(true);
     });
   });
@@ -23,7 +25,7 @@ describe('ReactStateHelper', () => {
   describe('toString', () => {
     it('round-trips state without mutation', () => {
       const json = helper.toString();
-      expect(ReactStateHelper.fromString(json).toString()).toBe(json);
+      expect(ReactStateHelper.loadExistingState(json).toString()).toBe(json);
     });
   });
 
@@ -151,7 +153,7 @@ describe('ReactStateHelper', () => {
 
     it('persists through serialization', () => {
       helper.markSuggestionSeen();
-      const restored = ReactStateHelper.fromString(helper.toString());
+      const restored = ReactStateHelper.loadExistingState(helper.toString());
       expect(restored.isSuggestionSeen()).toBe(true);
     });
 
