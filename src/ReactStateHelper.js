@@ -1,4 +1,4 @@
-// Copy and paste the following code into MobileCoach EXCEPT the last line `export { ReactStateHelper };`!
+// Copy and paste the following code into MobileCoach and uncomment the code at the end!
 class ReactStateHelper {
   #state;
 
@@ -81,5 +81,12 @@ class ReactStateHelper {
   }
 }
 
-// Ignore this line when copying into MobileCoach!
-export { ReactStateHelper };
+globalThis.ReactStateHelper = ReactStateHelper;
+
+// UNCOMMENT FROM HERE when copy+pasting to MobileCoach!
+// const helper = ReactStateHelper.fromString($stateJson);
+// helper.markTaskCompleted('chapter1', 'video');
+// let o = {
+//   stateJson: helper.toString() // Saved to MobileCoach as $stateJson
+// };
+// UNCOMMENT UNTIL HERE when copy+pasting to MobileCoach!

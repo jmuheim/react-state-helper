@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ReactStateHelper } from '../src/ReactStateHelper.js';
 
 // Default fixture: bouMgt (rolCha, sayNo) + emoReg (breCon) — all incomplete
 describe('ReactStateHelper', () => {
