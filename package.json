@@ -1,12 +1,16 @@
 {
   "name": "react-state-helper",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "type": "module",
+  "description": "A small JavaScript helper library for managing modular app state, designed for use in MobileCoach.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Josua",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^4.1.4"
+  }
 }
