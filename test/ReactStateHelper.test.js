@@ -84,31 +84,58 @@ describe('ReactStateHelper', () => {
       expect(helper.getProgress()).toBe(0);
     });
 
-    it('returns the fraction of completed tasks (1 of 3)', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      expect(helper.getProgress()).toBeCloseTo(1 / 3);
-    });
-
     it('returns 1 when all tasks are completed', () => {
       helper.markTaskCompleted('bouMgt', 'rolCha');
       helper.markTaskCompleted('bouMgt', 'sayNo');
+      helper.markTaskCompleted('bouMgt', 'limSet');
       helper.markTaskCompleted('emoReg', 'breCon');
       expect(helper.getProgress()).toBe(1);
     });
   });
 
-  describe('isGoodEnough', () => {
-    it('returns false when fewer than 3 tasks are completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
-      expect(helper.isGoodEnough()).toBe(false);
+  describe('getModuleProgress', () => {
+    it('returns 0 for all modules in the default state', () => {
+      expect(helper.getModuleProgress('bouMgt')).toBe(0);
+      expect(helper.getModuleProgress('emoReg')).toBe(0);
     });
 
-    it('returns true when all 3 tasks are completed', () => {
+    it('returns the fraction of completed tasks within the module (1 of 3)', () => {
+      helper.markTaskCompleted('bouMgt', 'rolCha');
+      expect(helper.getModuleProgress('bouMgt')).toBeCloseTo(1 / 3);
+    });
+
+    it('does not count tasks from other modules', () => {
+      helper.markTaskCompleted('emoReg', 'breCon');
+      expect(helper.getModuleProgress('bouMgt')).toBe(0);
+    });
+
+    it('returns 1 when all tasks in the module are completed', () => {
+      helper.markTaskCompleted('bouMgt', 'rolCha');
+      helper.markTaskCompleted('bouMgt', 'sayNo');
+      helper.markTaskCompleted('bouMgt', 'limSet');
+      expect(helper.getModuleProgress('bouMgt')).toBe(1);
+    });
+  });
+
+  describe('isGoodEnough', () => {
+    it('returns false when fewer than 3 tasks are completed in the module', () => {
+      helper.markTaskCompleted('bouMgt', 'rolCha');
+      helper.markTaskCompleted('bouMgt', 'sayNo');
+      expect(helper.isGoodEnough('bouMgt')).toBe(false);
+    });
+
+    it('returns true when 3 tasks are completed in the module', () => {
+      helper.markTaskCompleted('bouMgt', 'rolCha');
+      helper.markTaskCompleted('bouMgt', 'sayNo');
+      helper.markTaskCompleted('bouMgt', 'limSet');
+      expect(helper.isGoodEnough('bouMgt')).toBe(true);
+    });
+
+    it('does not count tasks from other modules', () => {
       helper.markTaskCompleted('bouMgt', 'rolCha');
       helper.markTaskCompleted('bouMgt', 'sayNo');
       helper.markTaskCompleted('emoReg', 'breCon');
-      expect(helper.isGoodEnough()).toBe(true);
+      expect(helper.isGoodEnough('bouMgt')).toBe(false);
     });
   });
 

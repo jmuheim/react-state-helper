@@ -28,6 +28,7 @@ class ReactStateHelper {
           tasks: [
             { id: "rolCha", title: "Rollenwechsel bewusst vollziehen", completed: false },
             { id: "sayNo",  title: "Nein sagen üben",                  completed: false },
+            { id: "limSet", title: "Grenzen setzen",                   completed: false },
           ],
         },
         {
@@ -69,8 +70,15 @@ class ReactStateHelper {
     return all.filter(t => t.completed).length / all.length;
   }
 
-  isGoodEnough() {
-    return this.countCompletedOverall() >= 3;
+  // Returns a value between 0 and 1 for the given module
+  getModuleProgress(moduleId) {
+    const tasks = this.#findModule(moduleId).tasks;
+    if (tasks.length === 0) return 0;
+    return tasks.filter(t => t.completed).length / tasks.length;
+  }
+
+  isGoodEnough(moduleId) {
+    return this.countCompletedInModule(moduleId) >= 3;
   }
 
   markSuggestionSeen() {
@@ -95,9 +103,11 @@ class ReactStateHelper {
 globalThis.ReactStateHelper = ReactStateHelper;
 
 // UNCOMMENT FROM HERE when copy+pasting to MobileCoach!
-// const helper = ReactStateHelper.fromString('$stateJson');
-// helper.markTaskCompleted('chapter1', 'video');
+// const helper = ReactStateHelper.fromString('$jsStateHelperJson');
+// const result = eval(`helper.$jsStateHelperCmd`); // e.g. $jsStateHelperCmd = "isTaskCompleted('bouMgt', 'sayNo')"
 // let o = {
-//   stateJson: helper.toString() // Saved to MobileCoach as $stateJson
+//   jsStateHelperJson:   helper.toString(),  // Saved to MobileCoach as $jsStateHelperJson
+//   jsStateHelperResult: result              // Saved to MobileCoach as $jsStateHelperResult
 // };
+// o
 // UNCOMMENT UNTIL HERE when copy+pasting to MobileCoach!
