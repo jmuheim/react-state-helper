@@ -1,11 +1,34 @@
-// Copy and paste the following code into MobileCoach EXCEPT the last line `export { ... }`!
+// Copy and paste the following code into MobileCoach EXCEPT the last line `export { ReactStateHelper };`!
 class ReactStateHelper {
   #state;
 
   static fromString(json) {
     const helper = new ReactStateHelper();
-    helper.#state = JSON.parse(json);
+    helper.#state = (json && json.trim()) ? JSON.parse(json) : ReactStateHelper.#initialState();
     return helper;
+  }
+
+  static #initialState() {
+    return {
+      modules: [
+        {
+          id: "bouMgt",
+          title: "Boundary Management",
+          tasks: [
+            { id: "rolCha", title: "Rollenwechsel bewusst vollziehen", completed: false },
+            { id: "sayNo",  title: "Nein sagen üben",                  completed: false },
+          ],
+        },
+        {
+          id: "emoReg",
+          title: "Emotionsregulation",
+          tasks: [
+            { id: "breCon", title: "Bewusstes Atmen", completed: false },
+          ],
+        },
+      ],
+      suggestionSeen: false,
+    };
   }
 
   toString() {
@@ -13,28 +36,24 @@ class ReactStateHelper {
   }
 
   markTaskCompleted(moduleId, taskId) {
-    this.#state.modules[moduleId].tasks[taskId].completed = true;
+    this.#findTask(moduleId, taskId).completed = true;
   }
 
   isTaskCompleted(moduleId, taskId) {
-    return this.#state.modules[moduleId].tasks[taskId].completed === true;
+    return this.#findTask(moduleId, taskId).completed === true;
   }
 
   countCompletedInModule(moduleId) {
-    return Object.values(this.#state.modules[moduleId].tasks)
-      .filter(t => t.completed).length;
+    return this.#findModule(moduleId).tasks.filter(t => t.completed).length;
   }
 
   countCompletedOverall() {
-    return Object.values(this.#state.modules)
-      .flatMap(m => Object.values(m.tasks))
-      .filter(t => t.completed).length;
+    return this.#state.modules.flatMap(m => m.tasks).filter(t => t.completed).length;
   }
 
   // Returns a value between 0 and 1
   getProgress() {
-    const all = Object.values(this.#state.modules)
-      .flatMap(m => Object.values(m.tasks));
+    const all = this.#state.modules.flatMap(m => m.tasks);
     if (all.length === 0) return 0;
     return all.filter(t => t.completed).length / all.length;
   }
@@ -51,6 +70,14 @@ class ReactStateHelper {
 
   isSuggestionSeen() {
     return this.#state.suggestionSeen === true;
+  }
+
+  #findModule(moduleId) {
+    return this.#state.modules.find(m => m.id === moduleId);
+  }
+
+  #findTask(moduleId, taskId) {
+    return this.#findModule(moduleId).tasks.find(t => t.id === taskId);
   }
 }
 
