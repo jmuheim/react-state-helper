@@ -10,7 +10,7 @@ describe('ReactStateHelper', () => {
 
   describe('fromString', () => {
     it('initializes default state when given an empty string', () => {
-      expect(helper.countCompletedOverall()).toBe(0);
+      expect(helper.toString()).toBe(JSON.stringify(ReactStateHelper.initialState()));
     });
 
     it('loads persisted state from JSON', () => {

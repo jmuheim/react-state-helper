@@ -4,11 +4,22 @@ class ReactStateHelper {
 
   static fromString(json) {
     const helper = new ReactStateHelper();
-    helper.#state = (json && json.trim()) ? JSON.parse(json) : ReactStateHelper.#initialState();
+    helper.#state = ReactStateHelper.#initOrLoadExistingState(json);
     return helper;
   }
 
-  static #initialState() {
+  static #initOrLoadExistingState(json) {
+    // String content available, restore saved state!
+    if (json && json.trim()) {
+      return JSON.parse(json);
+
+    // Very first app start: no string content available, so start fresh with the default state!
+    } else {
+      return ReactStateHelper.initialState();
+    }
+  }
+
+  static initialState() {
     return {
       modules: [
         {
