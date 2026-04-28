@@ -5,13 +5,13 @@ class ReactStateHelper {
   #state;
 
   static initDefaultState() {
-    const helper = new ReactStateHelper();
+    const helper = new this();
     helper.#state = this.initialState();
     return helper;
   }
 
   static loadExistingState(json) {
-    const helper = new ReactStateHelper();
+    const helper = new this();
     helper.#state = JSON.parse(json);
     return helper;
   }
@@ -107,9 +107,9 @@ if (typeof process === 'undefined') {
   // It holds the serialized state from the previous run, or empty string on the very first run.
   const jsStateHelperJson = '$jsStateHelperJson';
 
-  // Initialises the helper with the state from the previous run (if existing);
-  // otherwise with the default state (fresh start of the app).
-  const helper = jsStateHelperJson ? ReactStateHelper.loadExistingState(jsStateHelperJson) : ReactStateHelper.initDefaultState();
+  // Initialises the helper with the state from the previous run ($jsStateHelperJson in MobileCoach);
+  // otherwise initialise default state (fresh start of the app).
+  const helper = jsStateHelperJson == 'not-yet-initialised' ? ReactStateHelper.initDefaultState() : ReactStateHelper.loadExistingState(jsStateHelperJson);
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
   // - $jsStateHelperCmd = "isTaskCompleted('bouMgt', 'sayNo')"
@@ -117,11 +117,12 @@ if (typeof process === 'undefined') {
   // - $jsStateHelperCmd = "countCompletedInModule('bouMgt')"
   // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
+  // Please be extra careful! Typos or syntax errors will break this!
   const result = eval(`helper.$jsStateHelperCmd`);
 
   let o = {
-    jsStateHelperJson:   helper.toString(),  // Saved to MobileCoach as $jsStateHelperJson
-    jsStateHelperResult: result              // Saved to MobileCoach as $jsStateHelperResult
+    jsStateHelperJson:   helper.toString(),  // Save state to MobileCoach as $jsStateHelperJson
+    jsStateHelperResult: result,             // Save command result to MobileCoach as $jsStateHelperResult
   };
   o
 }
