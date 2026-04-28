@@ -1,6 +1,6 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
 //
-// Create the following variables in your MobileCoach project (each with value 0):
+// Create the following variables in your MobileCoach project (each with value 0 and access "manageable by service"):
 // - $jsStateHelperCmd
 // - $jsStateHelperError
 // - $jsStateHelperJson
