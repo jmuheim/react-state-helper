@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-// Default fixture: bouMgt (rolCha, sayNo) + emoReg (breCon) — all incomplete
 describe('ReactStateHelper', () => {
   let helper;
 
@@ -87,10 +86,9 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns 1 when all tasks are completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
-      helper.markTaskCompleted('bouMgt', 'limSet');
-      helper.markTaskCompleted('emoReg', 'breCon');
+      for (const module of ReactStateHelper.initialState().modules)
+        for (const task of module.tasks)
+          helper.markTaskCompleted(module.id, task.id);
       expect(helper.getProgress()).toBe(1);
     });
   });
@@ -101,9 +99,9 @@ describe('ReactStateHelper', () => {
       expect(helper.getModuleProgress('emoReg')).toBe(0);
     });
 
-    it('returns the fraction of completed tasks within the module (1 of 3)', () => {
+    it('returns the fraction of completed tasks within the module (1 of 5)', () => {
       helper.markTaskCompleted('bouMgt', 'rolCha');
-      expect(helper.getModuleProgress('bouMgt')).toBeCloseTo(1 / 3);
+      expect(helper.getModuleProgress('bouMgt')).toBeCloseTo(1 / 5);
     });
 
     it('does not count tasks from other modules', () => {
@@ -112,9 +110,9 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns 1 when all tasks in the module are completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
-      helper.markTaskCompleted('bouMgt', 'limSet');
+      const tasks = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').tasks;
+      for (const task of tasks)
+        helper.markTaskCompleted('bouMgt', task.id);
       expect(helper.getModuleProgress('bouMgt')).toBe(1);
     });
   });
