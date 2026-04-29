@@ -242,6 +242,7 @@ if (typeof process === 'undefined') {
   // otherwise initialise default state (fresh start of the app).
   let helper;
   try {
+    if (jsStateHelperJson === '0') throw new Error(); // MobileCoach default for uninitialised variables
     JSON.parse(jsStateHelperJson);
     helper = ReactStateHelper.loadExistingState(jsStateHelperJson);
   } catch {
