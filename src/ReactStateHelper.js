@@ -233,7 +233,7 @@ class ReactStateHelper {
   getParticipantGroup() {
     const { currentModuleId, currentTaskId } = this.#state;
     if (!currentModuleId || !currentTaskId) return null;
-    return `${currentModuleId}: ${currentTaskId}`;
+    return currentModuleId + ': ' + currentTaskId;
   }
 
   allCompletedTasksAsCsv() {
