@@ -6,6 +6,7 @@
 // - $jsStateHelperJson
 // - $jsStateHelperResult
 // - $jsStateHelperStatus
+// - $jsStateHelperTasksCompleted
 
 // Copy and paste the following code into MobileCoach and uncomment the code at the end!
 class ReactStateHelper {
@@ -266,11 +267,11 @@ if (typeof process === 'undefined') {
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. jsStateHelperJson becomes $jsStateHelperJson.
-    jsStateHelperJson:   helper.toString(),
-    jsStateHelperResult: result,
-    jsStateHelperStatus: status,
-    jsStateHelperError:  error || 'none',
-    tasksCompleted: helper.allCompletedTasksAsCsv()
+    jsStateHelperJson:           helper.toString(),
+    jsStateHelperResult:         result,
+    jsStateHelperStatus:         status,
+    jsStateHelperError:          error || 'none',
+    jsStateHelperTasksCompleted: helper.allCompletedTasksAsCsv()
   };
   o
 }
