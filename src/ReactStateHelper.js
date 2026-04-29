@@ -28,6 +28,15 @@ class ReactStateHelper {
     return {
       modules: [
         {
+          id: "onboard",
+          title: "Onboarding",
+          entered_first_at: null,
+          times_entered: 0,
+          tasks: [
+            { id: "introd", title: "Einführung", completed: false },
+          ],
+        },
+        {
           id: "bouMgt",
           title: "Boundary Management",
           entered_first_at: null,
@@ -160,6 +169,8 @@ class ReactStateHelper {
         },
       ],
       suggestionSeen: false,
+      currentModuleId: null,
+      currentTaskId: null,
     };
   }
 
@@ -209,6 +220,20 @@ class ReactStateHelper {
 
   isSuggestionSeen() {
     return this.#state.suggestionSeen === true;
+  }
+
+  enterModuleAndTask(moduleId, taskId) {
+    this.#state.currentModuleId = moduleId;
+    this.#state.currentTaskId = taskId;
+    const module = this.#findModule(moduleId);
+    if (!module.entered_first_at) module.entered_first_at = new Date().toISOString();
+    module.times_entered++;
+  }
+
+  getParticipantGroup() {
+    const { currentModuleId, currentTaskId } = this.#state;
+    if (!currentModuleId || !currentTaskId) return null;
+    return `${currentModuleId}: ${currentTaskId}`;
   }
 
   allCompletedTasksAsCsv() {
@@ -271,8 +296,9 @@ if (typeof process === 'undefined') {
     jsStateHelperJson:           helper.toString(),
     jsStateHelperResult:         result,
     jsStateHelperStatus:         status,
-    jsStateHelperError:          error || 'none',
-    jsStateHelperTasksCompleted: helper.allCompletedTasksAsCsv()
+    jsStateHelperError:          error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    jsStateHelperTasksCompleted: helper.allCompletedTasksAsCsv(),
+    participantGroup:            helper.getParticipantGroup()
   };
   o
 }

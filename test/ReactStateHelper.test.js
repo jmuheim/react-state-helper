@@ -157,6 +157,45 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('enterModuleAndTask / getParticipantGroup', () => {
+    it('returns null before any module has been entered', () => {
+      expect(helper.getParticipantGroup()).toBeNull();
+    });
+
+    it('returns "moduleId: taskId" after entering a module and task', () => {
+      helper.enterModuleAndTask('strMgt', 'staTec');
+      expect(helper.getParticipantGroup()).toBe('strMgt: staTec');
+    });
+
+    it('updates to the most recently entered module and task', () => {
+      helper.enterModuleAndTask('strMgt', 'staTec');
+      helper.enterModuleAndTask('bouMgt', 'sayNo');
+      expect(helper.getParticipantGroup()).toBe('bouMgt: sayNo');
+    });
+
+    it('sets entered_first_at on first entry and does not overwrite it', () => {
+      helper.enterModuleAndTask('strMgt', 'staTec');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'strMgt').entered_first_at;
+      expect(first).not.toBeNull();
+      helper.enterModuleAndTask('strMgt', 'staTec');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'strMgt').entered_first_at;
+      expect(second).toBe(first);
+    });
+
+    it('increments times_entered on each entry', () => {
+      helper.enterModuleAndTask('strMgt', 'staTec');
+      helper.enterModuleAndTask('strMgt', 'priSet');
+      const mod = JSON.parse(helper.toString()).modules.find(m => m.id === 'strMgt');
+      expect(mod.times_entered).toBe(2);
+    });
+
+    it('persists through serialization', () => {
+      helper.enterModuleAndTask('strMgt', 'staTec');
+      const restored = ReactStateHelper.loadExistingState(helper.toString());
+      expect(restored.getParticipantGroup()).toBe('strMgt: staTec');
+    });
+  });
+
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {
       expect(helper.isSuggestionSeen()).toBe(false);
