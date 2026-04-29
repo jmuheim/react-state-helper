@@ -139,6 +139,24 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('allCompletedTasksAsCsv', () => {
+    it('returns an empty string in the default state', () => {
+      expect(helper.allCompletedTasksAsCsv()).toBe('');
+    });
+
+    it('returns a single task id when one task is completed', () => {
+      helper.markTaskCompleted('bouMgt', 'rolCha');
+      expect(helper.allCompletedTasksAsCsv()).toBe('rolCha');
+    });
+
+    it('returns comma-separated ids across modules in order', () => {
+      helper.markTaskCompleted('bouMgt', 'rolCha');
+      helper.markTaskCompleted('bouMgt', 'sayNo');
+      helper.markTaskCompleted('emoReg', 'breCon');
+      expect(helper.allCompletedTasksAsCsv()).toBe('rolCha,sayNo,breCon');
+    });
+  });
+
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {
       expect(helper.isSuggestionSeen()).toBe(false);

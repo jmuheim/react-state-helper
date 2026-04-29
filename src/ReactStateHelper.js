@@ -210,6 +210,14 @@ class ReactStateHelper {
     return this.#state.suggestionSeen === true;
   }
 
+  allCompletedTasksAsCsv() {
+    return this.#state.modules
+      .flatMap(m => m.tasks)
+      .filter(t => t.completed)
+      .map(t => t.id)
+      .join(',');
+  }
+
   #findModule(moduleId) {
     return this.#state.modules.find(m => m.id === moduleId);
   }
@@ -262,6 +270,7 @@ if (typeof process === 'undefined') {
     jsStateHelperResult: result,
     jsStateHelperStatus: status,
     jsStateHelperError:  error || 'none',
+    tasksCompleted: helper.allCompletedTasksAsCsv()
   };
   o
 }
