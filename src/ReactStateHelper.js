@@ -222,7 +222,7 @@ class ReactStateHelper {
     return this.#state.suggestionSeen === true;
   }
 
-  enterModuleAndTask(moduleId, taskId) {
+  enterTask(moduleId, taskId) {
     this.#state.currentModuleId = moduleId;
     this.#state.currentTaskId = taskId;
     const module = this.#findModule(moduleId);
