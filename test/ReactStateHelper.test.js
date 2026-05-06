@@ -163,36 +163,36 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns "moduleId: taskId" after entering a task', () => {
-      helper.enterTask('strMgt', 'staTec');
-      expect(helper.getParticipantGroup()).toBe('strMgt: staTec');
+      helper.enterTask('bouMgt', 'rolCha');
+      expect(helper.getParticipantGroup()).toBe('bouMgt: rolCha');
     });
 
     it('updates to the most recently entered task', () => {
-      helper.enterTask('strMgt', 'staTec');
-      helper.enterTask('bouMgt', 'sayNo');
-      expect(helper.getParticipantGroup()).toBe('bouMgt: sayNo');
+      helper.enterTask('bouMgt', 'rolCha');
+      helper.enterTask('emoReg', 'breCon');
+      expect(helper.getParticipantGroup()).toBe('emoReg: breCon');
     });
 
     it('sets entered_first_at on first entry and does not overwrite it', () => {
-      helper.enterTask('strMgt', 'staTec');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'strMgt').entered_first_at;
+      helper.enterTask('bouMgt', 'rolCha');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_first_at;
       expect(first).not.toBeNull();
-      helper.enterTask('strMgt', 'staTec');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'strMgt').entered_first_at;
+      helper.enterTask('bouMgt', 'rolCha');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_first_at;
       expect(second).toBe(first);
     });
 
     it('increments times_entered on each entry', () => {
-      helper.enterTask('strMgt', 'staTec');
-      helper.enterTask('strMgt', 'priSet');
-      const mod = JSON.parse(helper.toString()).modules.find(m => m.id === 'strMgt');
+      helper.enterTask('bouMgt', 'rolCha');
+      helper.enterTask('bouMgt', 'sayNo');
+      const mod = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt');
       expect(mod.times_entered).toBe(2);
     });
 
     it('persists through serialization', () => {
-      helper.enterTask('strMgt', 'staTec');
+      helper.enterTask('bouMgt', 'rolCha');
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.getParticipantGroup()).toBe('strMgt: staTec');
+      expect(restored.getParticipantGroup()).toBe('bouMgt: rolCha');
     });
   });
 
