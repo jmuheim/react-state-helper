@@ -300,6 +300,24 @@ describe('ReactStateHelper', () => {
       helper.enterModule('bouMgt');
       expect(() => helper.enterSession('breCon')).toThrow('Session breCon not found in module bouMgt');
     });
+
+    it('enterModule resets currentSessionId and currentActivityId', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      helper.enterModule('emoReg');
+      const state = JSON.parse(helper.toString());
+      expect(state.currentSessionId).toBeNull();
+      expect(state.currentActivityId).toBeNull();
+    });
+
+    it('enterSession resets currentActivityId', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      helper.enterSession('sayNo');
+      expect(JSON.parse(helper.toString()).currentActivityId).toBeNull();
+    });
   });
 
   describe('enterActivity', () => {

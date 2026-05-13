@@ -262,11 +262,14 @@ class ReactStateHelper {
     const module = this.#findModule(moduleId);
     if (!module) throw new Error('Module ' + moduleId + ' not found');
     this.#state.currentModuleId = moduleId;
+    this.#state.currentSessionId = null;
+    this.#state.currentActivityId = null;
     module.enter();
   }
 
   enterSession(sessionId) {
     this.#state.currentSessionId = this.#findSession(sessionId).id;
+    this.#state.currentActivityId = null;
   }
 
   enterActivity(activityId) {
