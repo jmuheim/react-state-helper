@@ -219,8 +219,9 @@ class ReactStateHelper {
     this.#findActivity(this.#state.currentActivityId).markCompleted();
   }
 
-  isSessionCompleted(moduleId, sessionId) {
-    return this.#findModule(moduleId).findSession(sessionId).isCompleted();
+  isSessionCompleted(sessionId) {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    return this.#findModule(this.#state.currentModuleId).findSession(sessionId).isCompleted();
   }
 
   countCompletedInModule(moduleId) {

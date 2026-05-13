@@ -20,7 +20,7 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
+      expect(restored.isSessionCompleted('rolCha')).toBe(true);
     });
   });
 
@@ -64,16 +64,18 @@ describe('ReactStateHelper', () => {
 
   describe('isSessionCompleted', () => {
     it('returns false for all sessions in the default state', () => {
-      expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(false);
-      expect(helper.isSessionCompleted('bouMgt', 'sayNo')).toBe(false);
-      expect(helper.isSessionCompleted('emoReg', 'breCon')).toBe(false);
+      helper.enterModule('bouMgt');
+      expect(helper.isSessionCompleted('rolCha')).toBe(false);
+      expect(helper.isSessionCompleted('sayNo')).toBe(false);
+      helper.enterModule('emoReg');
+      expect(helper.isSessionCompleted('breCon')).toBe(false);
     });
 
     it('returns false when only some activities are completed', () => {
       helper.enterModule('bouMgt');
       helper.enterSession('rolCha');
       helper.enterActivity('somAct'); helper.markActivityCompleted();
-      expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(false);
+      expect(helper.isSessionCompleted('rolCha')).toBe(false);
     });
 
     it('returns true when all activities are completed', () => {
@@ -81,7 +83,11 @@ describe('ReactStateHelper', () => {
       helper.enterSession('rolCha');
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
-      expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
+      expect(helper.isSessionCompleted('rolCha')).toBe(true);
+    });
+
+    it('throws if no module has been entered', () => {
+      expect(() => helper.isSessionCompleted('rolCha')).toThrow('No module entered yet');
     });
   });
 
