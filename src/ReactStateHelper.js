@@ -136,14 +136,27 @@ class ReactStateHelper {
           entered_first_at: null,
           times_entered: 0,
           sessions: [
-            { id: "introd",
+            {
+              id: "introd",
               title: "Einführung",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "globGoal", title: "Globales Ziel definieren", entered_first_at: null, times_entered: 0, completed: false },
-                { id: "howEdu", title: "Psychoedukation: wie bewandert...?", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "globGoal",
+                  title: "Globales Ziel definieren",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+                {
+                  id: "howEdu",
+                  title: "Psychoedukation: wie bewandert...?",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
           ],
         },
@@ -153,46 +166,87 @@ class ReactStateHelper {
           entered_first_at: null,
           times_entered: 0,
           sessions: [
-            { id: "rolCha",
+            {
+              id: "rolCha",
               title: "Rollenwechsel bewusst vollziehen",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "somAct", title: "Eine erste Übung", entered_first_at: null, times_entered: 0, completed: false },
-                { id: "othAct", title: "Eine andere Übung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "somAct",
+                  title: "Eine erste Übung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+                {
+                  id: "othAct",
+                  title: "Eine andere Übung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "sayNo",
+            {
+              id: "sayNo",
               title: "Nein sagen üben",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "sayNoAct", title: "Nein sagen Übung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "sayNoAct",
+                  title: "Nein sagen Übung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "limSet",
+            {
+              id: "limSet",
               title: "Grenzen setzen",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "limSetAct", title: "Grenzen setzen Übung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "limSetAct",
+                  title: "Grenzen setzen Übung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "worBou",
+            {
+              id: "worBou",
               title: "Arbeitliche Grenzen kommunizieren",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "worBouAct", title: "Arbeitsgrenzen Übung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "worBouAct",
+                  title: "Arbeitsgrenzen Übung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "digDet",
+            {
+              id: "digDet",
               title: "Digitale Auszeiten einhalten",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "digDetAct", title: "Digitale Auszeit Übung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "digDetAct",
+                  title: "Digitale Auszeit Übung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
           ],
         },
@@ -202,37 +256,65 @@ class ReactStateHelper {
           entered_first_at: null,
           times_entered: 0,
           sessions: [
-            { id: "breCon",
+            {
+              id: "breCon",
               title: "Bewusstes Atmen",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "breConAct", title: "Atemübung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "breConAct",
+                  title: "Atemübung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "bodSca",
+            {
+              id: "bodSca",
               title: "Body-Scan-Übung",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "bodScaAct", title: "Body-Scan", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "bodScaAct",
+                  title: "Body-Scan",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "jouWri",
+            {
+              id: "jouWri",
               title: "Tagebuch schreiben",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "jouWriAct", title: "Tagebucheintrag", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "jouWriAct",
+                  title: "Tagebucheintrag",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
-            { id: "proRel",
+            {
+              id: "proRel",
               title: "Progressive Muskelentspannung",
               entered_first_at: null,
               times_entered: 0,
               activities: [
-                { id: "proRelAct", title: "Entspannungsübung", entered_first_at: null, times_entered: 0, completed: false },
-              ]
+                {
+                  id: "proRelAct",
+                  title: "Entspannungsübung",
+                  entered_first_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
             },
           ],
         },
