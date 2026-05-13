@@ -290,6 +290,15 @@ describe('ReactStateHelper', () => {
       expect(mod.times_entered).toBe(2);
     });
 
+    it('updates entered_last_at on every enterModule', () => {
+      helper.enterModule('bouMgt');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_last_at;
+      expect(first).not.toBeNull();
+      helper.enterModule('bouMgt');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_last_at;
+      expect(second).not.toBeNull();
+    });
+
     it('sets entered_first_at on first enterSession and does not overwrite it', () => {
       helper.enterModule('bouMgt');
       helper.enterSession('rolCha');
@@ -309,6 +318,18 @@ describe('ReactStateHelper', () => {
       const session = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
         .sessions.find(s => s.id === 'rolCha');
       expect(session.times_entered).toBe(2);
+    });
+
+    it('updates entered_last_at on every enterSession', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha').entered_last_at;
+      expect(first).not.toBeNull();
+      helper.enterSession('rolCha');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha').entered_last_at;
+      expect(second).not.toBeNull();
     });
 
     it('persists through serialization', () => {
@@ -388,6 +409,20 @@ describe('ReactStateHelper', () => {
         .sessions.find(s => s.id === 'rolCha')
         .activities.find(a => a.id === 'somAct');
       expect(activity.times_entered).toBe(2);
+    });
+
+    it('updates entered_last_at on every enterActivity', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha')
+        .activities.find(a => a.id === 'somAct').entered_last_at;
+      expect(first).not.toBeNull();
+      helper.enterActivity('somAct');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha')
+        .activities.find(a => a.id === 'somAct').entered_last_at;
+      expect(second).not.toBeNull();
     });
   });
 
