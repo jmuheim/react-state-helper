@@ -9,18 +9,107 @@
 // - $jsStateHelperSessionsCompleted
 
 // Copy and paste the following code into MobileCoach and uncomment the code at the end!
+class Activity {
+  constructor({ id, title, completed = false }) {
+    this.id = id;
+    this.title = title;
+    this.completed = completed;
+  }
+
+  markCompleted() {
+    this.completed = true;
+  }
+
+  isCompleted() {
+    return this.completed;
+  }
+
+  toJSON() {
+    return { id: this.id, title: this.title, completed: this.completed };
+  }
+
+  static fromJSON(obj) {
+    return new Activity(obj);
+  }
+}
+
+class Session {
+  constructor({ id, title, activities = [] }) {
+    this.id = id;
+    this.title = title;
+    this.activities = activities;
+  }
+
+  isCompleted() {
+    return this.activities.length > 0 && this.activities.every(a => a.isCompleted());
+  }
+
+  findActivity(activityId) {
+    return this.activities.find(a => a.id === activityId);
+  }
+
+  toJSON() {
+    return { id: this.id, title: this.title, activities: this.activities };
+  }
+
+  static fromJSON({ id, title, activities }) {
+    return new Session({ id, title, activities: activities.map(a => Activity.fromJSON(a)) });
+  }
+}
+
+class Module {
+  constructor({ id, title, sessions = [], entered_first_at = null, times_entered = 0 }) {
+    this.id = id;
+    this.title = title;
+    this.entered_first_at = entered_first_at;
+    this.times_entered = times_entered;
+    this.sessions = sessions;
+  }
+
+  enter() {
+    if (!this.entered_first_at) this.entered_first_at = new Date().toISOString();
+    this.times_entered++;
+  }
+
+  findSession(sessionId) {
+    return this.sessions.find(s => s.id === sessionId);
+  }
+
+  countCompleted() {
+    return this.sessions.filter(s => s.isCompleted()).length;
+  }
+
+  getProgress() {
+    if (this.sessions.length === 0) return 0;
+    return this.sessions.filter(s => s.isCompleted()).length / this.sessions.length;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      entered_first_at: this.entered_first_at,
+      times_entered: this.times_entered,
+      sessions: this.sessions,
+    };
+  }
+
+  static fromJSON({ id, title, entered_first_at, times_entered, sessions }) {
+    return new Module({ id, title, entered_first_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s)) });
+  }
+}
+
 class ReactStateHelper {
   #state;
 
   static initDefaultState() {
-    const helper = new this();
-    helper.#state = this.initialState();
-    return helper;
+    return this.loadExistingState(JSON.stringify(this.initialState()));
   }
 
   static loadExistingState(json) {
     const helper = new this();
-    helper.#state = JSON.parse(json);
+    const data = JSON.parse(json);
+    helper.#state = { ...data, modules: data.modules.map(m => Module.fromJSON(m)) };
     return helper;
   }
 
@@ -126,38 +215,35 @@ class ReactStateHelper {
   }
 
   markActivityCompleted(moduleId, sessionId, activityId) {
-    this.#findActivityIn(moduleId, sessionId, activityId).completed = true;
+    this.#findActivityIn(moduleId, sessionId, activityId).markCompleted();
   }
 
   isSessionCompleted(moduleId, sessionId) {
-    const session = this.#findModule(moduleId).sessions.find(s => s.id === sessionId);
-    return this.#isSessionDone(session);
+    return this.#findModule(moduleId).findSession(sessionId).isCompleted();
   }
 
   countCompletedInModule(moduleId) {
-    return this.#findModule(moduleId).sessions.filter(s => this.#isSessionDone(s)).length;
+    return this.#findModule(moduleId).countCompleted();
   }
 
   countCompletedOverall() {
-    return this.#state.modules.flatMap(m => m.sessions).filter(s => this.#isSessionDone(s)).length;
+    return this.#state.modules.reduce((sum, m) => sum + m.countCompleted(), 0);
   }
 
   // Returns a value between 0 and 1
   getProgress() {
     const all = this.#state.modules.flatMap(m => m.sessions);
     if (all.length === 0) return 0;
-    return all.filter(s => this.#isSessionDone(s)).length / all.length;
+    return all.filter(s => s.isCompleted()).length / all.length;
   }
 
   // Returns a value between 0 and 1 for the given module
   getModuleProgress(moduleId) {
-    const sessions = this.#findModule(moduleId).sessions;
-    if (sessions.length === 0) return 0;
-    return sessions.filter(s => this.#isSessionDone(s)).length / sessions.length;
+    return this.#findModule(moduleId).getProgress();
   }
 
   isGoodEnough(moduleId) {
-    return this.countCompletedInModule(moduleId) >= 3;
+    return this.#findModule(moduleId).countCompleted() >= 3;
   }
 
   markSuggestionSeen() {
@@ -174,8 +260,7 @@ class ReactStateHelper {
     const module = this.#findModule(moduleId);
     if (!module) throw new Error('Module ' + moduleId + ' not found');
     this.#state.currentModuleId = moduleId;
-    if (!module.entered_first_at) module.entered_first_at = new Date().toISOString();
-    module.times_entered++;
+    module.enter();
   }
 
   enterSession(sessionId) {
@@ -195,14 +280,9 @@ class ReactStateHelper {
   allCompletedSessionsAsCsv() {
     return this.#state.modules
       .flatMap(m => m.sessions)
-      .filter(s => this.#isSessionDone(s))
+      .filter(s => s.isCompleted())
       .map(s => s.id)
       .join(',');
-  }
-
-  // A session is done when it has at least one activity and all activities are completed.
-  #isSessionDone(session) {
-    return session.activities.length > 0 && session.activities.every(a => a.completed);
   }
 
   #findModule(moduleId) {
@@ -211,14 +291,14 @@ class ReactStateHelper {
 
   #findSession(sessionId) {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    const session = this.#findModule(this.#state.currentModuleId).sessions.find(s => s.id === sessionId);
+    const session = this.#findModule(this.#state.currentModuleId).findSession(sessionId);
     if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + this.#state.currentModuleId);
     return session;
   }
 
   #findActivity(activityId) {
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    const activity = this.#findSession(this.#state.currentSessionId).activities.find(a => a.id === activityId);
+    const activity = this.#findSession(this.#state.currentSessionId).findActivity(activityId);
     if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + this.#state.currentSessionId);
     return activity;
   }
@@ -226,9 +306,9 @@ class ReactStateHelper {
   #findActivityIn(moduleId, sessionId, activityId) {
     const mod = this.#findModule(moduleId);
     if (!mod) throw new Error('Module ' + moduleId + ' not found');
-    const session = mod.sessions.find(s => s.id === sessionId);
+    const session = mod.findSession(sessionId);
     if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + moduleId);
-    const activity = session.activities.find(a => a.id === activityId);
+    const activity = session.findActivity(activityId);
     if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + sessionId);
     return activity;
   }
