@@ -15,8 +15,10 @@ describe('ReactStateHelper', () => {
 
   describe('loadExistingState', () => {
     it('loads persisted state from JSON', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
       const restored = ReactStateHelper.loadExistingState(helper.toString());
       expect(restored.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
     });
@@ -31,7 +33,10 @@ describe('ReactStateHelper', () => {
 
   describe('markActivityCompleted', () => {
     it('marks an activity as completed', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      helper.markActivityCompleted();
       const state = JSON.parse(helper.toString());
       const activity = state.modules.find(m => m.id === 'bouMgt')
         .sessions.find(s => s.id === 'rolCha')
@@ -40,13 +45,20 @@ describe('ReactStateHelper', () => {
     });
 
     it('is idempotent', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      helper.markActivityCompleted();
+      helper.markActivityCompleted();
       const state = JSON.parse(helper.toString());
       const activity = state.modules.find(m => m.id === 'bouMgt')
         .sessions.find(s => s.id === 'rolCha')
         .activities.find(a => a.id === 'somAct');
       expect(activity.completed).toBe(true);
+    });
+
+    it('throws if no activity has been entered', () => {
+      expect(() => helper.markActivityCompleted()).toThrow('No activity entered yet');
     });
   });
 
@@ -58,13 +70,17 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns false when only some activities are completed', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
       expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(false);
     });
 
     it('returns true when all activities are completed', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
     });
   });
@@ -76,8 +92,10 @@ describe('ReactStateHelper', () => {
     });
 
     it('counts only completed sessions within the given module', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.countCompletedInModule('bouMgt')).toBe(1);
       expect(helper.countCompletedInModule('emoReg')).toBe(0);
     });
@@ -89,10 +107,14 @@ describe('ReactStateHelper', () => {
     });
 
     it('increases as sessions across modules are completed', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.countCompletedOverall()).toBe(1);
-      helper.markActivityCompleted('emoReg', 'breCon', 'breConAct');
+      helper.enterModule('emoReg');
+      helper.enterSession('breCon');
+      helper.enterActivity('breConAct'); helper.markActivityCompleted();
       expect(helper.countCompletedOverall()).toBe(2);
     });
   });
@@ -103,10 +125,16 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns 1 when all sessions are completed', () => {
-      for (const module of ReactStateHelper.initialState().modules)
-        for (const session of module.sessions)
-          for (const activity of session.activities)
-            helper.markActivityCompleted(module.id, session.id, activity.id);
+      for (const module of ReactStateHelper.initialState().modules) {
+        helper.enterModule(module.id);
+        for (const session of module.sessions) {
+          helper.enterSession(session.id);
+          for (const activity of session.activities) {
+            helper.enterActivity(activity.id);
+            helper.markActivityCompleted();
+          }
+        }
+      }
       expect(helper.getProgress()).toBe(1);
     });
   });
@@ -118,46 +146,67 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns the fraction of completed sessions within the module (1 of 5)', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.getModuleProgress('bouMgt')).toBeCloseTo(1 / 5);
     });
 
     it('does not count sessions from other modules', () => {
-      helper.markActivityCompleted('emoReg', 'breCon', 'breConAct');
+      helper.enterModule('emoReg');
+      helper.enterSession('breCon');
+      helper.enterActivity('breConAct'); helper.markActivityCompleted();
       expect(helper.getModuleProgress('bouMgt')).toBe(0);
     });
 
     it('returns 1 when all sessions in the module are completed', () => {
+      helper.enterModule('bouMgt');
       const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').sessions;
-      for (const session of sessions)
-        for (const activity of session.activities)
-          helper.markActivityCompleted('bouMgt', session.id, activity.id);
+      for (const session of sessions) {
+        helper.enterSession(session.id);
+        for (const activity of session.activities) {
+          helper.enterActivity(activity.id);
+          helper.markActivityCompleted();
+        }
+      }
       expect(helper.getModuleProgress('bouMgt')).toBe(1);
     });
   });
 
   describe('isGoodEnough', () => {
     it('returns false when fewer than 3 sessions are completed in the module', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
-      helper.markActivityCompleted('bouMgt', 'sayNo', 'sayNoAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      helper.enterSession('sayNo');
+      helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
       expect(helper.isGoodEnough('bouMgt')).toBe(false);
     });
 
     it('returns true when 3 sessions are completed in the module', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
-      helper.markActivityCompleted('bouMgt', 'sayNo', 'sayNoAct');
-      helper.markActivityCompleted('bouMgt', 'limSet', 'limSetAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      helper.enterSession('sayNo');
+      helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
+      helper.enterSession('limSet');
+      helper.enterActivity('limSetAct'); helper.markActivityCompleted();
       expect(helper.isGoodEnough('bouMgt')).toBe(true);
     });
 
     it('does not count sessions from other modules', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
-      helper.markActivityCompleted('bouMgt', 'sayNo', 'sayNoAct');
-      helper.markActivityCompleted('emoReg', 'breCon', 'breConAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      helper.enterSession('sayNo');
+      helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
+      helper.enterModule('emoReg');
+      helper.enterSession('breCon');
+      helper.enterActivity('breConAct'); helper.markActivityCompleted();
       expect(helper.isGoodEnough('bouMgt')).toBe(false);
     });
   });
@@ -168,21 +217,30 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns a single session id when one session is completed', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.allCompletedSessionsAsCsv()).toBe('rolCha');
     });
 
     it('does not include partially completed sessions', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
       expect(helper.allCompletedSessionsAsCsv()).toBe('');
     });
 
     it('returns comma-separated ids across modules in order', () => {
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'somAct');
-      helper.markActivityCompleted('bouMgt', 'rolCha', 'othAct');
-      helper.markActivityCompleted('bouMgt', 'sayNo', 'sayNoAct');
-      helper.markActivityCompleted('emoReg', 'breCon', 'breConAct');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      helper.enterSession('sayNo');
+      helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
+      helper.enterModule('emoReg');
+      helper.enterSession('breCon');
+      helper.enterActivity('breConAct'); helper.markActivityCompleted();
       expect(helper.allCompletedSessionsAsCsv()).toBe('rolCha,sayNo,breCon');
     });
   });
@@ -248,6 +306,7 @@ describe('ReactStateHelper', () => {
     });
 
     it('throws if enterActivity is called without a current session', () => {
+      helper.enterModule('bouMgt');
       expect(() => helper.enterActivity('somAct')).toThrow('No session entered yet');
     });
 

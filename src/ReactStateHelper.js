@@ -214,8 +214,9 @@ class ReactStateHelper {
     return JSON.stringify(this.#state);
   }
 
-  markActivityCompleted(moduleId, sessionId, activityId) {
-    this.#findActivityIn(moduleId, sessionId, activityId).markCompleted();
+  markActivityCompleted() {
+    if (!this.#state.currentActivityId) throw new Error('No activity entered yet');
+    this.#findActivity(this.#state.currentActivityId).markCompleted();
   }
 
   isSessionCompleted(moduleId, sessionId) {
@@ -297,21 +298,14 @@ class ReactStateHelper {
   }
 
   #findActivity(activityId) {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
     const activity = this.#findSession(this.#state.currentSessionId).findActivity(activityId);
     if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + this.#state.currentSessionId);
     return activity;
   }
 
-  #findActivityIn(moduleId, sessionId, activityId) {
-    const mod = this.#findModule(moduleId);
-    if (!mod) throw new Error('Module ' + moduleId + ' not found');
-    const session = mod.findSession(sessionId);
-    if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + moduleId);
-    const activity = session.findActivity(activityId);
-    if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + sessionId);
-    return activity;
-  }
+
 }
 
 // Expose as a global so tests can use it without an import (matching MobileCoach's plain-script environment)
@@ -337,7 +331,7 @@ if (typeof process === 'undefined') {
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
   // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'rolCha')"
-  // - $jsStateHelperCmd = "markActivityCompleted('bouMgt', 'rolCha', 'somAct')"
+  // - $jsStateHelperCmd = "markActivityCompleted()"
   // - $jsStateHelperCmd = "countCompletedInModule('bouMgt')"
   // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
