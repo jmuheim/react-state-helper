@@ -15,9 +15,9 @@ describe('ReactStateHelper', () => {
 
   describe('loadExistingState', () => {
     it('loads persisted state from JSON', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
+      helper.markSessionCompleted('bouMgt', 'rolCha');
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.isTaskCompleted('bouMgt', 'rolCha')).toBe(true);
+      expect(restored.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
     });
   });
 
@@ -28,29 +28,29 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('markTaskCompleted', () => {
-    it('marks an incomplete task as completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      expect(helper.isTaskCompleted('bouMgt', 'rolCha')).toBe(true);
+  describe('markSessionCompleted', () => {
+    it('marks an incomplete session as completed', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
     });
 
-    it('is idempotent when the task is already completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      expect(helper.isTaskCompleted('bouMgt', 'rolCha')).toBe(true);
+    it('is idempotent when the session is already completed', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(true);
     });
   });
 
-  describe('isTaskCompleted', () => {
-    it('returns false for all tasks in the default state', () => {
-      expect(helper.isTaskCompleted('bouMgt', 'rolCha')).toBe(false);
-      expect(helper.isTaskCompleted('bouMgt', 'sayNo')).toBe(false);
-      expect(helper.isTaskCompleted('emoReg', 'breCon')).toBe(false);
+  describe('isSessionCompleted', () => {
+    it('returns false for all sessions in the default state', () => {
+      expect(helper.isSessionCompleted('bouMgt', 'rolCha')).toBe(false);
+      expect(helper.isSessionCompleted('bouMgt', 'sayNo')).toBe(false);
+      expect(helper.isSessionCompleted('emoReg', 'breCon')).toBe(false);
     });
 
-    it('returns true after the task is marked completed', () => {
-      helper.markTaskCompleted('emoReg', 'breCon');
-      expect(helper.isTaskCompleted('emoReg', 'breCon')).toBe(true);
+    it('returns true after the session is marked completed', () => {
+      helper.markSessionCompleted('emoReg', 'breCon');
+      expect(helper.isSessionCompleted('emoReg', 'breCon')).toBe(true);
     });
   });
 
@@ -60,8 +60,8 @@ describe('ReactStateHelper', () => {
       expect(helper.countCompletedInModule('emoReg')).toBe(0);
     });
 
-    it('counts only completed tasks within the given module', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
+    it('counts only completed sessions within the given module', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
       expect(helper.countCompletedInModule('bouMgt')).toBe(1);
       expect(helper.countCompletedInModule('emoReg')).toBe(0);
     });
@@ -72,10 +72,10 @@ describe('ReactStateHelper', () => {
       expect(helper.countCompletedOverall()).toBe(0);
     });
 
-    it('increases as tasks across modules are completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
+    it('increases as sessions across modules are completed', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
       expect(helper.countCompletedOverall()).toBe(1);
-      helper.markTaskCompleted('emoReg', 'breCon');
+      helper.markSessionCompleted('emoReg', 'breCon');
       expect(helper.countCompletedOverall()).toBe(2);
     });
   });
@@ -85,10 +85,10 @@ describe('ReactStateHelper', () => {
       expect(helper.getProgress()).toBe(0);
     });
 
-    it('returns 1 when all tasks are completed', () => {
+    it('returns 1 when all sessions are completed', () => {
       for (const module of ReactStateHelper.initialState().modules)
-        for (const task of module.tasks)
-          helper.markTaskCompleted(module.id, task.id);
+        for (const session of module.sessions)
+          helper.markSessionCompleted(module.id, session.id);
       expect(helper.getProgress()).toBe(1);
     });
   });
@@ -99,100 +99,132 @@ describe('ReactStateHelper', () => {
       expect(helper.getModuleProgress('emoReg')).toBe(0);
     });
 
-    it('returns the fraction of completed tasks within the module (1 of 5)', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
+    it('returns the fraction of completed sessions within the module (1 of 5)', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
       expect(helper.getModuleProgress('bouMgt')).toBeCloseTo(1 / 5);
     });
 
-    it('does not count tasks from other modules', () => {
-      helper.markTaskCompleted('emoReg', 'breCon');
+    it('does not count sessions from other modules', () => {
+      helper.markSessionCompleted('emoReg', 'breCon');
       expect(helper.getModuleProgress('bouMgt')).toBe(0);
     });
 
-    it('returns 1 when all tasks in the module are completed', () => {
-      const tasks = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').tasks;
-      for (const task of tasks)
-        helper.markTaskCompleted('bouMgt', task.id);
+    it('returns 1 when all sessions in the module are completed', () => {
+      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').sessions;
+      for (const session of sessions)
+        helper.markSessionCompleted('bouMgt', session.id);
       expect(helper.getModuleProgress('bouMgt')).toBe(1);
     });
   });
 
   describe('isGoodEnough', () => {
-    it('returns false when fewer than 3 tasks are completed in the module', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
+    it('returns false when fewer than 3 sessions are completed in the module', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      helper.markSessionCompleted('bouMgt', 'sayNo');
       expect(helper.isGoodEnough('bouMgt')).toBe(false);
     });
 
-    it('returns true when 3 tasks are completed in the module', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
-      helper.markTaskCompleted('bouMgt', 'limSet');
+    it('returns true when 3 sessions are completed in the module', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      helper.markSessionCompleted('bouMgt', 'sayNo');
+      helper.markSessionCompleted('bouMgt', 'limSet');
       expect(helper.isGoodEnough('bouMgt')).toBe(true);
     });
 
-    it('does not count tasks from other modules', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
-      helper.markTaskCompleted('emoReg', 'breCon');
+    it('does not count sessions from other modules', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      helper.markSessionCompleted('bouMgt', 'sayNo');
+      helper.markSessionCompleted('emoReg', 'breCon');
       expect(helper.isGoodEnough('bouMgt')).toBe(false);
     });
   });
 
-  describe('allCompletedTasksAsCsv', () => {
+  describe('allCompletedSessionsAsCsv', () => {
     it('returns an empty string in the default state', () => {
-      expect(helper.allCompletedTasksAsCsv()).toBe('');
+      expect(helper.allCompletedSessionsAsCsv()).toBe('');
     });
 
-    it('returns a single task id when one task is completed', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      expect(helper.allCompletedTasksAsCsv()).toBe('rolCha');
+    it('returns a single session id when one session is completed', () => {
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      expect(helper.allCompletedSessionsAsCsv()).toBe('rolCha');
     });
 
     it('returns comma-separated ids across modules in order', () => {
-      helper.markTaskCompleted('bouMgt', 'rolCha');
-      helper.markTaskCompleted('bouMgt', 'sayNo');
-      helper.markTaskCompleted('emoReg', 'breCon');
-      expect(helper.allCompletedTasksAsCsv()).toBe('rolCha,sayNo,breCon');
+      helper.markSessionCompleted('bouMgt', 'rolCha');
+      helper.markSessionCompleted('bouMgt', 'sayNo');
+      helper.markSessionCompleted('emoReg', 'breCon');
+      expect(helper.allCompletedSessionsAsCsv()).toBe('rolCha,sayNo,breCon');
     });
   });
 
-  describe('enterTask / getParticipantGroup', () => {
-    it('returns null before any task has been entered', () => {
+  describe('enterModule / enterSession / getParticipantGroup', () => {
+    it('returns null before any session has been entered', () => {
       expect(helper.getParticipantGroup()).toBeNull();
     });
 
-    it('returns "moduleId: taskId" after entering a task', () => {
-      helper.enterTask('bouMgt', 'rolCha');
+    it('returns "moduleId: sessionId" after entering a module and session', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
       expect(helper.getParticipantGroup()).toBe('bouMgt: rolCha');
     });
 
-    it('updates to the most recently entered task', () => {
-      helper.enterTask('bouMgt', 'rolCha');
-      helper.enterTask('emoReg', 'breCon');
+    it('updates to the most recently entered module and session', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterModule('emoReg');
+      helper.enterSession('breCon');
       expect(helper.getParticipantGroup()).toBe('emoReg: breCon');
     });
 
-    it('sets entered_first_at on first entry and does not overwrite it', () => {
-      helper.enterTask('bouMgt', 'rolCha');
+    it('sets entered_first_at on first enterModule and does not overwrite it', () => {
+      helper.enterModule('bouMgt');
       const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_first_at;
       expect(first).not.toBeNull();
-      helper.enterTask('bouMgt', 'rolCha');
+      helper.enterModule('bouMgt');
       const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_first_at;
       expect(second).toBe(first);
     });
 
-    it('increments times_entered on each entry', () => {
-      helper.enterTask('bouMgt', 'rolCha');
-      helper.enterTask('bouMgt', 'sayNo');
+    it('increments times_entered on each enterModule', () => {
+      helper.enterModule('bouMgt');
+      helper.enterModule('bouMgt');
       const mod = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt');
       expect(mod.times_entered).toBe(2);
     });
 
     it('persists through serialization', () => {
-      helper.enterTask('bouMgt', 'rolCha');
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
       const restored = ReactStateHelper.loadExistingState(helper.toString());
       expect(restored.getParticipantGroup()).toBe('bouMgt: rolCha');
+    });
+
+    it('throws if enterSession is called without a current module', () => {
+      expect(() => helper.enterSession('rolCha')).toThrow('No module entered yet');
+    });
+
+    it('throws if the sessionId is not in the current module', () => {
+      helper.enterModule('bouMgt');
+      expect(() => helper.enterSession('breCon')).toThrow('Session breCon not found in module bouMgt');
+    });
+  });
+
+  describe('enterActivity', () => {
+    it('sets the current activity', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      expect(JSON.parse(helper.toString()).currentActivityId).toBe('somAct');
+    });
+
+    it('throws if enterActivity is called without a current session', () => {
+      expect(() => helper.enterActivity('somAct')).toThrow('No session entered yet');
+    });
+
+    it('throws if the activityId is not in the current session', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      expect(() => helper.enterActivity('globGoal')).toThrow('Activity globGoal not found in session rolCha');
     });
   });
 

@@ -6,7 +6,7 @@
 // - $jsStateHelperJson
 // - $jsStateHelperResult
 // - $jsStateHelperStatus
-// - $jsStateHelperTasksCompleted
+// - $jsStateHelperSessionsCompleted
 
 // Copy and paste the following code into MobileCoach and uncomment the code at the end!
 class ReactStateHelper {
@@ -32,7 +32,7 @@ class ReactStateHelper {
           title: "Onboarding",
           entered_first_at: null,
           times_entered: 0,
-          tasks: [
+          sessions: [
             { id: "introd",
               title: "Einführung",
               completed: false,
@@ -48,7 +48,7 @@ class ReactStateHelper {
           title: "Boundary Management",
           entered_first_at: null,
           times_entered: 0,
-          tasks: [
+          sessions: [
             { id: "rolCha",
               title: "Rollenwechsel bewusst vollziehen",
               completed: false,
@@ -84,7 +84,7 @@ class ReactStateHelper {
           title: "Emotionsregulation",
           entered_first_at: null,
           times_entered: 0,
-          tasks: [
+          sessions: [
             { id: "breCon",
               title: "Bewusstes Atmen",
               completed: false,
@@ -110,7 +110,7 @@ class ReactStateHelper {
       ],
       suggestionSeen: false,
       currentModuleId: null,
-      currentTaskId: null,
+      currentSessionId: null,
       currentActivityId: null,
     };
   }
@@ -119,34 +119,34 @@ class ReactStateHelper {
     return JSON.stringify(this.#state);
   }
 
-  markTaskCompleted(moduleId, taskId) {
-    this.#findTask(moduleId, taskId).completed = true;
+  markSessionCompleted(moduleId, sessionId) {
+    this.#findModule(moduleId).sessions.find(s => s.id === sessionId).completed = true;
   }
 
-  isTaskCompleted(moduleId, taskId) {
-    return this.#findTask(moduleId, taskId).completed === true;
+  isSessionCompleted(moduleId, sessionId) {
+    return this.#findModule(moduleId).sessions.find(s => s.id === sessionId).completed === true;
   }
 
   countCompletedInModule(moduleId) {
-    return this.#findModule(moduleId).tasks.filter(t => t.completed).length;
+    return this.#findModule(moduleId).sessions.filter(s => s.completed).length;
   }
 
   countCompletedOverall() {
-    return this.#state.modules.flatMap(m => m.tasks).filter(t => t.completed).length;
+    return this.#state.modules.flatMap(m => m.sessions).filter(s => s.completed).length;
   }
 
   // Returns a value between 0 and 1
   getProgress() {
-    const all = this.#state.modules.flatMap(m => m.tasks);
+    const all = this.#state.modules.flatMap(m => m.sessions);
     if (all.length === 0) return 0;
-    return all.filter(t => t.completed).length / all.length;
+    return all.filter(s => s.completed).length / all.length;
   }
 
   // Returns a value between 0 and 1 for the given module
   getModuleProgress(moduleId) {
-    const tasks = this.#findModule(moduleId).tasks;
-    if (tasks.length === 0) return 0;
-    return tasks.filter(t => t.completed).length / tasks.length;
+    const sessions = this.#findModule(moduleId).sessions;
+    if (sessions.length === 0) return 0;
+    return sessions.filter(s => s.completed).length / sessions.length;
   }
 
   isGoodEnough(moduleId) {
@@ -163,25 +163,33 @@ class ReactStateHelper {
     return this.#state.suggestionSeen === true;
   }
 
-  enterTask(moduleId, taskId) {
-    this.#state.currentModuleId = moduleId;
-    this.#state.currentTaskId = taskId;
+  enterModule(moduleId) {
     const module = this.#findModule(moduleId);
+    if (!module) throw new Error('Module ' + moduleId + ' not found');
+    this.#state.currentModuleId = moduleId;
     if (!module.entered_first_at) module.entered_first_at = new Date().toISOString();
     module.times_entered++;
   }
 
-  getParticipantGroup() {
-    const { currentModuleId, currentTaskId } = this.#state;
-    if (!currentModuleId || !currentTaskId) return null;
-    return currentModuleId + ': ' + currentTaskId;
+  enterSession(sessionId) {
+    this.#state.currentSessionId = this.#findSession(sessionId).id;
   }
 
-  allCompletedTasksAsCsv() {
+  enterActivity(activityId) {
+    this.#state.currentActivityId = this.#findActivity(activityId).id;
+  }
+
+  getParticipantGroup() {
+    const { currentModuleId, currentSessionId } = this.#state;
+    if (!currentModuleId || !currentSessionId) return null;
+    return currentModuleId + ': ' + currentSessionId;
+  }
+
+  allCompletedSessionsAsCsv() {
     return this.#state.modules
-      .flatMap(m => m.tasks)
-      .filter(t => t.completed)
-      .map(t => t.id)
+      .flatMap(m => m.sessions)
+      .filter(s => s.completed)
+      .map(s => s.id)
       .join(',');
   }
 
@@ -189,8 +197,18 @@ class ReactStateHelper {
     return this.#state.modules.find(m => m.id === moduleId);
   }
 
-  #findTask(moduleId, taskId) {
-    return this.#findModule(moduleId).tasks.find(t => t.id === taskId);
+  #findSession(sessionId) {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    const session = this.#findModule(this.#state.currentModuleId).sessions.find(s => s.id === sessionId);
+    if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + this.#state.currentModuleId);
+    return session;
+  }
+
+  #findActivity(activityId) {
+    if (!this.#state.currentSessionId) throw new Error('No session entered yet');
+    const activity = this.#findSession(this.#state.currentSessionId).activities.find(a => a.id === activityId);
+    if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + this.#state.currentSessionId);
+    return activity;
   }
 }
 
@@ -216,8 +234,8 @@ if (typeof process === 'undefined') {
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
-  // - $jsStateHelperCmd = "isTaskCompleted('bouMgt', 'sayNo')"
-  // - $jsStateHelperCmd = "markTaskCompleted('bouMgt', 'sayNo')"
+  // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'sayNo')"
+  // - $jsStateHelperCmd = "markSessionCompleted('bouMgt', 'sayNo')"
   // - $jsStateHelperCmd = "countCompletedInModule('bouMgt')"
   // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
@@ -234,12 +252,12 @@ if (typeof process === 'undefined') {
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. jsStateHelperJson becomes $jsStateHelperJson.
-    jsStateHelperJson:           helper.toString(),
-    jsStateHelperResult:         result,
-    jsStateHelperStatus:         status,
-    jsStateHelperError:          error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    jsStateHelperTasksCompleted: helper.allCompletedTasksAsCsv(),
-    participantGroup:            helper.getParticipantGroup()
+    jsStateHelperJson:              helper.toString(),
+    jsStateHelperResult:            result,
+    jsStateHelperStatus:            status,
+    jsStateHelperError:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    jsStateHelperSessionsCompleted: helper.allCompletedSessionsAsCsv(),
+    participantGroup:               helper.getParticipantGroup()
   };
   o
 }
