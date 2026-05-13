@@ -10,10 +10,17 @@
 
 // Copy and paste the following code into MobileCoach and uncomment the code at the end!
 class Activity {
-  constructor({ id, title, completed = false }) {
+  constructor({ id, title, entered_first_at = null, times_entered = 0, completed = false }) {
     this.id = id;
     this.title = title;
+    this.entered_first_at = entered_first_at;
+    this.times_entered = times_entered;
     this.completed = completed;
+  }
+
+  enter() {
+    if (!this.entered_first_at) this.entered_first_at = new Date().toISOString();
+    this.times_entered++;
   }
 
   markCompleted() {
@@ -25,7 +32,7 @@ class Activity {
   }
 
   toJSON() {
-    return { id: this.id, title: this.title, completed: this.completed };
+    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, times_entered: this.times_entered, completed: this.completed };
   }
 
   static fromJSON(obj) {
@@ -34,10 +41,17 @@ class Activity {
 }
 
 class Session {
-  constructor({ id, title, activities = [] }) {
+  constructor({ id, title, entered_first_at = null, times_entered = 0, activities = [] }) {
     this.id = id;
     this.title = title;
+    this.entered_first_at = entered_first_at;
+    this.times_entered = times_entered;
     this.activities = activities;
+  }
+
+  enter() {
+    if (!this.entered_first_at) this.entered_first_at = new Date().toISOString();
+    this.times_entered++;
   }
 
   isCompleted() {
@@ -49,11 +63,11 @@ class Session {
   }
 
   toJSON() {
-    return { id: this.id, title: this.title, activities: this.activities };
+    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, times_entered: this.times_entered, activities: this.activities };
   }
 
-  static fromJSON({ id, title, activities }) {
-    return new Session({ id, title, activities: activities.map(a => Activity.fromJSON(a)) });
+  static fromJSON({ id, title, entered_first_at, times_entered, activities }) {
+    return new Session({ id, title, entered_first_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
   }
 }
 
@@ -124,9 +138,11 @@ class ReactStateHelper {
           sessions: [
             { id: "introd",
               title: "Einführung",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "globGoal", title: "Globales Ziel definieren", completed: false },
-                { id: "howEdu", title: "Psychoedukation: wie bewandert...?", completed: false },
+                { id: "globGoal", title: "Globales Ziel definieren", entered_first_at: null, times_entered: 0, completed: false },
+                { id: "howEdu", title: "Psychoedukation: wie bewandert...?", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
           ],
@@ -139,33 +155,43 @@ class ReactStateHelper {
           sessions: [
             { id: "rolCha",
               title: "Rollenwechsel bewusst vollziehen",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "somAct", title: "Eine erste Übung", completed: false },
-                { id: "othAct", title: "Eine andere Übung", completed: false },
+                { id: "somAct", title: "Eine erste Übung", entered_first_at: null, times_entered: 0, completed: false },
+                { id: "othAct", title: "Eine andere Übung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "sayNo",
               title: "Nein sagen üben",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "sayNoAct", title: "Nein sagen Übung", completed: false },
+                { id: "sayNoAct", title: "Nein sagen Übung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "limSet",
               title: "Grenzen setzen",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "limSetAct", title: "Grenzen setzen Übung", completed: false },
+                { id: "limSetAct", title: "Grenzen setzen Übung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "worBou",
               title: "Arbeitliche Grenzen kommunizieren",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "worBouAct", title: "Arbeitsgrenzen Übung", completed: false },
+                { id: "worBouAct", title: "Arbeitsgrenzen Übung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "digDet",
               title: "Digitale Auszeiten einhalten",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "digDetAct", title: "Digitale Auszeit Übung", completed: false },
+                { id: "digDetAct", title: "Digitale Auszeit Übung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
           ],
@@ -178,26 +204,34 @@ class ReactStateHelper {
           sessions: [
             { id: "breCon",
               title: "Bewusstes Atmen",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "breConAct", title: "Atemübung", completed: false },
+                { id: "breConAct", title: "Atemübung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "bodSca",
               title: "Body-Scan-Übung",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "bodScaAct", title: "Body-Scan", completed: false },
+                { id: "bodScaAct", title: "Body-Scan", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "jouWri",
               title: "Tagebuch schreiben",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "jouWriAct", title: "Tagebucheintrag", completed: false },
+                { id: "jouWriAct", title: "Tagebucheintrag", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
             { id: "proRel",
               title: "Progressive Muskelentspannung",
+              entered_first_at: null,
+              times_entered: 0,
               activities: [
-                { id: "proRelAct", title: "Entspannungsübung", completed: false },
+                { id: "proRelAct", title: "Entspannungsübung", entered_first_at: null, times_entered: 0, completed: false },
               ]
             },
           ],
@@ -269,12 +303,16 @@ class ReactStateHelper {
   }
 
   enterSession(sessionId) {
-    this.#state.currentSessionId = this.#findSession(sessionId).id;
+    const session = this.#findSession(sessionId);
+    this.#state.currentSessionId = session.id;
     this.#state.currentActivityId = null;
+    session.enter();
   }
 
   enterActivity(activityId) {
-    this.#state.currentActivityId = this.#findActivity(activityId).id;
+    const activity = this.#findActivity(activityId);
+    this.#state.currentActivityId = activity.id;
+    activity.enter();
   }
 
   getParticipantGroup() {

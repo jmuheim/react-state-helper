@@ -290,6 +290,27 @@ describe('ReactStateHelper', () => {
       expect(mod.times_entered).toBe(2);
     });
 
+    it('sets entered_first_at on first enterSession and does not overwrite it', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha').entered_first_at;
+      expect(first).not.toBeNull();
+      helper.enterSession('rolCha');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha').entered_first_at;
+      expect(second).toBe(first);
+    });
+
+    it('increments times_entered on each enterSession', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterSession('rolCha');
+      const session = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha');
+      expect(session.times_entered).toBe(2);
+    });
+
     it('persists through serialization', () => {
       helper.enterModule('bouMgt');
       helper.enterSession('rolCha');
@@ -343,6 +364,30 @@ describe('ReactStateHelper', () => {
     it('throws if the activityId is not in the current session', () => {
       helper.enterSession('rolCha');
       expect(() => helper.enterActivity('globGoal')).toThrow('Activity globGoal not found in session rolCha');
+    });
+
+    it('sets entered_first_at on first enterActivity and does not overwrite it', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha')
+        .activities.find(a => a.id === 'somAct').entered_first_at;
+      expect(first).not.toBeNull();
+      helper.enterActivity('somAct');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha')
+        .activities.find(a => a.id === 'somAct').entered_first_at;
+      expect(second).toBe(first);
+    });
+
+    it('increments times_entered on each enterActivity', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct');
+      helper.enterActivity('somAct');
+      const activity = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
+        .sessions.find(s => s.id === 'rolCha')
+        .activities.find(a => a.id === 'somAct');
+      expect(activity.times_entered).toBe(2);
     });
   });
 
