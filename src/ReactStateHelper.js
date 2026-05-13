@@ -75,7 +75,7 @@ class Module {
     return this.sessions.find(s => s.id === sessionId);
   }
 
-  countCompleted() {
+  countCompletedSessions() {
     return this.sessions.filter(s => s.isCompleted()).length;
   }
 
@@ -224,12 +224,13 @@ class ReactStateHelper {
     return this.#findModule(this.#state.currentModuleId).findSession(sessionId).isCompleted();
   }
 
-  countCompletedInModule(moduleId) {
-    return this.#findModule(moduleId).countCompleted();
+  countCompletedSessions() {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    return this.#findModule(this.#state.currentModuleId).countCompletedSessions();
   }
 
   countCompletedOverall() {
-    return this.#state.modules.reduce((sum, m) => sum + m.countCompleted(), 0);
+    return this.#state.modules.reduce((sum, m) => sum + m.countCompletedSessions(), 0);
   }
 
   // Returns a value between 0 and 1
@@ -245,7 +246,7 @@ class ReactStateHelper {
   }
 
   isGoodEnough(moduleId) {
-    return this.#findModule(moduleId).countCompleted() >= 3;
+    return this.#findModule(moduleId).countCompletedSessions() >= 3;
   }
 
   markSuggestionSeen() {
@@ -336,7 +337,7 @@ if (typeof process === 'undefined') {
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
   // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'rolCha')"
   // - $jsStateHelperCmd = "markActivityCompleted()"
-  // - $jsStateHelperCmd = "countCompletedInModule('bouMgt')"
+  // - $jsStateHelperCmd = "countCompletedSessions('bouMgt')"
   // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!

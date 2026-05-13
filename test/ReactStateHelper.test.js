@@ -90,19 +90,24 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('countCompletedInModule', () => {
-    it('returns 0 for all modules in the default state', () => {
-      expect(helper.countCompletedInModule('bouMgt')).toBe(0);
-      expect(helper.countCompletedInModule('emoReg')).toBe(0);
+  describe('countCompletedSessions', () => {
+    it('throws if no module has been entered', () => {
+      expect(() => helper.countCompletedSessions()).toThrow('No module entered yet');
     });
 
-    it('counts only completed sessions within the given module', () => {
+    it('returns 0 for the current module in the default state', () => {
+      helper.enterModule('bouMgt');
+      expect(helper.countCompletedSessions()).toBe(0);
+    });
+
+    it('counts only completed sessions within the current module', () => {
       helper.enterModule('bouMgt');
       helper.enterSession('rolCha');
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
-      expect(helper.countCompletedInModule('bouMgt')).toBe(1);
-      expect(helper.countCompletedInModule('emoReg')).toBe(0);
+      expect(helper.countCompletedSessions()).toBe(1);
+      helper.enterModule('emoReg');
+      expect(helper.countCompletedSessions()).toBe(0);
     });
   });
 
