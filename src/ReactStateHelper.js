@@ -35,7 +35,6 @@ class ReactStateHelper {
           sessions: [
             { id: "introd",
               title: "Einführung",
-              completed: false,
               activities: [
                 { id: "globGoal", title: "Globales Ziel definieren", completed: false },
                 { id: "howEdu", title: "Psychoedukation: wie bewandert...?", completed: false },
@@ -51,7 +50,6 @@ class ReactStateHelper {
           sessions: [
             { id: "rolCha",
               title: "Rollenwechsel bewusst vollziehen",
-              completed: false,
               activities: [
                 { id: "somAct", title: "Eine erste Übung", completed: false },
                 { id: "othAct", title: "Eine andere Übung", completed: false },
@@ -59,23 +57,27 @@ class ReactStateHelper {
             },
             { id: "sayNo",
               title: "Nein sagen üben",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "sayNoAct", title: "Nein sagen Übung", completed: false },
+              ]
             },
             { id: "limSet",
               title: "Grenzen setzen",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "limSetAct", title: "Grenzen setzen Übung", completed: false },
+              ]
             },
             { id: "worBou",
               title: "Arbeitliche Grenzen kommunizieren",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "worBouAct", title: "Arbeitsgrenzen Übung", completed: false },
+              ]
             },
             { id: "digDet",
               title: "Digitale Auszeiten einhalten",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "digDetAct", title: "Digitale Auszeit Übung", completed: false },
+              ]
             },
           ],
         },
@@ -87,23 +89,27 @@ class ReactStateHelper {
           sessions: [
             { id: "breCon",
               title: "Bewusstes Atmen",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "breConAct", title: "Atemübung", completed: false },
+              ]
             },
             { id: "bodSca",
               title: "Body-Scan-Übung",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "bodScaAct", title: "Body-Scan", completed: false },
+              ]
             },
             { id: "jouWri",
               title: "Tagebuch schreiben",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "jouWriAct", title: "Tagebucheintrag", completed: false },
+              ]
             },
             { id: "proRel",
               title: "Progressive Muskelentspannung",
-              completed: false,
-              activities: []
+              activities: [
+                { id: "proRelAct", title: "Entspannungsübung", completed: false },
+              ]
             },
           ],
         },
@@ -119,34 +125,35 @@ class ReactStateHelper {
     return JSON.stringify(this.#state);
   }
 
-  markSessionCompleted(moduleId, sessionId) {
-    this.#findModule(moduleId).sessions.find(s => s.id === sessionId).completed = true;
+  markActivityCompleted(moduleId, sessionId, activityId) {
+    this.#findActivityIn(moduleId, sessionId, activityId).completed = true;
   }
 
   isSessionCompleted(moduleId, sessionId) {
-    return this.#findModule(moduleId).sessions.find(s => s.id === sessionId).completed === true;
+    const session = this.#findModule(moduleId).sessions.find(s => s.id === sessionId);
+    return this.#isSessionDone(session);
   }
 
   countCompletedInModule(moduleId) {
-    return this.#findModule(moduleId).sessions.filter(s => s.completed).length;
+    return this.#findModule(moduleId).sessions.filter(s => this.#isSessionDone(s)).length;
   }
 
   countCompletedOverall() {
-    return this.#state.modules.flatMap(m => m.sessions).filter(s => s.completed).length;
+    return this.#state.modules.flatMap(m => m.sessions).filter(s => this.#isSessionDone(s)).length;
   }
 
   // Returns a value between 0 and 1
   getProgress() {
     const all = this.#state.modules.flatMap(m => m.sessions);
     if (all.length === 0) return 0;
-    return all.filter(s => s.completed).length / all.length;
+    return all.filter(s => this.#isSessionDone(s)).length / all.length;
   }
 
   // Returns a value between 0 and 1 for the given module
   getModuleProgress(moduleId) {
     const sessions = this.#findModule(moduleId).sessions;
     if (sessions.length === 0) return 0;
-    return sessions.filter(s => s.completed).length / sessions.length;
+    return sessions.filter(s => this.#isSessionDone(s)).length / sessions.length;
   }
 
   isGoodEnough(moduleId) {
@@ -188,9 +195,14 @@ class ReactStateHelper {
   allCompletedSessionsAsCsv() {
     return this.#state.modules
       .flatMap(m => m.sessions)
-      .filter(s => s.completed)
+      .filter(s => this.#isSessionDone(s))
       .map(s => s.id)
       .join(',');
+  }
+
+  // A session is done when it has at least one activity and all activities are completed.
+  #isSessionDone(session) {
+    return session.activities.length > 0 && session.activities.every(a => a.completed);
   }
 
   #findModule(moduleId) {
@@ -208,6 +220,16 @@ class ReactStateHelper {
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
     const activity = this.#findSession(this.#state.currentSessionId).activities.find(a => a.id === activityId);
     if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + this.#state.currentSessionId);
+    return activity;
+  }
+
+  #findActivityIn(moduleId, sessionId, activityId) {
+    const mod = this.#findModule(moduleId);
+    if (!mod) throw new Error('Module ' + moduleId + ' not found');
+    const session = mod.sessions.find(s => s.id === sessionId);
+    if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + moduleId);
+    const activity = session.activities.find(a => a.id === activityId);
+    if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + sessionId);
     return activity;
   }
 }
@@ -234,8 +256,8 @@ if (typeof process === 'undefined') {
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
-  // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'sayNo')"
-  // - $jsStateHelperCmd = "markSessionCompleted('bouMgt', 'sayNo')"
+  // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'rolCha')"
+  // - $jsStateHelperCmd = "markActivityCompleted('bouMgt', 'rolCha', 'somAct')"
   // - $jsStateHelperCmd = "countCompletedInModule('bouMgt')"
   // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
