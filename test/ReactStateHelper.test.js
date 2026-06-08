@@ -90,6 +90,47 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('isModuleCompleted', () => {
+    it('returns false for all modules in the default state', () => {
+      expect(helper.isModuleCompleted('bouMgt')).toBe(false);
+      expect(helper.isModuleCompleted('emoReg')).toBe(false);
+    });
+
+    it('returns false when only some sessions are completed', () => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      expect(helper.isModuleCompleted('bouMgt')).toBe(false);
+    });
+
+    it('returns true when all sessions in the module are completed', () => {
+      helper.enterModule('bouMgt');
+      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').sessions;
+      for (const session of sessions) {
+        helper.enterSession(session.id);
+        for (const activity of session.activities) {
+          helper.enterActivity(activity.id);
+          helper.markActivityCompleted();
+        }
+      }
+      expect(helper.isModuleCompleted('bouMgt')).toBe(true);
+    });
+
+    it('does not count sessions from other modules', () => {
+      helper.enterModule('emoReg');
+      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'emoReg').sessions;
+      for (const session of sessions) {
+        helper.enterSession(session.id);
+        for (const activity of session.activities) {
+          helper.enterActivity(activity.id);
+          helper.markActivityCompleted();
+        }
+      }
+      expect(helper.isModuleCompleted('bouMgt')).toBe(false);
+    });
+  });
+
   describe('countCompletedSessions', () => {
     it('throws if no module has been entered', () => {
       expect(() => helper.countCompletedSessions()).toThrow('No module entered yet');

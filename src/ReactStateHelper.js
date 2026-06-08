@@ -24,6 +24,10 @@ class Module {
     return this.sessions.filter(s => s.isCompleted()).length;
   }
 
+  isCompleted() {
+    return this.sessions.length > 0 && this.sessions.every(s => s.isCompleted());
+  }
+
   getProgress() {
     if (this.sessions.length === 0) return 0;
     return this.sessions.filter(s => s.isCompleted()).length / this.sessions.length;
@@ -358,6 +362,10 @@ class ReactStateHelper {
   markActivityCompleted() {
     if (!this.#state.currentActivityId) throw new Error('No activity entered yet');
     this.#findActivity(this.#state.currentActivityId).markCompleted();
+  }
+
+  isModuleCompleted(moduleId) {
+    return this.#findModule(moduleId).isCompleted();
   }
 
   isSessionCompleted(sessionId) {
