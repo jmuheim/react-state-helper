@@ -1,82 +1,4 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
-//
-// Create the following variables in your MobileCoach project (each with value 0 and access "manageable by service"):
-// - $jsStateHelperCmd
-// - $jsStateHelperError
-// - $jsStateHelperJson
-// - $jsStateHelperResult
-// - $jsStateHelperStatus
-// - $jsStateHelperSessionsCompleted
-
-// Copy and paste the following code into MobileCoach and uncomment the code at the end!
-class Activity {
-  constructor({ id, title, entered_first_at = null, entered_last_at = null, times_entered = 0, completed = false }) {
-    this.id = id;
-    this.title = title;
-    this.entered_first_at = entered_first_at;
-    this.entered_last_at = entered_last_at;
-    this.times_entered = times_entered;
-    this.completed = completed;
-  }
-
-  enter() {
-    const now = new Date().toISOString();
-    if (!this.entered_first_at) this.entered_first_at = now;
-    this.entered_last_at = now;
-    this.times_entered++;
-  }
-
-  markCompleted() {
-    this.completed = true;
-  }
-
-  isCompleted() {
-    return this.completed;
-  }
-
-  toJSON() {
-    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, completed: this.completed };
-  }
-
-  static fromJSON(obj) {
-    return new Activity(obj);
-  }
-}
-
-class Session {
-  constructor({ id, title, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [] }) {
-    this.id = id;
-    this.title = title;
-    this.entered_first_at = entered_first_at;
-    this.entered_last_at = entered_last_at;
-    this.times_entered = times_entered;
-    this.activities = activities;
-  }
-
-  enter() {
-    const now = new Date().toISOString();
-    if (!this.entered_first_at) this.entered_first_at = now;
-    this.entered_last_at = now;
-    this.times_entered++;
-  }
-
-  isCompleted() {
-    return this.activities.length > 0 && this.activities.every(a => a.isCompleted());
-  }
-
-  findActivity(activityId) {
-    return this.activities.find(a => a.id === activityId);
-  }
-
-  toJSON() {
-    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities };
-  }
-
-  static fromJSON({ id, title, entered_first_at, entered_last_at, times_entered, activities }) {
-    return new Session({ id, title, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
-  }
-}
-
 class Module {
   constructor({ id, title, sessions = [], entered_first_at = null, entered_last_at = null, times_entered = 0 }) {
     this.id = id;
@@ -120,6 +42,74 @@ class Module {
 
   static fromJSON({ id, title, entered_first_at, entered_last_at, times_entered, sessions }) {
     return new Module({ id, title, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s)) });
+  }
+}
+
+class Session {
+  constructor({ id, title, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [] }) {
+    this.id = id;
+    this.title = title;
+    this.entered_first_at = entered_first_at;
+    this.entered_last_at = entered_last_at;
+    this.times_entered = times_entered;
+    this.activities = activities;
+  }
+
+  enter() {
+    const now = new Date().toISOString();
+    if (!this.entered_first_at) this.entered_first_at = now;
+    this.entered_last_at = now;
+    this.times_entered++;
+  }
+
+  isCompleted() {
+    return this.activities.length > 0 && this.activities.every(a => a.isCompleted());
+  }
+
+  findActivity(activityId) {
+    return this.activities.find(a => a.id === activityId);
+  }
+
+  toJSON() {
+    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities };
+  }
+
+  static fromJSON({ id, title, entered_first_at, entered_last_at, times_entered, activities }) {
+    return new Session({ id, title, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
+  }
+}
+
+class Activity {
+  constructor({ id, title, entered_first_at = null, entered_last_at = null, times_entered = 0, completed = false }) {
+    this.id = id;
+    this.title = title;
+    this.entered_first_at = entered_first_at;
+    this.entered_last_at = entered_last_at;
+    this.times_entered = times_entered;
+    this.completed = completed;
+  }
+
+  enter() {
+    const now = new Date().toISOString();
+    if (!this.entered_first_at) this.entered_first_at = now;
+    this.entered_last_at = now;
+    this.times_entered++;
+  }
+
+  markCompleted() {
+    this.completed = true;
+  }
+
+  isCompleted() {
+    return this.completed;
+  }
+
+  toJSON() {
+    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, completed: this.completed };
+  }
+
+  static fromJSON(obj) {
+    return new Activity(obj);
   }
 }
 
