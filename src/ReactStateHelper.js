@@ -1,8 +1,9 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
 class Module {
-  constructor({ id, title, sessions = [], entered_first_at = null, entered_last_at = null, times_entered = 0 }) {
+  constructor({ id, title, sessions_needed_for_adequate_use = 1, sessions = [], entered_first_at = null, entered_last_at = null, times_entered = 0 }) {
     this.id = id;
     this.title = title;
+    this.sessions_needed_for_adequate_use = sessions_needed_for_adequate_use;
     this.entered_first_at = entered_first_at;
     this.entered_last_at = entered_last_at;
     this.times_entered = times_entered;
@@ -28,6 +29,10 @@ class Module {
     return this.sessions.length > 0 && this.sessions.every(s => s.isCompleted());
   }
 
+  hasAdequateProgress() {
+    return this.countCompletedSessions() >= this.sessions_needed_for_adequate_use;
+  }
+
   getProgress() {
     if (this.sessions.length === 0) return 0;
     return this.sessions.filter(s => s.isCompleted()).length / this.sessions.length;
@@ -37,6 +42,7 @@ class Module {
     return {
       id: this.id,
       title: this.title,
+      sessions_needed_for_adequate_use: this.sessions_needed_for_adequate_use,
       entered_first_at: this.entered_first_at,
       entered_last_at: this.entered_last_at,
       times_entered: this.times_entered,
@@ -44,8 +50,8 @@ class Module {
     };
   }
 
-  static fromJSON({ id, title, entered_first_at, entered_last_at, times_entered, sessions }) {
-    return new Module({ id, title, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s)) });
+  static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }) {
+    return new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s)) });
   }
 }
 
@@ -137,6 +143,7 @@ class ReactStateHelper {
         {
           id: "onboard",
           title: "Onboarding",
+          sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
@@ -171,6 +178,7 @@ class ReactStateHelper {
         {
           id: "bouMgt",
           title: "Boundary Management",
+          sessions_needed_for_adequate_use: 3,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
@@ -273,6 +281,7 @@ class ReactStateHelper {
         {
           id: "emoReg",
           title: "Emotionsregulation",
+          sessions_needed_for_adequate_use: 3,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
@@ -395,7 +404,7 @@ class ReactStateHelper {
   }
 
   isGoodEnough(moduleId) {
-    return this.#findModule(moduleId).countCompletedSessions() >= 3;
+    return this.#findModule(moduleId).hasAdequateProgress();
   }
 
   markSuggestionSeen() {

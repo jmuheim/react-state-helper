@@ -261,6 +261,14 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('breConAct'); helper.markActivityCompleted();
       expect(helper.isGoodEnough('bouMgt')).toBe(false);
     });
+
+    it('uses the per-module threshold — onboard (threshold=1) is good enough after 1 completed session', () => {
+      helper.enterModule('onboard');
+      helper.enterSession('introd');
+      helper.enterActivity('globGoal'); helper.markActivityCompleted();
+      helper.enterActivity('howEdu'); helper.markActivityCompleted();
+      expect(helper.isGoodEnough('onboard')).toBe(true);
+    });
   });
 
   describe('allCompletedSessionsAsCsv', () => {
