@@ -504,6 +504,96 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('getModuleMenuVars', () => {
+    it('marks the first incomplete module as next and leaves the rest plain', () => {
+      const vars = helper.getModuleMenuVars();
+      expect(vars.menuLabel1).toBe('👉 Onboarding');
+      expect(vars.menuLabel2).toBe('Boundary Management');
+      expect(vars.menuLabel3).toBe('Emotionsregulation');
+    });
+
+    it('fills unused slots with empty string', () => {
+      const vars = helper.getModuleMenuVars();
+      for (let i = 4; i <= 10; i++) expect(vars[`menuLabel${i}`]).toBe('');
+    });
+
+    it('marks a completed module with the completed emoji', () => {
+      helper.enterModule('onboard');
+      helper.enterSession('introd');
+      helper.enterActivity('globGoal'); helper.markActivityCompleted();
+      helper.enterActivity('howEdu'); helper.markActivityCompleted();
+      const vars = helper.getModuleMenuVars();
+      expect(vars.menuLabel1).toBe('✅ Onboarding');
+      expect(vars.menuLabel2).toBe('👉 Boundary Management');
+    });
+
+    it('marks no module as next when all are completed', () => {
+      for (const module of ReactStateHelper.initialState().modules) {
+        helper.enterModule(module.id);
+        for (const session of module.sessions) {
+          helper.enterSession(session.id);
+          for (const activity of session.activities) {
+            helper.enterActivity(activity.id);
+            helper.markActivityCompleted();
+          }
+        }
+      }
+      const vars = helper.getModuleMenuVars();
+      expect(vars.menuLabel1).toBe('✅ Onboarding');
+      expect(vars.menuLabel2).toBe('✅ Boundary Management');
+      expect(vars.menuLabel3).toBe('✅ Emotionsregulation');
+    });
+
+    it('accepts custom emojis', () => {
+      const vars = helper.getModuleMenuVars({ completedEmoji: '☑️', nextEmoji: '▶️' });
+      expect(vars.menuLabel1).toBe('▶️ Onboarding');
+    });
+
+    it('omits emoji prefix when emoji is empty string', () => {
+      const vars = helper.getModuleMenuVars({ completedEmoji: '', nextEmoji: '' });
+      expect(vars.menuLabel1).toBe('Onboarding');
+    });
+  });
+
+  describe('getSessionMenuVars', () => {
+    beforeEach(() => {
+      helper.enterModule('bouMgt');
+    });
+
+    it('marks the first incomplete session as next and leaves the rest plain', () => {
+      const vars = helper.getSessionMenuVars();
+      expect(vars.menuLabel1).toBe('👉 Rollenwechsel bewusst vollziehen');
+      expect(vars.menuLabel2).toBe('Nein sagen üben');
+      expect(vars.menuLabel3).toBe('Grenzen setzen');
+      expect(vars.menuLabel4).toBe('Arbeitliche Grenzen kommunizieren');
+      expect(vars.menuLabel5).toBe('Digitale Auszeiten einhalten');
+    });
+
+    it('fills unused slots with empty string', () => {
+      const vars = helper.getSessionMenuVars();
+      for (let i = 6; i <= 10; i++) expect(vars[`menuLabel${i}`]).toBe('');
+    });
+
+    it('marks a completed session with the completed emoji', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      const vars = helper.getSessionMenuVars();
+      expect(vars.menuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen');
+      expect(vars.menuLabel2).toBe('👉 Nein sagen üben');
+    });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.getSessionMenuVars()).toThrow('No module entered yet');
+    });
+
+    it('accepts custom emojis', () => {
+      const vars = helper.getSessionMenuVars({ completedEmoji: '☑️', nextEmoji: '▶️' });
+      expect(vars.menuLabel1).toBe('▶️ Rollenwechsel bewusst vollziehen');
+    });
+  });
+
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {
       expect(helper.isSuggestionSeen()).toBe(false);

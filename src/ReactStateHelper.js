@@ -477,6 +477,35 @@ class ReactStateHelper {
       .join(',');
   }
 
+  getModuleMenuVars({ completedEmoji = '✅', nextEmoji = '👉' } = {}) {
+    return this.#buildMenuVars(this.#state.modules, completedEmoji, nextEmoji);
+  }
+
+  getSessionMenuVars({ completedEmoji = '✅', nextEmoji = '👉' } = {}) {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    return this.#buildMenuVars(this.#findModule(this.#state.currentModuleId).sessions, completedEmoji, nextEmoji);
+  }
+
+  #buildMenuVars(items, completedEmoji, nextEmoji) {
+    const MAX_MENU_SLOTS = 10;
+    const vars = {};
+    let nextAssigned = false;
+    for (let i = 0; i < MAX_MENU_SLOTS; i++) {
+      const item = items[i];
+      if (!item) {
+        vars[`menuLabel${i + 1}`] = '';
+      } else if (item.isCompleted()) {
+        vars[`menuLabel${i + 1}`] = completedEmoji ? `${completedEmoji} ${item.title}` : item.title;
+      } else if (!nextAssigned) {
+        vars[`menuLabel${i + 1}`] = nextEmoji ? `${nextEmoji} ${item.title}` : item.title;
+        nextAssigned = true;
+      } else {
+        vars[`menuLabel${i + 1}`] = item.title;
+      }
+    }
+    return vars;
+  }
+
   #findModule(moduleId) {
     return this.#state.modules.find(m => m.id === moduleId);
   }
