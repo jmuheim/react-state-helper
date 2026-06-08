@@ -56,9 +56,10 @@ class Module {
 }
 
 class Session {
-  constructor({ id, title, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [] }) {
+  constructor({ id, title, activities_needed_for_adequate_use = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [] }) {
     this.id = id;
     this.title = title;
+    this.activities_needed_for_adequate_use = activities_needed_for_adequate_use;
     this.entered_first_at = entered_first_at;
     this.entered_last_at = entered_last_at;
     this.times_entered = times_entered;
@@ -76,16 +77,24 @@ class Session {
     return this.activities.length > 0 && this.activities.every(a => a.isCompleted());
   }
 
+  countCompletedActivities() {
+    return this.activities.filter(a => a.isCompleted()).length;
+  }
+
+  hasAdequateProgress() {
+    return this.countCompletedActivities() >= this.activities_needed_for_adequate_use;
+  }
+
   findActivity(activityId) {
     return this.activities.find(a => a.id === activityId);
   }
 
   toJSON() {
-    return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities };
+    return { id: this.id, title: this.title, activities_needed_for_adequate_use: this.activities_needed_for_adequate_use, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities };
   }
 
-  static fromJSON({ id, title, entered_first_at, entered_last_at, times_entered, activities }) {
-    return new Session({ id, title, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
+  static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities }) {
+    return new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
   }
 }
 
@@ -151,6 +160,7 @@ class ReactStateHelper {
             {
               id: "introd",
               title: "Einführung",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -186,6 +196,7 @@ class ReactStateHelper {
             {
               id: "rolCha",
               title: "Rollenwechsel bewusst vollziehen",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -211,6 +222,7 @@ class ReactStateHelper {
             {
               id: "sayNo",
               title: "Nein sagen üben",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -228,6 +240,7 @@ class ReactStateHelper {
             {
               id: "limSet",
               title: "Grenzen setzen",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -245,6 +258,7 @@ class ReactStateHelper {
             {
               id: "worBou",
               title: "Arbeitliche Grenzen kommunizieren",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -262,6 +276,7 @@ class ReactStateHelper {
             {
               id: "digDet",
               title: "Digitale Auszeiten einhalten",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -289,6 +304,7 @@ class ReactStateHelper {
             {
               id: "breCon",
               title: "Bewusstes Atmen",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -306,6 +322,7 @@ class ReactStateHelper {
             {
               id: "bodSca",
               title: "Body-Scan-Übung",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -323,6 +340,7 @@ class ReactStateHelper {
             {
               id: "jouWri",
               title: "Tagebuch schreiben",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -340,6 +358,7 @@ class ReactStateHelper {
             {
               id: "proRel",
               title: "Progressive Muskelentspannung",
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
@@ -380,6 +399,11 @@ class ReactStateHelper {
   isSessionCompleted(sessionId) {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     return this.#findModule(this.#state.currentModuleId).findSession(sessionId).isCompleted();
+  }
+
+  hasSessionAdequateProgress(sessionId) {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    return this.#findModule(this.#state.currentModuleId).findSession(sessionId).hasAdequateProgress();
   }
 
   countCompletedSessions() {

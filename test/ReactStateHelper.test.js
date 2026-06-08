@@ -90,6 +90,35 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('hasSessionAdequateProgress', () => {
+    beforeEach(() => {
+      helper.enterModule('bouMgt');
+    });
+
+    it('returns false for all sessions in the default state', () => {
+      expect(helper.hasSessionAdequateProgress('rolCha')).toBe(false);
+      expect(helper.hasSessionAdequateProgress('sayNo')).toBe(false);
+    });
+
+    it('returns true once completed activities meet the threshold (rolCha threshold=1)', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      expect(helper.hasSessionAdequateProgress('rolCha')).toBe(true);
+    });
+
+    it('unlike isSessionCompleted, stays true even if not all activities are done', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      expect(helper.isSessionCompleted('rolCha')).toBe(false);
+      expect(helper.hasSessionAdequateProgress('rolCha')).toBe(true);
+    });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.hasSessionAdequateProgress('rolCha')).toThrow('No module entered yet');
+    });
+  });
+
   describe('isModuleCompleted', () => {
     it('returns false for all modules in the default state', () => {
       expect(helper.isModuleCompleted('bouMgt')).toBe(false);
