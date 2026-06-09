@@ -514,7 +514,7 @@ describe('ReactStateHelper', () => {
 
     it('fills unused slots with empty string', () => {
       const vars = helper.populateModuleMenuLabels();
-      for (let i = 4; i <= 10; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+      for (let i = 4; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
     it('marks a completed module with the completed emoji', () => {
@@ -571,7 +571,7 @@ describe('ReactStateHelper', () => {
 
     it('fills unused slots with empty string', () => {
       const vars = helper.populateSessionMenuLabels();
-      for (let i = 6; i <= 10; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+      for (let i = 6; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
     it('marks a completed session with the completed emoji', () => {

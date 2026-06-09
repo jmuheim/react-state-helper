@@ -487,7 +487,7 @@ class ReactStateHelper {
   }
 
   #buildMenuVars(items, completedEmoji, nextEmoji) {
-    const MAX_MENU_SLOTS = 10;
+    const MAX_MENU_SLOTS = 9;
     const vars = {};
     let nextAssigned = false;
     for (let i = 0; i < MAX_MENU_SLOTS; i++) {
