@@ -21,7 +21,7 @@ npm run test:watch    # re-run on file changes
    | `$jsStateHelperStatus` | `success` or `error` |
    | `$jsStateHelperError` | Error message if status is `error`, otherwise `none` |
    | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session IDs across all modules |
-   | `$menuLabel1` – `$menuLabel10` | Dynamic menu entry labels populated by `getModuleMenuVars()` / `getSessionMenuVars()` |
+   | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel10` | Dynamic menu entry labels populated by `populateModuleMenuLabels()` / `populateSessionMenuLabels()` |
 
 The script reads `$jsStateHelperJson` (persisted state from the previous run), executes the command in `$jsStateHelperCmd` (e.g. `markActivityCompleted()`, `isGoodEnough('bouMgt')`), and writes results back to the variables above.
 
