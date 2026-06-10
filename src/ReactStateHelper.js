@@ -488,9 +488,9 @@ class ReactStateHelper {
       const threshold = session.activities_needed_for_adequate_use;
       const idx = module.sessions.findIndex(s => s.id === session.id);
       const next = module.sessions[idx + 1];
-      const nextPart = next ? `, or skip to "${next.title}"` : '';
-      if (completed >= total) return `You have completed all activities in "${session.title}". You can re-visit them as often as you like${nextPart}.`;
-      if (completed >= threshold) return `You have good progress in "${session.title}". You can stay and complete more activities${nextPart}.`;
+      const nextPart = next ? `, or skip to session 📑 "${next.title}"` : '';
+      if (completed >= total) return `You have completed all 🎯 activities in 📑 "${session.title}". You can re-visit them as often as you like${nextPart}.`;
+      if (completed >= threshold) return `You have good progress in session 📑 "${session.title}". You can stay and complete more 🎯 activities${nextPart}.`;
       return '';
     }
     if (this.#state.currentModuleId) {
@@ -500,9 +500,9 @@ class ReactStateHelper {
       const threshold = module.sessions_needed_for_adequate_use;
       const idx = this.#state.modules.findIndex(m => m.id === module.id);
       const next = this.#state.modules[idx + 1];
-      const nextPart = next ? `, or skip to "${next.title}"` : '';
-      if (completed >= total) return `You have completed all sessions in "${module.title}". You can re-visit them as often as you like${nextPart}.`;
-      if (completed >= threshold) return `You have good progress in "${module.title}". You can stay and complete more sessions${nextPart}.`;
+      const nextPart = next ? `, or skip to module 🗂️ "${next.title}"` : '';
+      if (completed >= total) return `You have completed all 📑 sessions in module 🗂️ "${module.title}". You can re-visit them as often as you like${nextPart}.`;
+      if (completed >= threshold) return `You have good progress in module 🗂️ "${module.title}". You can stay and complete more 📑 sessions${nextPart}.`;
       return '';
     }
     return '';

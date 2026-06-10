@@ -668,13 +668,13 @@ describe('ReactStateHelper', () => {
 
       it('returns good-progress message when threshold met but activities remain', () => {
         helper.enterActivity('somAct'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('You have good progress in "Rollenwechsel bewusst vollziehen". You can stay and complete more activities, or skip to "Nein sagen üben".');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in session 📑 "Rollenwechsel bewusst vollziehen". You can stay and complete more 🎯 activities, or skip to session 📑 "Nein sagen üben".');
       });
 
       it('returns all-completed message when all activities are done', () => {
         helper.enterActivity('somAct'); helper.markActivityCompleted();
         helper.enterActivity('othAct'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('You have completed all activities in "Rollenwechsel bewusst vollziehen". You can re-visit them as often as you like, or skip to "Nein sagen üben".');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 🎯 activities in 📑 "Rollenwechsel bewusst vollziehen". You can re-visit them as often as you like, or skip to session 📑 "Nein sagen üben".');
       });
     });
 
@@ -694,7 +694,7 @@ describe('ReactStateHelper', () => {
         helper.enterModule('bouMgt');
         helper.enterSession('worBou'); helper.enterActivity('worBouAct'); helper.markActivityCompleted();
         helper.enterModule('bouMgt');
-        expect(helper.getProgressAdvice()).toBe('You have good progress in "Boundary Management". You can stay and complete more sessions, or skip to "Emotionsregulation".');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Boundary Management". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Emotionsregulation".');
       });
 
       it('returns all-completed message when all sessions are done', () => {
@@ -708,7 +708,7 @@ describe('ReactStateHelper', () => {
         helper.enterModule('bouMgt');
         helper.enterSession('digDet'); helper.enterActivity('digDetAct'); helper.markActivityCompleted();
         helper.enterModule('bouMgt');
-        expect(helper.getProgressAdvice()).toBe('You have completed all sessions in "Boundary Management". You can re-visit them as often as you like, or skip to "Emotionsregulation".');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Boundary Management". You can re-visit them as often as you like, or skip to module 🗂️ "Emotionsregulation".');
       });
     });
   });
