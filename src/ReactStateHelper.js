@@ -495,12 +495,12 @@ class ReactStateHelper {
       if (!item) {
         vars[`jsStateHelperMenuLabel${i + 1}`] = '';
       } else if (item.isCompleted()) {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = completedEmoji ? `${completedEmoji} ${item.title}` : item.title;
+        vars[`jsStateHelperMenuLabel${i + 1}`] = `${completedEmoji ? completedEmoji + ' ' : ''}${item.title}:${item.id}`;
       } else if (!nextAssigned) {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = nextEmoji ? `${nextEmoji} ${item.title}` : item.title;
+        vars[`jsStateHelperMenuLabel${i + 1}`] = `${nextEmoji ? nextEmoji + ' ' : ''}${item.title}:${item.id}`;
         nextAssigned = true;
       } else {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = item.title;
+        vars[`jsStateHelperMenuLabel${i + 1}`] = `${item.title}:${item.id}`;
       }
     }
     return vars;

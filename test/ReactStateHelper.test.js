@@ -507,9 +507,9 @@ describe('ReactStateHelper', () => {
   describe('populateModuleMenuLabels', () => {
     it('marks the first incomplete module as next and leaves the rest plain', () => {
       const vars = helper.populateModuleMenuLabels();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Onboarding');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Boundary Management');
-      expect(vars.jsStateHelperMenuLabel3).toBe('Emotionsregulation');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Onboarding:onboard');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Boundary Management:bouMgt');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Emotionsregulation:emoReg');
     });
 
     it('fills unused slots with empty string', () => {
@@ -523,8 +523,8 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('globGoal'); helper.markActivityCompleted();
       helper.enterActivity('howEdu'); helper.markActivityCompleted();
       const vars = helper.populateModuleMenuLabels();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding');
-      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Boundary Management');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding:onboard');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Boundary Management:bouMgt');
     });
 
     it('marks no module as next when all are completed', () => {
@@ -539,19 +539,19 @@ describe('ReactStateHelper', () => {
         }
       }
       const vars = helper.populateModuleMenuLabels();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Boundary Management');
-      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Emotionsregulation');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding:onboard');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Boundary Management:bouMgt');
+      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Emotionsregulation:emoReg');
     });
 
     it('accepts custom emojis', () => {
       const vars = helper.populateModuleMenuLabels({ completedEmoji: '☑️', nextEmoji: '▶️' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Onboarding');
+      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Onboarding:onboard');
     });
 
     it('omits emoji prefix when emoji is empty string', () => {
       const vars = helper.populateModuleMenuLabels({ completedEmoji: '', nextEmoji: '' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('Onboarding');
+      expect(vars.jsStateHelperMenuLabel1).toBe('Onboarding:onboard');
     });
   });
 
@@ -562,11 +562,11 @@ describe('ReactStateHelper', () => {
 
     it('marks the first incomplete session as next and leaves the rest plain', () => {
       const vars = helper.populateSessionMenuLabels();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Rollenwechsel bewusst vollziehen');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Nein sagen üben');
-      expect(vars.jsStateHelperMenuLabel3).toBe('Grenzen setzen');
-      expect(vars.jsStateHelperMenuLabel4).toBe('Arbeitliche Grenzen kommunizieren');
-      expect(vars.jsStateHelperMenuLabel5).toBe('Digitale Auszeiten einhalten');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Rollenwechsel bewusst vollziehen:rolCha');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Nein sagen üben:sayNo');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Grenzen setzen:limSet');
+      expect(vars.jsStateHelperMenuLabel4).toBe('Arbeitliche Grenzen kommunizieren:worBou');
+      expect(vars.jsStateHelperMenuLabel5).toBe('Digitale Auszeiten einhalten:digDet');
     });
 
     it('fills unused slots with empty string', () => {
@@ -579,8 +579,8 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
       const vars = helper.populateSessionMenuLabels();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen');
-      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Nein sagen üben');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen:rolCha');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Nein sagen üben:sayNo');
     });
 
     it('throws if no module has been entered', () => {
@@ -590,7 +590,7 @@ describe('ReactStateHelper', () => {
 
     it('accepts custom emojis', () => {
       const vars = helper.populateSessionMenuLabels({ completedEmoji: '☑️', nextEmoji: '▶️' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Rollenwechsel bewusst vollziehen');
+      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Rollenwechsel bewusst vollziehen:rolCha');
     });
   });
 
