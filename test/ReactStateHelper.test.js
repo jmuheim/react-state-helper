@@ -88,6 +88,11 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.isSessionCompleted('rolCha')).toBe(true);
     });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.isSessionCompleted('rolCha')).toThrow('No module entered yet');
+    });
   });
 
   describe('hasSessionAdequateProgress', () => {
@@ -417,6 +422,10 @@ describe('ReactStateHelper', () => {
       expect(restored.getParticipantGroup()).toBe('bouMgt: rolCha');
     });
 
+    it('throws if the moduleId does not exist', () => {
+      expect(() => helper.enterModule('nonExistent')).toThrow('Module nonExistent not found');
+    });
+
     it('throws if enterSession is called without a current module', () => {
       expect(() => helper.enterSession('rolCha')).toThrow('No module entered yet');
     });
@@ -574,6 +583,21 @@ describe('ReactStateHelper', () => {
       expect(vars.jsStateHelperMenuLabel2).toBe('👉 Nein sagen üben:sayNo');
     });
 
+    it('marks no session as next when all are completed', () => {
+      const module = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt');
+      helper.enterModule('bouMgt');
+      for (const session of module.sessions) {
+        helper.enterSession(session.id);
+        for (const activity of session.activities) {
+          helper.enterActivity(activity.id);
+          helper.markActivityCompleted();
+        }
+      }
+      const vars = helper.populateSessionMenuLabels();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen:rolCha');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Nein sagen üben:sayNo');
+    });
+
     it('throws if no module has been entered', () => {
       helper = ReactStateHelper.initDefaultState();
       expect(() => helper.populateSessionMenuLabels()).toThrow('No module entered yet');
@@ -608,6 +632,14 @@ describe('ReactStateHelper', () => {
     it('throws if no module has been entered', () => {
       helper = ReactStateHelper.initDefaultState();
       expect(() => helper.populateActivityMenuLabels()).toThrow('No module entered yet');
+    });
+
+    it('marks no activity as next when all are completed', () => {
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      const vars = helper.populateActivityMenuLabels();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Eine andere Übung:othAct');
     });
 
     it('throws if no session has been entered', () => {
