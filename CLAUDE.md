@@ -63,9 +63,9 @@ MobileCoach has no way to call specific JS functions directly. Instead, inside M
 
 ### Menus are static by default
 
-MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` variables and populate them from JS (`populateModuleMenuLabels()` / `populateSessionMenuLabels()`). Unused slots are set to `""` so MobileCoach can hide them. The maximum of 9 slots is a hard constraint — adding more requires re-declaring variables in the MobileCoach project.
+MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` variables and populate them from JS (`populateModuleMenuLabels()` / `populateSessionMenuLabels()` / `populateActivityMenuLabels()`). Unused slots are set to `""` so MobileCoach can hide them. The maximum of 9 slots is a hard constraint — adding more requires re-declaring variables in the MobileCoach project.
 
-### Button value format
+The MobileCoach flow must ensure the user has previously navigated into the right context before invoking these commands — otherwise the script will error. `populateSessionMenuLabels()` requires a module to already be entered in state (via `enterModule('bouMgt')`); `populateActivityMenuLabels()` requires both a module and a session (via `enterModule('bouMgt')` / `enterSession('rolCha')`).
 
 Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter.
 

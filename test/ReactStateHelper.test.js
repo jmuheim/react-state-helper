@@ -594,6 +594,47 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('populateActivityMenuLabels', () => {
+    beforeEach(() => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+    });
+
+    it('marks the first incomplete activity as next and leaves the rest plain', () => {
+      const vars = helper.populateActivityMenuLabels();
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Eine erste Übung:somAct');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Eine andere Übung:othAct');
+    });
+
+    it('fills unused slots with empty string', () => {
+      const vars = helper.populateActivityMenuLabels();
+      for (let i = 3; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+    });
+
+    it('marks a completed activity with the completed emoji', () => {
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      const vars = helper.populateActivityMenuLabels();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Eine andere Übung:othAct');
+    });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.populateActivityMenuLabels()).toThrow('No module entered yet');
+    });
+
+    it('throws if no session has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      helper.enterModule('bouMgt');
+      expect(() => helper.populateActivityMenuLabels()).toThrow('No session entered yet');
+    });
+
+    it('accepts custom emojis', () => {
+      const vars = helper.populateActivityMenuLabels({ completedEmoji: '☑️', nextEmoji: '▶️' });
+      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Eine erste Übung:somAct');
+    });
+  });
+
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {
       expect(helper.isSuggestionSeen()).toBe(false);

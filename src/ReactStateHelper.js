@@ -486,6 +486,12 @@ class ReactStateHelper {
     return this.#buildMenuVars(this.#findModule(this.#state.currentModuleId).sessions, completedEmoji, nextEmoji);
   }
 
+  populateActivityMenuLabels({ completedEmoji = '✅', nextEmoji = '👉' } = {}) {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    if (!this.#state.currentSessionId) throw new Error('No session entered yet');
+    return this.#buildMenuVars(this.#findSession(this.#state.currentSessionId).activities, completedEmoji, nextEmoji);
+  }
+
   #buildMenuVars(items, completedEmoji, nextEmoji) {
     const MAX_MENU_SLOTS = 9;
     const vars = {};
