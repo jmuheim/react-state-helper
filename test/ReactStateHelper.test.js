@@ -674,7 +674,7 @@ describe('ReactStateHelper', () => {
       it('returns all-completed message when all activities are done', () => {
         helper.enterActivity('somAct'); helper.markActivityCompleted();
         helper.enterActivity('othAct'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('You have completed all 🎯 activities in 📑 "Rollenwechsel bewusst vollziehen". You can re-visit them as often as you like, or skip to session 📑 "Nein sagen üben".');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 🎯 activities in session 📑 "Rollenwechsel bewusst vollziehen". You can re-visit them as often as you like, or skip to session 📑 "Nein sagen üben".');
       });
     });
 

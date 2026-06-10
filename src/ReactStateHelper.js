@@ -484,28 +484,21 @@ class ReactStateHelper {
     if (this.#state.currentSessionId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
-      const completed = session.countCompletedActivities();
-      const total = session.activities.length;
-      const threshold = session.activities_needed_for_adequate_use;
       const idx = module.sessions.findIndex(ss => ss.id === session.id);
-      const next = module.sessions[idx + 1];
-      const nextPart = next ? `, or skip to session ${s} "${next.title}"` : '';
-      if (completed >= total) return `You have completed all ${a} activities in ${s} "${session.title}". You can re-visit them as often as you like${nextPart}.`;
-      if (completed >= threshold) return `You have good progress in session ${s} "${session.title}". You can stay and complete more ${a} activities${nextPart}.`;
-      return '';
+      return this.#buildProgressAdvice({ label: 'session', emoji: s, title: session.title, subLabel: 'activities', subEmoji: a, completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_use, next: module.sessions[idx + 1] });
     }
     if (this.#state.currentModuleId) {
       const module = this.#findModule(this.#state.currentModuleId);
-      const completed = module.countCompletedSessions();
-      const total = module.sessions.length;
-      const threshold = module.sessions_needed_for_adequate_use;
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
-      const next = this.#state.modules[idx + 1];
-      const nextPart = next ? `, or skip to module ${m} "${next.title}"` : '';
-      if (completed >= total) return `You have completed all ${s} sessions in module ${m} "${module.title}". You can re-visit them as often as you like${nextPart}.`;
-      if (completed >= threshold) return `You have good progress in module ${m} "${module.title}". You can stay and complete more ${s} sessions${nextPart}.`;
-      return '';
+      return this.#buildProgressAdvice({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: module.sessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
     }
+    return '';
+  }
+
+  #buildProgressAdvice({ label, emoji, title, subLabel, subEmoji, completed, total, threshold, next }) {
+    const nextPart = next ? `, or skip to ${label} ${emoji} "${next.title}"` : '';
+    if (completed >= total) return `You have completed all ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}". You can re-visit them as often as you like${nextPart}.`;
+    if (completed >= threshold) return `You have good progress in ${label} ${emoji} "${title}". You can stay and complete more ${subEmoji} ${subLabel}${nextPart}.`;
     return '';
   }
 
