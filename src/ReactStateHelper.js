@@ -477,20 +477,21 @@ class ReactStateHelper {
       .join(',');
   }
 
-  static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉' };
+  static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉', moduleEmoji: '🗂️', sessionEmoji: '📑', activityEmoji: '🎯' };
 
   getProgressAdvice() {
+    const { moduleEmoji: m, sessionEmoji: s, activityEmoji: a } = ReactStateHelper.#MENU_EMOJIS;
     if (this.#state.currentSessionId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
       const completed = session.countCompletedActivities();
       const total = session.activities.length;
       const threshold = session.activities_needed_for_adequate_use;
-      const idx = module.sessions.findIndex(s => s.id === session.id);
+      const idx = module.sessions.findIndex(ss => ss.id === session.id);
       const next = module.sessions[idx + 1];
-      const nextPart = next ? `, or skip to session 📑 "${next.title}"` : '';
-      if (completed >= total) return `You have completed all 🎯 activities in 📑 "${session.title}". You can re-visit them as often as you like${nextPart}.`;
-      if (completed >= threshold) return `You have good progress in session 📑 "${session.title}". You can stay and complete more 🎯 activities${nextPart}.`;
+      const nextPart = next ? `, or skip to session ${s} "${next.title}"` : '';
+      if (completed >= total) return `You have completed all ${a} activities in ${s} "${session.title}". You can re-visit them as often as you like${nextPart}.`;
+      if (completed >= threshold) return `You have good progress in session ${s} "${session.title}". You can stay and complete more ${a} activities${nextPart}.`;
       return '';
     }
     if (this.#state.currentModuleId) {
@@ -498,11 +499,11 @@ class ReactStateHelper {
       const completed = module.countCompletedSessions();
       const total = module.sessions.length;
       const threshold = module.sessions_needed_for_adequate_use;
-      const idx = this.#state.modules.findIndex(m => m.id === module.id);
+      const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
       const next = this.#state.modules[idx + 1];
-      const nextPart = next ? `, or skip to module 🗂️ "${next.title}"` : '';
-      if (completed >= total) return `You have completed all 📑 sessions in module 🗂️ "${module.title}". You can re-visit them as often as you like${nextPart}.`;
-      if (completed >= threshold) return `You have good progress in module 🗂️ "${module.title}". You can stay and complete more 📑 sessions${nextPart}.`;
+      const nextPart = next ? `, or skip to module ${m} "${next.title}"` : '';
+      if (completed >= total) return `You have completed all ${s} sessions in module ${m} "${module.title}". You can re-visit them as often as you like${nextPart}.`;
+      if (completed >= threshold) return `You have good progress in module ${m} "${module.title}". You can stay and complete more ${s} sessions${nextPart}.`;
       return '';
     }
     return '';
