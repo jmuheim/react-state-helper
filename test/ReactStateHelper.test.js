@@ -88,6 +88,11 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('othAct'); helper.markActivityCompleted();
       expect(helper.isSessionCompleted('rolCha')).toBe(true);
     });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.isSessionCompleted('rolCha')).toThrow('No module entered yet');
+    });
   });
 
   describe('hasSessionAdequateProgress', () => {
@@ -417,6 +422,10 @@ describe('ReactStateHelper', () => {
       expect(restored.getParticipantGroup()).toBe('bouMgt: rolCha');
     });
 
+    it('throws if the moduleId does not exist', () => {
+      expect(() => helper.enterModule('nonExistent')).toThrow('Module nonExistent not found');
+    });
+
     it('throws if enterSession is called without a current module', () => {
       expect(() => helper.enterSession('rolCha')).toThrow('No module entered yet');
     });
@@ -503,6 +512,144 @@ describe('ReactStateHelper', () => {
       expect(second).not.toBeNull();
     });
   });
+
+  describe('populateMenuLabelsForModule', () => {
+    it('marks the first incomplete module as 👉 and leaves the rest plain', () => {
+      const vars = helper.populateMenuLabelsForModule();
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Onboarding:onboard');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Boundary Management:bouMgt');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Emotionsregulation:emoReg');
+    });
+
+    it('fills unused slots with empty string', () => {
+      const vars = helper.populateMenuLabelsForModule();
+      for (let i = 4; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+    });
+
+    it('marks a completed module with ✅', () => {
+      helper.enterModule('onboard');
+      helper.enterSession('introd');
+      helper.enterActivity('globGoal'); helper.markActivityCompleted();
+      helper.enterActivity('howEdu'); helper.markActivityCompleted();
+      const vars = helper.populateMenuLabelsForModule();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding:onboard');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Boundary Management:bouMgt');
+    });
+
+    it('marks no module as 👉 when all are ✅', () => {
+      for (const module of ReactStateHelper.initialState().modules) {
+        helper.enterModule(module.id);
+        for (const session of module.sessions) {
+          helper.enterSession(session.id);
+          for (const activity of session.activities) {
+            helper.enterActivity(activity.id);
+            helper.markActivityCompleted();
+          }
+        }
+      }
+      const vars = helper.populateMenuLabelsForModule();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding:onboard');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Boundary Management:bouMgt');
+      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Emotionsregulation:emoReg');
+    });
+
+  });
+
+  describe('populateMenuLabelsForSession', () => {
+    beforeEach(() => {
+      helper.enterModule('bouMgt');
+    });
+
+    it('marks the first incomplete session as 👉 and leaves the rest plain', () => {
+      const vars = helper.populateMenuLabelsForSession();
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Rollenwechsel bewusst vollziehen:rolCha');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Nein sagen üben:sayNo');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Grenzen setzen:limSet');
+      expect(vars.jsStateHelperMenuLabel4).toBe('Arbeitliche Grenzen kommunizieren:worBou');
+      expect(vars.jsStateHelperMenuLabel5).toBe('Digitale Auszeiten einhalten:digDet');
+    });
+
+    it('fills unused slots with empty string', () => {
+      const vars = helper.populateMenuLabelsForSession();
+      for (let i = 6; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+    });
+
+    it('marks a completed session with ✅', () => {
+      helper.enterSession('rolCha');
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      const vars = helper.populateMenuLabelsForSession();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen:rolCha');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Nein sagen üben:sayNo');
+    });
+
+    it('marks no session as 👉 when all are ✅', () => {
+      const module = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt');
+      helper.enterModule('bouMgt');
+      for (const session of module.sessions) {
+        helper.enterSession(session.id);
+        for (const activity of session.activities) {
+          helper.enterActivity(activity.id);
+          helper.markActivityCompleted();
+        }
+      }
+      const vars = helper.populateMenuLabelsForSession();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen:rolCha');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Nein sagen üben:sayNo');
+    });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.populateMenuLabelsForSession()).toThrow('No module entered yet');
+    });
+
+  });
+
+  describe('populateMenuLabelsForActivity', () => {
+    beforeEach(() => {
+      helper.enterModule('bouMgt');
+      helper.enterSession('rolCha');
+    });
+
+    it('marks the first incomplete activity as 👉 and leaves the rest plain', () => {
+      const vars = helper.populateMenuLabelsForActivity();
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Eine erste Übung:somAct');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Eine andere Übung:othAct');
+    });
+
+    it('fills unused slots with empty string', () => {
+      const vars = helper.populateMenuLabelsForActivity();
+      for (let i = 3; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+    });
+
+    it('marks a completed activity with ✅', () => {
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      const vars = helper.populateMenuLabelsForActivity();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Eine andere Übung:othAct');
+    });
+
+    it('throws if no module has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      expect(() => helper.populateMenuLabelsForActivity()).toThrow('No module entered yet');
+    });
+
+    it('marks no activity as 👉 when all are ✅', () => {
+      helper.enterActivity('somAct'); helper.markActivityCompleted();
+      helper.enterActivity('othAct'); helper.markActivityCompleted();
+      const vars = helper.populateMenuLabelsForActivity();
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Eine andere Übung:othAct');
+    });
+
+    it('throws if no session has been entered', () => {
+      helper = ReactStateHelper.initDefaultState();
+      helper.enterModule('bouMgt');
+      expect(() => helper.populateMenuLabelsForActivity()).toThrow('No session entered yet');
+    });
+
+  });
+
 
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {

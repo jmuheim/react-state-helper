@@ -477,6 +477,44 @@ class ReactStateHelper {
       .join(',');
   }
 
+  static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉' };
+
+  populateMenuLabelsForModule() {
+    return this.#buildMenuVars(this.#state.modules);
+  }
+
+  populateMenuLabelsForSession() {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    return this.#buildMenuVars(this.#findModule(this.#state.currentModuleId).sessions);
+  }
+
+  populateMenuLabelsForActivity() {
+    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
+    if (!this.#state.currentSessionId) throw new Error('No session entered yet');
+    return this.#buildMenuVars(this.#findSession(this.#state.currentSessionId).activities);
+  }
+
+  #buildMenuVars(items) {
+    const { completedEmoji, nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
+    const MAX_MENU_SLOTS = 9;
+    const vars = {};
+    let nextAssigned = false;
+    for (let i = 0; i < MAX_MENU_SLOTS; i++) {
+      const item = items[i];
+      if (!item) {
+        vars[`jsStateHelperMenuLabel${i + 1}`] = '';
+      } else if (item.isCompleted()) {
+        vars[`jsStateHelperMenuLabel${i + 1}`] = `${completedEmoji ? completedEmoji + ' ' : ''}${item.title}:${item.id}`;
+      } else if (!nextAssigned) {
+        vars[`jsStateHelperMenuLabel${i + 1}`] = `${nextEmoji ? nextEmoji + ' ' : ''}${item.title}:${item.id}`;
+        nextAssigned = true;
+      } else {
+        vars[`jsStateHelperMenuLabel${i + 1}`] = `${item.title}:${item.id}`;
+      }
+    }
+    return vars;
+  }
+
   #findModule(moduleId) {
     return this.#state.modules.find(m => m.id === moduleId);
   }
