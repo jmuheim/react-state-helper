@@ -63,9 +63,9 @@ MobileCoach has no way to call specific JS functions directly. Instead, inside M
 
 ### Menus are static by default
 
-MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` variables and populate them from JS. This can be done for each hierarchy level: modules → sessions → activities (i.e. `populateModuleMenuLabels()`).
+MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` variables and populate them from JS. This can be done for each hierarchy level: modules → sessions → activities (i.e. `populateMenuLabelsForModule()`).
 
-The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('bouMgt')` before calling `populateSessionMenuLabels()`; and to `populateActivityMenuLabels()`, you also first need to `enterSession('rolCha')`.
+The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('bouMgt')` before calling `populateMenuLabelsForSession()`; and to `populateMenuLabelsForActivity()`, you also first need to `enterSession('rolCha')`.
 
 Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter.
 

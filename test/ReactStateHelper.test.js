@@ -513,16 +513,16 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('populateModuleMenuLabels', () => {
+  describe('populateMenuLabelsForModule', () => {
     it('marks the first incomplete module as next and leaves the rest plain', () => {
-      const vars = helper.populateModuleMenuLabels();
+      const vars = helper.populateMenuLabelsForModule();
       expect(vars.jsStateHelperMenuLabel1).toBe('👉 Onboarding:onboard');
       expect(vars.jsStateHelperMenuLabel2).toBe('Boundary Management:bouMgt');
       expect(vars.jsStateHelperMenuLabel3).toBe('Emotionsregulation:emoReg');
     });
 
     it('fills unused slots with empty string', () => {
-      const vars = helper.populateModuleMenuLabels();
+      const vars = helper.populateMenuLabelsForModule();
       for (let i = 4; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
@@ -531,7 +531,7 @@ describe('ReactStateHelper', () => {
       helper.enterSession('introd');
       helper.enterActivity('globGoal'); helper.markActivityCompleted();
       helper.enterActivity('howEdu'); helper.markActivityCompleted();
-      const vars = helper.populateModuleMenuLabels();
+      const vars = helper.populateMenuLabelsForModule();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding:onboard');
       expect(vars.jsStateHelperMenuLabel2).toBe('👉 Boundary Management:bouMgt');
     });
@@ -547,7 +547,7 @@ describe('ReactStateHelper', () => {
           }
         }
       }
-      const vars = helper.populateModuleMenuLabels();
+      const vars = helper.populateMenuLabelsForModule();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Onboarding:onboard');
       expect(vars.jsStateHelperMenuLabel2).toBe('✅ Boundary Management:bouMgt');
       expect(vars.jsStateHelperMenuLabel3).toBe('✅ Emotionsregulation:emoReg');
@@ -555,13 +555,13 @@ describe('ReactStateHelper', () => {
 
   });
 
-  describe('populateSessionMenuLabels', () => {
+  describe('populateMenuLabelsForSession', () => {
     beforeEach(() => {
       helper.enterModule('bouMgt');
     });
 
     it('marks the first incomplete session as next and leaves the rest plain', () => {
-      const vars = helper.populateSessionMenuLabels();
+      const vars = helper.populateMenuLabelsForSession();
       expect(vars.jsStateHelperMenuLabel1).toBe('👉 Rollenwechsel bewusst vollziehen:rolCha');
       expect(vars.jsStateHelperMenuLabel2).toBe('Nein sagen üben:sayNo');
       expect(vars.jsStateHelperMenuLabel3).toBe('Grenzen setzen:limSet');
@@ -570,7 +570,7 @@ describe('ReactStateHelper', () => {
     });
 
     it('fills unused slots with empty string', () => {
-      const vars = helper.populateSessionMenuLabels();
+      const vars = helper.populateMenuLabelsForSession();
       for (let i = 6; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
@@ -578,7 +578,7 @@ describe('ReactStateHelper', () => {
       helper.enterSession('rolCha');
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
-      const vars = helper.populateSessionMenuLabels();
+      const vars = helper.populateMenuLabelsForSession();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen:rolCha');
       expect(vars.jsStateHelperMenuLabel2).toBe('👉 Nein sagen üben:sayNo');
     });
@@ -593,51 +593,51 @@ describe('ReactStateHelper', () => {
           helper.markActivityCompleted();
         }
       }
-      const vars = helper.populateSessionMenuLabels();
+      const vars = helper.populateMenuLabelsForSession();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst vollziehen:rolCha');
       expect(vars.jsStateHelperMenuLabel2).toBe('✅ Nein sagen üben:sayNo');
     });
 
     it('throws if no module has been entered', () => {
       helper = ReactStateHelper.initDefaultState();
-      expect(() => helper.populateSessionMenuLabels()).toThrow('No module entered yet');
+      expect(() => helper.populateMenuLabelsForSession()).toThrow('No module entered yet');
     });
 
   });
 
-  describe('populateActivityMenuLabels', () => {
+  describe('populateMenuLabelsForActivity', () => {
     beforeEach(() => {
       helper.enterModule('bouMgt');
       helper.enterSession('rolCha');
     });
 
     it('marks the first incomplete activity as next and leaves the rest plain', () => {
-      const vars = helper.populateActivityMenuLabels();
+      const vars = helper.populateMenuLabelsForActivity();
       expect(vars.jsStateHelperMenuLabel1).toBe('👉 Eine erste Übung:somAct');
       expect(vars.jsStateHelperMenuLabel2).toBe('Eine andere Übung:othAct');
     });
 
     it('fills unused slots with empty string', () => {
-      const vars = helper.populateActivityMenuLabels();
+      const vars = helper.populateMenuLabelsForActivity();
       for (let i = 3; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
     it('marks a completed activity with the completed emoji', () => {
       helper.enterActivity('somAct'); helper.markActivityCompleted();
-      const vars = helper.populateActivityMenuLabels();
+      const vars = helper.populateMenuLabelsForActivity();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
       expect(vars.jsStateHelperMenuLabel2).toBe('👉 Eine andere Übung:othAct');
     });
 
     it('throws if no module has been entered', () => {
       helper = ReactStateHelper.initDefaultState();
-      expect(() => helper.populateActivityMenuLabels()).toThrow('No module entered yet');
+      expect(() => helper.populateMenuLabelsForActivity()).toThrow('No module entered yet');
     });
 
     it('marks no activity as next when all are completed', () => {
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
-      const vars = helper.populateActivityMenuLabels();
+      const vars = helper.populateMenuLabelsForActivity();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
       expect(vars.jsStateHelperMenuLabel2).toBe('✅ Eine andere Übung:othAct');
     });
@@ -645,7 +645,7 @@ describe('ReactStateHelper', () => {
     it('throws if no session has been entered', () => {
       helper = ReactStateHelper.initDefaultState();
       helper.enterModule('bouMgt');
-      expect(() => helper.populateActivityMenuLabels()).toThrow('No session entered yet');
+      expect(() => helper.populateMenuLabelsForActivity()).toThrow('No session entered yet');
     });
 
   });
