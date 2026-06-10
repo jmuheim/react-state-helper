@@ -651,6 +651,68 @@ describe('ReactStateHelper', () => {
   });
 
 
+  describe('getProgressAdvice', () => {
+    it('returns empty string when no context is set', () => {
+      expect(helper.getProgressAdvice()).toBe('');
+    });
+
+    describe('session-level advice (rolCha: threshold 1, total 2 activities)', () => {
+      beforeEach(() => {
+        helper.enterModule('bouMgt');
+        helper.enterSession('rolCha');
+      });
+
+      it('returns empty string when below activity threshold', () => {
+        expect(helper.getProgressAdvice()).toBe('');
+      });
+
+      it('returns good-progress message when threshold met but activities remain', () => {
+        helper.enterActivity('somAct'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('You have good progress in this session. You can stay and complete more activities, or you can skip to the next session.');
+      });
+
+      it('returns all-completed message when all activities are done', () => {
+        helper.enterActivity('somAct'); helper.markActivityCompleted();
+        helper.enterActivity('othAct'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('You have completed all activities in this session. You can re-visit them as often as you like, but we suggest to go to the next session.');
+      });
+    });
+
+    describe('module-level advice (bouMgt: threshold 3, total 5 sessions)', () => {
+      beforeEach(() => {
+        helper.enterModule('bouMgt');
+      });
+
+      it('returns empty string when below session threshold', () => {
+        expect(helper.getProgressAdvice()).toBe('');
+      });
+
+      it('returns good-progress message when threshold met but sessions remain', () => {
+        helper.enterSession('sayNo'); helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('limSet'); helper.enterActivity('limSetAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('worBou'); helper.enterActivity('worBouAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in this module. You can stay and complete more sessions, or you can skip to the next module.');
+      });
+
+      it('returns all-completed message when all sessions are done', () => {
+        helper.enterSession('rolCha'); helper.enterActivity('somAct'); helper.markActivityCompleted(); helper.enterActivity('othAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('sayNo'); helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('limSet'); helper.enterActivity('limSetAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('worBou'); helper.enterActivity('worBouAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('digDet'); helper.enterActivity('digDetAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        expect(helper.getProgressAdvice()).toBe('You have completed all sessions in this module. You can re-visit them as often as you like, but we suggest to go to the next module.');
+      });
+    });
+  });
+
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {
       expect(helper.isSuggestionSeen()).toBe(false);

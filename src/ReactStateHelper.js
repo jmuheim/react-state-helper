@@ -479,6 +479,28 @@ class ReactStateHelper {
 
   static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉' };
 
+  getProgressAdvice() {
+    if (this.#state.currentSessionId) {
+      const session = this.#findSession(this.#state.currentSessionId);
+      const completed = session.countCompletedActivities();
+      const total = session.activities.length;
+      const threshold = session.activities_needed_for_adequate_use;
+      if (completed >= total) return 'You have completed all activities in this session. You can re-visit them as often as you like, but we suggest to go to the next session.';
+      if (completed >= threshold) return 'You have good progress in this session. You can stay and complete more activities, or you can skip to the next session.';
+      return '';
+    }
+    if (this.#state.currentModuleId) {
+      const module = this.#findModule(this.#state.currentModuleId);
+      const completed = module.countCompletedSessions();
+      const total = module.sessions.length;
+      const threshold = module.sessions_needed_for_adequate_use;
+      if (completed >= total) return 'You have completed all sessions in this module. You can re-visit them as often as you like, but we suggest to go to the next module.';
+      if (completed >= threshold) return 'You have good progress in this module. You can stay and complete more sessions, or you can skip to the next module.';
+      return '';
+    }
+    return '';
+  }
+
   populateMenuLabelsForModule() {
     return this.#buildMenuVars(this.#state.modules);
   }
