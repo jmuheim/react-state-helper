@@ -514,7 +514,7 @@ describe('ReactStateHelper', () => {
   });
 
   describe('populateMenuLabelsForModule', () => {
-    it('marks the first incomplete module as next and leaves the rest plain', () => {
+    it('marks the first incomplete module as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForModule();
       expect(vars.jsStateHelperMenuLabel1).toBe('👉 Onboarding:onboard');
       expect(vars.jsStateHelperMenuLabel2).toBe('Boundary Management:bouMgt');
@@ -526,7 +526,7 @@ describe('ReactStateHelper', () => {
       for (let i = 4; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
-    it('marks a completed module with the completed emoji', () => {
+    it('marks a completed module with ✅', () => {
       helper.enterModule('onboard');
       helper.enterSession('introd');
       helper.enterActivity('globGoal'); helper.markActivityCompleted();
@@ -536,7 +536,7 @@ describe('ReactStateHelper', () => {
       expect(vars.jsStateHelperMenuLabel2).toBe('👉 Boundary Management:bouMgt');
     });
 
-    it('marks no module as next when all are completed', () => {
+    it('marks no module as 👉 when all are ✅', () => {
       for (const module of ReactStateHelper.initialState().modules) {
         helper.enterModule(module.id);
         for (const session of module.sessions) {
@@ -560,7 +560,7 @@ describe('ReactStateHelper', () => {
       helper.enterModule('bouMgt');
     });
 
-    it('marks the first incomplete session as next and leaves the rest plain', () => {
+    it('marks the first incomplete session as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForSession();
       expect(vars.jsStateHelperMenuLabel1).toBe('👉 Rollenwechsel bewusst vollziehen:rolCha');
       expect(vars.jsStateHelperMenuLabel2).toBe('Nein sagen üben:sayNo');
@@ -574,7 +574,7 @@ describe('ReactStateHelper', () => {
       for (let i = 6; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
-    it('marks a completed session with the completed emoji', () => {
+    it('marks a completed session with ✅', () => {
       helper.enterSession('rolCha');
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
@@ -583,7 +583,7 @@ describe('ReactStateHelper', () => {
       expect(vars.jsStateHelperMenuLabel2).toBe('👉 Nein sagen üben:sayNo');
     });
 
-    it('marks no session as next when all are completed', () => {
+    it('marks no session as 👉 when all are ✅', () => {
       const module = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt');
       helper.enterModule('bouMgt');
       for (const session of module.sessions) {
@@ -611,7 +611,7 @@ describe('ReactStateHelper', () => {
       helper.enterSession('rolCha');
     });
 
-    it('marks the first incomplete activity as next and leaves the rest plain', () => {
+    it('marks the first incomplete activity as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForActivity();
       expect(vars.jsStateHelperMenuLabel1).toBe('👉 Eine erste Übung:somAct');
       expect(vars.jsStateHelperMenuLabel2).toBe('Eine andere Übung:othAct');
@@ -622,7 +622,7 @@ describe('ReactStateHelper', () => {
       for (let i = 3; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
-    it('marks a completed activity with the completed emoji', () => {
+    it('marks a completed activity with ✅', () => {
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForActivity();
       expect(vars.jsStateHelperMenuLabel1).toBe('✅ Eine erste Übung:somAct');
@@ -634,7 +634,7 @@ describe('ReactStateHelper', () => {
       expect(() => helper.populateMenuLabelsForActivity()).toThrow('No module entered yet');
     });
 
-    it('marks no activity as next when all are completed', () => {
+    it('marks no activity as 👉 when all are ✅', () => {
       helper.enterActivity('somAct'); helper.markActivityCompleted();
       helper.enterActivity('othAct'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForActivity();
