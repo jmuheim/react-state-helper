@@ -544,15 +544,6 @@ describe('ReactStateHelper', () => {
       expect(vars.jsStateHelperMenuLabel3).toBe('✅ Emotionsregulation:emoReg');
     });
 
-    it('accepts custom emojis', () => {
-      const vars = helper.populateModuleMenuLabels({ completedEmoji: '☑️', nextEmoji: '▶️' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Onboarding:onboard');
-    });
-
-    it('omits emoji prefix when emoji is empty string', () => {
-      const vars = helper.populateModuleMenuLabels({ completedEmoji: '', nextEmoji: '' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('Onboarding:onboard');
-    });
   });
 
   describe('populateSessionMenuLabels', () => {
@@ -588,10 +579,6 @@ describe('ReactStateHelper', () => {
       expect(() => helper.populateSessionMenuLabels()).toThrow('No module entered yet');
     });
 
-    it('accepts custom emojis', () => {
-      const vars = helper.populateSessionMenuLabels({ completedEmoji: '☑️', nextEmoji: '▶️' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Rollenwechsel bewusst vollziehen:rolCha');
-    });
   });
 
   describe('populateActivityMenuLabels', () => {
@@ -629,11 +616,8 @@ describe('ReactStateHelper', () => {
       expect(() => helper.populateActivityMenuLabels()).toThrow('No session entered yet');
     });
 
-    it('accepts custom emojis', () => {
-      const vars = helper.populateActivityMenuLabels({ completedEmoji: '☑️', nextEmoji: '▶️' });
-      expect(vars.jsStateHelperMenuLabel1).toBe('▶️ Eine erste Übung:somAct');
-    });
   });
+
 
   describe('markSuggestionSeen / isSuggestionSeen', () => {
     it('is false in the default state', () => {

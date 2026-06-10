@@ -477,22 +477,25 @@ class ReactStateHelper {
       .join(',');
   }
 
-  populateModuleMenuLabels({ completedEmoji = '✅', nextEmoji = '👉' } = {}) {
-    return this.#buildMenuVars(this.#state.modules, completedEmoji, nextEmoji);
+  static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉' };
+
+  populateModuleMenuLabels() {
+    return this.#buildMenuVars(this.#state.modules);
   }
 
-  populateSessionMenuLabels({ completedEmoji = '✅', nextEmoji = '👉' } = {}) {
+  populateSessionMenuLabels() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    return this.#buildMenuVars(this.#findModule(this.#state.currentModuleId).sessions, completedEmoji, nextEmoji);
+    return this.#buildMenuVars(this.#findModule(this.#state.currentModuleId).sessions);
   }
 
-  populateActivityMenuLabels({ completedEmoji = '✅', nextEmoji = '👉' } = {}) {
+  populateActivityMenuLabels() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    return this.#buildMenuVars(this.#findSession(this.#state.currentSessionId).activities, completedEmoji, nextEmoji);
+    return this.#buildMenuVars(this.#findSession(this.#state.currentSessionId).activities);
   }
 
-  #buildMenuVars(items, completedEmoji, nextEmoji) {
+  #buildMenuVars(items) {
+    const { completedEmoji, nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
     const MAX_MENU_SLOTS = 9;
     const vars = {};
     let nextAssigned = false;
