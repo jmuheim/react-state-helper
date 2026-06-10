@@ -481,12 +481,16 @@ class ReactStateHelper {
 
   getProgressAdvice() {
     if (this.#state.currentSessionId) {
+      const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
       const completed = session.countCompletedActivities();
       const total = session.activities.length;
       const threshold = session.activities_needed_for_adequate_use;
-      if (completed >= total) return 'You have completed all activities in this session. You can re-visit them as often as you like, but we suggest to go to the next session.';
-      if (completed >= threshold) return 'You have good progress in this session. You can stay and complete more activities, or you can skip to the next session.';
+      const idx = module.sessions.findIndex(s => s.id === session.id);
+      const next = module.sessions[idx + 1];
+      const nextPart = next ? `, or skip to "${next.title}"` : '';
+      if (completed >= total) return `You have completed all activities in "${session.title}". You can re-visit them as often as you like${nextPart}.`;
+      if (completed >= threshold) return `You have good progress in "${session.title}". You can stay and complete more activities${nextPart}.`;
       return '';
     }
     if (this.#state.currentModuleId) {
@@ -494,8 +498,11 @@ class ReactStateHelper {
       const completed = module.countCompletedSessions();
       const total = module.sessions.length;
       const threshold = module.sessions_needed_for_adequate_use;
-      if (completed >= total) return 'You have completed all sessions in this module. You can re-visit them as often as you like, but we suggest to go to the next module.';
-      if (completed >= threshold) return 'You have good progress in this module. You can stay and complete more sessions, or you can skip to the next module.';
+      const idx = this.#state.modules.findIndex(m => m.id === module.id);
+      const next = this.#state.modules[idx + 1];
+      const nextPart = next ? `, or skip to "${next.title}"` : '';
+      if (completed >= total) return `You have completed all sessions in "${module.title}". You can re-visit them as often as you like${nextPart}.`;
+      if (completed >= threshold) return `You have good progress in "${module.title}". You can stay and complete more sessions${nextPart}.`;
       return '';
     }
     return '';
