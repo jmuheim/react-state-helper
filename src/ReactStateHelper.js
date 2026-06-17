@@ -506,6 +506,7 @@ class ReactStateHelper {
         return `By finishing ${s} session "${session.title}", you have now completed all its ${a} activities. You can re-visit them if you like${nextSessionPart}.`;
       if (sessionAdequate)
         return `Hooray! By finishing ${actPart}, you have now adequately progressed in ${s} session "${session.title}". You can proceed with more activities if you like${nextSessionPart}.`;
+      if (!activity) return `Start with one of the available ${a} activities in ${s} session "${session.title}".`;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       if (!nextActivity) throw new Error(`No uncompleted activity found in session "${session.title}" despite being below threshold`);
       return `Keep going in ${s} session "${session.title}" — next up is ${a} activity "${nextActivity.title}".`;

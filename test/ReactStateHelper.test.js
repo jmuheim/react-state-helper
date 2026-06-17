@@ -662,7 +662,12 @@ describe('ReactStateHelper', () => {
         helper.enterSession('rolCha');
       });
 
-      it('returns a keep-going message pointing to the next uncompleted activity when below threshold', () => {
+      it('returns a start-with message when no activity has been entered yet', () => {
+        expect(helper.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "Rollenwechsel bewusst vollziehen".');
+      });
+
+      it('returns a keep-going message pointing to the next uncompleted activity when an activity is entered but below threshold', () => {
+        helper.enterActivity('somAct');
         expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Rollenwechsel bewusst vollziehen" — next up is 🎯 activity "Eine erste Übung".');
       });
 
