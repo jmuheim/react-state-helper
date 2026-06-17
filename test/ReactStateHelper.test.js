@@ -764,7 +764,7 @@ describe('ReactStateHelper', () => {
     });
 
     describe('session-level advice', () => {
-      describe('other activities not yet adequately used (ses1a in mod1: threshold 1, 2 activities)', () => {
+      describe('other sessions not yet adequately used (ses1a in mod1: threshold 1, 2 activities)', () => {
         beforeEach(() => {
           helper.enterModule('mod1');
           helper.enterSession('ses1a');
@@ -780,7 +780,7 @@ describe('ReactStateHelper', () => {
         });
       });
 
-      describe('some activities adequately used (ses2b in mod2: threshold 2, 3 activities)', () => {
+      describe('all other sessions adequately used (ses2b in mod2: threshold 2, 3 activities)', () => {
         beforeEach(() => {
           helper.enterModule('mod2');
           helper.enterSession('ses2b');
