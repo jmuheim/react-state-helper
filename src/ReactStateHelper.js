@@ -513,7 +513,7 @@ class ReactStateHelper {
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
       return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: module.sessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
     }
-    return '';
+    throw new Error('No module entered yet');
   }
 
   #buildProgressAdviceString({ label, emoji, title, subLabel, subEmoji, completed, total, threshold, next }) {

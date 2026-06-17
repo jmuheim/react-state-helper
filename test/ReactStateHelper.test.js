@@ -652,8 +652,8 @@ describe('ReactStateHelper', () => {
 
 
   describe('getProgressAdvice', () => {
-    it('returns empty string when no context is set', () => {
-      expect(helper.getProgressAdvice()).toBe('');
+    it('throws when no module is entered', () => {
+      expect(() => helper.getProgressAdvice()).toThrow('No module entered yet');
     });
 
     describe('session-level advice (rolCha in bouMgt: activity threshold 1, total 2)', () => {
