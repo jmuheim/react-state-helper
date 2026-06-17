@@ -26,7 +26,8 @@ class Module {
   }
 
   isCompleted() {
-    return this.sessions.length > 0 && this.sessions.every(s => s.isCompleted());
+    const completable = this.sessions.filter(s => s.activities.length > 0);
+    return completable.length > 0 && completable.every(s => s.isCompleted());
   }
 
   hasAdequateProgress() {
@@ -34,8 +35,9 @@ class Module {
   }
 
   getProgress() {
-    if (this.sessions.length === 0) return 0;
-    return this.sessions.filter(s => s.isCompleted()).length / this.sessions.length;
+    const completable = this.sessions.filter(s => s.activities.length > 0);
+    if (completable.length === 0) return 0;
+    return completable.filter(s => s.isCompleted()).length / completable.length;
   }
 
   toJSON() {
@@ -150,68 +152,41 @@ class ReactStateHelper {
     return {
       modules: [
         {
-          id: "onboard",
-          title: "Onboarding",
+          id: "bouMgt",
+          title: "Boundary Management",
           sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
           sessions: [
             {
-              id: "introd",
+              id: "bouIntro",
               title: "Einführung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
-              activities: [
-                {
-                  id: "globGoal",
-                  title: "Globales Ziel definieren",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-                {
-                  id: "howEdu",
-                  title: "Psychoedukation: wie bewandert...?",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
+              activities: [],
             },
-          ],
-        },
-        {
-          id: "bouMgt",
-          title: "Boundary Management",
-          sessions_needed_for_adequate_use: 3,
-          entered_first_at: null,
-          entered_last_at: null,
-          times_entered: 0,
-          sessions: [
             {
-              id: "rolCha",
-              title: "Rollenwechsel bewusst vollziehen",
+              id: "gesGre",
+              title: "gesunde Grenzen setzen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "somAct",
-                  title: "Eine erste Übung",
+                  id: "rolGes",
+                  title: "Rollenwechsel bewusst gestalten",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
                 {
-                  id: "othAct",
-                  title: "Eine andere Übung",
+                  id: "abgKon",
+                  title: "Abgrenzen mit Klarheit: Das Konsequenzengitter",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
@@ -220,70 +195,16 @@ class ReactStateHelper {
               ],
             },
             {
-              id: "sayNo",
-              title: "Nein sagen üben",
+              id: "paus",
+              title: "Pausen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "sayNoAct",
-                  title: "Nein sagen Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "limSet",
-              title: "Grenzen setzen",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "limSetAct",
-                  title: "Grenzen setzen Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "worBou",
-              title: "Arbeitliche Grenzen kommunizieren",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "worBouAct",
-                  title: "Arbeitsgrenzen Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "digDet",
-              title: "Digitale Auszeiten einhalten",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "digDetAct",
-                  title: "Digitale Auszeit Übung",
+                  id: "mikPau",
+                  title: "Mikropausen im Schulalltag",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
@@ -296,22 +217,31 @@ class ReactStateHelper {
         {
           id: "emoReg",
           title: "Emotionsregulation",
-          sessions_needed_for_adequate_use: 3,
+          sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
           sessions: [
             {
-              id: "breCon",
-              title: "Bewusstes Atmen",
+              id: "emoIntro",
+              title: "Einführung",
+              activities_needed_for_adequate_use: 1,
+              entered_first_at: null,
+              entered_last_at: null,
+              times_entered: 0,
+              activities: [],
+            },
+            {
+              id: "neuBew",
+              title: "Neubewertung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "breConAct",
-                  title: "Atemübung",
+                  id: "neuBewAct",
+                  title: "Neubewertung",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
@@ -320,52 +250,32 @@ class ReactStateHelper {
               ],
             },
             {
-              id: "bodSca",
-              title: "Body-Scan-Übung",
-              activities_needed_for_adequate_use: 1,
+              id: "umgEmo",
+              title: "Umgang mit schwierigen Emotionen",
+              activities_needed_for_adequate_use: 2,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "bodScaAct",
-                  title: "Body-Scan",
+                  id: "akzep",
+                  title: "Akzeptanz",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
-              ],
-            },
-            {
-              id: "jouWri",
-              title: "Tagebuch schreiben",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
                 {
-                  id: "jouWriAct",
-                  title: "Tagebucheintrag",
+                  id: "emoSit",
+                  title: "Emotionsregulation in schwierigen Situationen",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
-              ],
-            },
-            {
-              id: "proRel",
-              title: "Progressive Muskelentspannung",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
                 {
-                  id: "proRelAct",
-                  title: "Entspannungsübung",
+                  id: "umgSup",
+                  title: "Umgang mit Suppression",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
@@ -417,7 +327,7 @@ class ReactStateHelper {
 
   // Returns a value between 0 and 1
   getProgress() {
-    const all = this.#state.modules.flatMap(m => m.sessions);
+    const all = this.#state.modules.flatMap(m => m.sessions.filter(s => s.activities.length > 0));
     if (all.length === 0) return 0;
     return all.filter(s => s.isCompleted()).length / all.length;
   }
@@ -514,7 +424,8 @@ class ReactStateHelper {
     if (this.#state.currentModuleId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
-      return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: module.sessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
+      const completableSessions = module.sessions.filter(s => s.activities.length > 0);
+      return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
     }
     throw new Error('No module entered yet');
   }
