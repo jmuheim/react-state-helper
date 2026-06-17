@@ -662,8 +662,8 @@ describe('ReactStateHelper', () => {
         helper.enterSession('rolCha');
       });
 
-      it('returns empty string when below activity threshold', () => {
-        expect(helper.getProgressAdvice()).toBe('');
+      it('returns a keep-going message pointing to the next uncompleted activity when below threshold', () => {
+        expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Rollenwechsel bewusst vollziehen" — next up is 🎯 activity "Eine erste Übung".');
       });
 
       it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
