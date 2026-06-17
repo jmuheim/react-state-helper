@@ -419,7 +419,7 @@ class ReactStateHelper {
       if (!activity) return `Start with one of the available ${a} activities in ${s} session "${session.title}".`;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       if (!nextActivity) throw new Error(`No uncompleted activity found in session "${session.title}" despite being below threshold`);
-      return `Keep going in ${s} session "${session.title}" — next up is ${a} activity "${nextActivity.title}".`;
+      return `Keep going in ${s} session "${session.title}" — for example with ${a} activity "${nextActivity.title}".`;
     }
     if (this.#state.currentModuleId) {
       const module = this.#findModule(this.#state.currentModuleId);
@@ -437,7 +437,7 @@ class ReactStateHelper {
     if (completed >= total) return `You have completed all ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}"${allCoveredPart}. You can re-visit them as often as you like${skipPart}.`;
     if (completed >= threshold) return `You have good progress in ${label} ${emoji} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
     if (completed === 0) return `Start with one of the available ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}".`;
-    if (nextItem) return `Keep going in ${label} ${emoji} "${title}" — next up is ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
+    if (nextItem) return `Keep going in ${label} ${emoji} "${title}" — for example with ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
     return '';
   }
 

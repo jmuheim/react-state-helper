@@ -722,7 +722,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('mod3');
           helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
           helper.enterModule('mod3');
-          expect(helper.getProgressAdvice()).toBe('Keep going in module 🗂️ "Module Three" — next up is 📑 session "Session Three B".');
+          expect(helper.getProgressAdvice()).toBe('Keep going in module 🗂️ "Module Three" — for example with 📑 session "Session Three B".');
         });
 
         it('returns good-progress message when threshold met but sessions remain', () => {
@@ -788,7 +788,7 @@ describe('ReactStateHelper', () => {
 
         it('returns a keep-going message when an activity is entered but below threshold', () => {
           helper.enterActivity('act2b1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Session Two B" — next up is 🎯 activity "Activity 2b-2".');
+          expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Session Two B" — for example with 🎯 activity "Activity 2b-2".');
         });
 
         it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
