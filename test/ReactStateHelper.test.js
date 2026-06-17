@@ -728,7 +728,7 @@ describe('ReactStateHelper', () => {
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enterSession('ses1a'); helper.enterActivity('act1a1'); helper.markActivityCompleted(); helper.enterActivity('act1a2'); helper.markActivityCompleted();
           helper.enterModule('mod1');
-          expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Module One". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Module Two".');
+          expect(helper.getProgressAdvice()).toBe('You have good enough progress in module 🗂️ "Module One". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Module Two".');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -747,7 +747,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('mod3');
           helper.enterSession('ses3b'); helper.enterActivity('act3b1'); helper.markActivityCompleted();
           helper.enterModule('mod3');
-          expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Module Three" — and in every other module, too. You can stay and complete more 📑 sessions.');
+          expect(helper.getProgressAdvice()).toBe('You have good enough progress in module 🗂️ "Module Three" — and in every other module, too. You can stay and complete more 📑 sessions.');
         });
 
         it('returns all-completed message when all sessions are done', () => {

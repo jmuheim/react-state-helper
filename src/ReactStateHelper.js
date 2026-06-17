@@ -435,7 +435,7 @@ class ReactStateHelper {
     const skipPart = next ? `, or skip to ${label} ${emoji} "${next.title}"` : '';
     const allCoveredPart = next ? '' : ` — and in every other ${label}, too`;
     if (completed >= total) return `You have completed all ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}"${allCoveredPart}. You can re-visit them as often as you like${skipPart}.`;
-    if (completed >= threshold) return `You have good progress in ${label} ${emoji} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
+    if (completed >= threshold) return `You have good enough progress in ${label} ${emoji} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
     if (completed === 0) return `Start with one of the available ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}".`;
     if (nextItem) return `Keep going in ${label} ${emoji} "${title}" — for example with ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
     return '';
