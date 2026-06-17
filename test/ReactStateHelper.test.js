@@ -728,7 +728,7 @@ describe('ReactStateHelper', () => {
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enterSession('ses1a'); helper.enterActivity('act1a1'); helper.markActivityCompleted(); helper.enterActivity('act1a2'); helper.markActivityCompleted();
           helper.enterModule('mod1');
-          expect(helper.getProgressAdvice()).toBe('You have good enough progress in module 🗂️ "Module One". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Module Two".');
+          expect(helper.getProgressAdvice()).toBe('You have good enough progress in module 🗂️ "Module One". You can stay and complete more 📑 sessions, or move on to module 🗂️ "Module Two".');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -736,7 +736,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('mod1');
           helper.enterSession('ses1b'); helper.enterActivity('act1b1'); helper.markActivityCompleted();
           helper.enterModule('mod1');
-          expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Module One". You can re-visit them as often as you like, or skip to module 🗂️ "Module Two".');
+          expect(helper.getProgressAdvice()).toBe('You have completed module 🗂️ "Module One". You can re-visit the contained sessions as often as you like, or move on to module 🗂️ "Module Two".');
         });
       });
 
@@ -758,7 +758,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('mod3');
           helper.enterSession('ses3c'); helper.enterActivity('act3c1'); helper.markActivityCompleted();
           helper.enterModule('mod3');
-          expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Module Three" — and in every other module, too. You can re-visit them as often as you like.');
+          expect(helper.getProgressAdvice()).toBe('You have completed module 🗂️ "Module Three" — and in every other module, too. You can re-visit the contained sessions as often as you like.');
         });
       });
     });
@@ -776,7 +776,7 @@ describe('ReactStateHelper', () => {
 
         it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
           helper.enterActivity('act1a1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in 📑 session "Session One A". You can proceed with more activities if you like, or skip ahead to 📑 session "Session One B".');
+          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in 📑 session "Session One A". You can proceed with more activities if you like, or move on to 📑 session "Session One B".');
         });
       });
 
@@ -804,7 +804,7 @@ describe('ReactStateHelper', () => {
         helper.enterModule('mod3');
         helper.enterSession('ses3a');
         helper.enterActivity('act3a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('By finishing 📑 session "Session Three A", you have now completed all its 🎯 activities. You can re-visit them if you like, or skip ahead to 📑 session "Session Three B".');
+        expect(helper.getProgressAdvice()).toBe('By finishing 📑 session "Session Three A", you have now completed all its 🎯 activities. You can re-visit them if you like, or move on to 📑 session "Session Three B".');
       });
 
       describe('cascade: completing a session also triggers module adequate use (case C)', () => {
@@ -812,7 +812,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('mod1');
           helper.enterSession('ses1b');
           helper.enterActivity('act1b1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session One B", you have now adequately progressed in 🗂️ module "Module One". You can proceed with more sessions if you like, or skip ahead to 🗂️ module "Module Two".');
+          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session One B", you have now adequately progressed in 🗂️ module "Module One". You can proceed with more sessions if you like, or move on to 🗂️ module "Module Two".');
         });
 
         it('without next module: session complete AND module adequate — no skip option (ses3b in mod3: threshold 2)', () => {
@@ -832,7 +832,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('mod1');
           helper.enterSession('ses1a');
           helper.enterActivity('act1a1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in both 📑 session "Session One A" and 🗂️ module "Module One". You can proceed with more activities if you like, or skip ahead to 🗂️ module "Module Two".');
+          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in both 📑 session "Session One A" and 🗂️ module "Module One". You can proceed with more activities if you like, or move on to 🗂️ module "Module Two".');
         });
       });
     });

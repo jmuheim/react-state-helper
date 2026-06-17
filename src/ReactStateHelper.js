@@ -404,8 +404,8 @@ class ReactStateHelper {
       const sessionAdequate = session.hasAdequateProgress();
       const moduleAdequate = module.hasAdequateProgress();
 
-      const nextSessionPart = nextSession ? `, or skip ahead to ${s} session "${nextSession.title}"` : '';
-      const nextModulePart = nextModule ? `, or skip ahead to ${m} module "${nextModule.title}"` : '';
+      const nextSessionPart = nextSession ? `, or move on to ${s} session "${nextSession.title}"` : '';
+      const nextModulePart = nextModule ? `, or move on to ${m} module "${nextModule.title}"` : '';
       const actPart = activity ? `${a} activity "${activity.title}"` : 'an activity';
 
       if (sessionComplete && moduleAdequate)
@@ -432,9 +432,9 @@ class ReactStateHelper {
   }
 
   #buildProgressAdviceString({ label, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, next, nextItem }) {
-    const skipPart = next ? `, or skip to ${label} ${emoji} "${next.title}"` : '';
+    const skipPart = next ? `, or move on to ${label} ${emoji} "${next.title}"` : '';
     const allCoveredPart = next ? '' : ` — and in every other ${label}, too`;
-    if (completed >= total) return `You have completed all ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}"${allCoveredPart}. You can re-visit them as often as you like${skipPart}.`;
+    if (completed >= total) return `You have completed ${label} ${emoji} "${title}"${allCoveredPart}. You can re-visit the contained ${subLabel} as often as you like${skipPart}.`;
     if (completed >= threshold) return `You have good enough progress in ${label} ${emoji} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
     if (completed === 0) return `Start with one of the available ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}".`;
     if (nextItem) return `Keep going in ${label} ${emoji} "${title}" — for example with ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
