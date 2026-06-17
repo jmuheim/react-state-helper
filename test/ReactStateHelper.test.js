@@ -1,128 +1,205 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
+const testState = {
+  modules: [
+    {
+      id: 'mod1',
+      title: 'Module One',
+      sessions_needed_for_adequate_use: 1,
+      entered_first_at: null, entered_last_at: null, times_entered: 0,
+      sessions: [
+        {
+          id: 'ses1intro',
+          title: 'Intro One',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [],
+        },
+        {
+          id: 'ses1a',
+          title: 'Session One A',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act1a1', title: 'Activity 1a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'act1a2', title: 'Activity 1a-2: Subtitle', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+        {
+          id: 'ses1b',
+          title: 'Session One B',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act1b1', title: 'Activity 1b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'mod2',
+      title: 'Module Two',
+      sessions_needed_for_adequate_use: 1,
+      entered_first_at: null, entered_last_at: null, times_entered: 0,
+      sessions: [
+        {
+          id: 'ses2intro',
+          title: 'Intro Two',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [],
+        },
+        {
+          id: 'ses2a',
+          title: 'Session Two A',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act2a1', title: 'Activity 2a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+        {
+          id: 'ses2b',
+          title: 'Session Two B',
+          activities_needed_for_adequate_use: 2,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act2b1', title: 'Activity 2b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'act2b2', title: 'Activity 2b-2', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'act2b3', title: 'Activity 2b-3', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+      ],
+    },
+  ],
+  suggestionSeen: false,
+  currentModuleId: null,
+  currentSessionId: null,
+  currentActivityId: null,
+};
+
 describe('ReactStateHelper', () => {
   let helper;
 
   beforeEach(() => {
-    helper = ReactStateHelper.initDefaultState();
+    helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
   });
 
   describe('initDefaultState', () => {
-    it('initializes the default state', () => {
-      expect(helper.toString()).toBe(JSON.stringify(ReactStateHelper.initialState()));
+    it('creates a fresh helper matching initialState()', () => {
+      const fresh = ReactStateHelper.initDefaultState();
+      expect(fresh.toString()).toBe(JSON.stringify(ReactStateHelper.initialState()));
     });
   });
 
   describe('loadExistingState', () => {
     it('loads persisted state from JSON', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      expect(helper.isSessionCompleted('gesGre')).toBe(false);
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      expect(helper.isSessionCompleted('ses1a')).toBe(false);
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.isSessionCompleted('gesGre')).toBe(true);
+      expect(restored.isSessionCompleted('ses1a')).toBe(true);
     });
   });
 
   describe('isSessionCompleted', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
+      helper.enterModule('mod1');
     });
 
     it('returns false for all sessions in the default state', () => {
-      expect(helper.isSessionCompleted('gesGre')).toBe(false);
-      expect(helper.isSessionCompleted('paus')).toBe(false);
-      helper.enterModule('emoReg');
-      expect(helper.isSessionCompleted('neuBew')).toBe(false);
+      expect(helper.isSessionCompleted('ses1a')).toBe(false);
+      expect(helper.isSessionCompleted('ses1b')).toBe(false);
+      helper.enterModule('mod2');
+      expect(helper.isSessionCompleted('ses2a')).toBe(false);
     });
 
     it('returns false when only some activities are completed', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      expect(helper.isSessionCompleted('gesGre')).toBe(false);
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      expect(helper.isSessionCompleted('ses1a')).toBe(false);
     });
 
     it('returns true when all activities are completed', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
-      expect(helper.isSessionCompleted('gesGre')).toBe(true);
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
+      expect(helper.isSessionCompleted('ses1a')).toBe(true);
     });
 
     it('throws if no module has been entered', () => {
-      helper = ReactStateHelper.initDefaultState();
-      expect(() => helper.isSessionCompleted('gesGre')).toThrow('No module entered yet');
+      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
+      expect(() => helper.isSessionCompleted('ses1a')).toThrow('No module entered yet');
     });
   });
 
   describe('hasSessionAdequateProgress', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
+      helper.enterModule('mod1');
     });
 
     it('returns false for all sessions in the default state', () => {
-      expect(helper.hasSessionAdequateProgress('gesGre')).toBe(false);
-      expect(helper.hasSessionAdequateProgress('paus')).toBe(false);
+      expect(helper.hasSessionAdequateProgress('ses1a')).toBe(false);
+      expect(helper.hasSessionAdequateProgress('ses1b')).toBe(false);
     });
 
-    it('returns true once completed activities meet the threshold (gesGre threshold=1)', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      expect(helper.hasSessionAdequateProgress('gesGre')).toBe(true);
+    it('returns true once completed activities meet the threshold (ses1a threshold=1)', () => {
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      expect(helper.hasSessionAdequateProgress('ses1a')).toBe(true);
     });
 
     it('unlike isSessionCompleted, stays true even if not all activities are done', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      expect(helper.isSessionCompleted('gesGre')).toBe(false);
-      expect(helper.hasSessionAdequateProgress('gesGre')).toBe(true);
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      expect(helper.isSessionCompleted('ses1a')).toBe(false);
+      expect(helper.hasSessionAdequateProgress('ses1a')).toBe(true);
     });
 
     it('throws if no module has been entered', () => {
-      helper = ReactStateHelper.initDefaultState();
-      expect(() => helper.hasSessionAdequateProgress('gesGre')).toThrow('No module entered yet');
+      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
+      expect(() => helper.hasSessionAdequateProgress('ses1a')).toThrow('No module entered yet');
     });
   });
 
   describe('isModuleCompleted', () => {
     it('returns false for all modules in the default state', () => {
-      expect(helper.isModuleCompleted('bouMgt')).toBe(false);
-      expect(helper.isModuleCompleted('emoReg')).toBe(false);
+      expect(helper.isModuleCompleted('mod1')).toBe(false);
+      expect(helper.isModuleCompleted('mod2')).toBe(false);
     });
 
     it('returns false when only some sessions are completed', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
-      expect(helper.isModuleCompleted('bouMgt')).toBe(false);
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
+      expect(helper.isModuleCompleted('mod1')).toBe(false);
     });
 
     it('returns true when all sessions with activities are completed', () => {
-      helper.enterModule('bouMgt');
-      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').sessions;
-      for (const session of sessions) {
-        helper.enterSession(session.id);
-        for (const activity of session.activities) {
-          helper.enterActivity(activity.id);
-          helper.markActivityCompleted();
+      helper.enterModule('mod1');
+      const mod1Data = testState.modules.find(m => m.id === 'mod1');
+      for (const ses of mod1Data.sessions) {
+        helper.enterSession(ses.id);
+        for (const act of ses.activities) {
+          helper.enterActivity(act.id); helper.markActivityCompleted();
         }
       }
-      expect(helper.isModuleCompleted('bouMgt')).toBe(true);
+      expect(helper.isModuleCompleted('mod1')).toBe(true);
     });
 
     it('does not count sessions from other modules', () => {
-      helper.enterModule('emoReg');
-      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'emoReg').sessions;
-      for (const session of sessions) {
-        helper.enterSession(session.id);
-        for (const activity of session.activities) {
-          helper.enterActivity(activity.id);
-          helper.markActivityCompleted();
+      helper.enterModule('mod2');
+      const mod2Data = testState.modules.find(m => m.id === 'mod2');
+      for (const ses of mod2Data.sessions) {
+        helper.enterSession(ses.id);
+        for (const act of ses.activities) {
+          helper.enterActivity(act.id); helper.markActivityCompleted();
         }
       }
-      expect(helper.isModuleCompleted('bouMgt')).toBe(false);
+      expect(helper.isModuleCompleted('mod1')).toBe(false);
     });
   });
 
@@ -132,17 +209,17 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns 0 for the current module in the default state', () => {
-      helper.enterModule('bouMgt');
+      helper.enterModule('mod1');
       expect(helper.countCompletedSessions()).toBe(0);
     });
 
     it('counts only completed sessions within the current module', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
       expect(helper.countCompletedSessions()).toBe(1);
-      helper.enterModule('emoReg');
+      helper.enterModule('mod2');
       expect(helper.countCompletedSessions()).toBe(0);
     });
   });
@@ -153,14 +230,14 @@ describe('ReactStateHelper', () => {
     });
 
     it('increases as sessions across modules are completed', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
       expect(helper.countCompletedOverall()).toBe(1);
-      helper.enterModule('emoReg');
-      helper.enterSession('neuBew');
-      helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
+      helper.enterModule('mod2');
+      helper.enterSession('ses2a');
+      helper.enterActivity('act2a1'); helper.markActivityCompleted();
       expect(helper.countCompletedOverall()).toBe(2);
     });
   });
@@ -171,13 +248,12 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns 1 when all sessions are completed', () => {
-      for (const module of ReactStateHelper.initialState().modules) {
-        helper.enterModule(module.id);
-        for (const session of module.sessions) {
-          helper.enterSession(session.id);
-          for (const activity of session.activities) {
-            helper.enterActivity(activity.id);
-            helper.markActivityCompleted();
+      for (const mod of testState.modules) {
+        helper.enterModule(mod.id);
+        for (const ses of mod.sessions) {
+          helper.enterSession(ses.id);
+          for (const act of ses.activities) {
+            helper.enterActivity(act.id); helper.markActivityCompleted();
           }
         }
       }
@@ -187,67 +263,66 @@ describe('ReactStateHelper', () => {
 
   describe('getModuleProgress', () => {
     it('returns 0 for all modules in the default state', () => {
-      expect(helper.getModuleProgress('bouMgt')).toBe(0);
-      expect(helper.getModuleProgress('emoReg')).toBe(0);
+      expect(helper.getModuleProgress('mod1')).toBe(0);
+      expect(helper.getModuleProgress('mod2')).toBe(0);
     });
 
     it('returns the fraction of completed sessions within the module (1 of 2 completable)', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
-      expect(helper.getModuleProgress('bouMgt')).toBeCloseTo(1 / 2);
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
+      expect(helper.getModuleProgress('mod1')).toBeCloseTo(1 / 2);
     });
 
     it('does not count sessions from other modules', () => {
-      helper.enterModule('emoReg');
-      helper.enterSession('neuBew');
-      helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-      expect(helper.getModuleProgress('bouMgt')).toBe(0);
+      helper.enterModule('mod2');
+      helper.enterSession('ses2a');
+      helper.enterActivity('act2a1'); helper.markActivityCompleted();
+      expect(helper.getModuleProgress('mod1')).toBe(0);
     });
 
     it('returns 1 when all sessions in the module are completed', () => {
-      helper.enterModule('bouMgt');
-      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').sessions;
-      for (const session of sessions) {
-        helper.enterSession(session.id);
-        for (const activity of session.activities) {
-          helper.enterActivity(activity.id);
-          helper.markActivityCompleted();
+      helper.enterModule('mod1');
+      const mod1Data = testState.modules.find(m => m.id === 'mod1');
+      for (const ses of mod1Data.sessions) {
+        helper.enterSession(ses.id);
+        for (const act of ses.activities) {
+          helper.enterActivity(act.id); helper.markActivityCompleted();
         }
       }
-      expect(helper.getModuleProgress('bouMgt')).toBe(1);
+      expect(helper.getModuleProgress('mod1')).toBe(1);
     });
   });
 
   describe('isGoodEnough', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
+      helper.enterModule('mod1');
     });
 
     it('returns false with no completed sessions', () => {
-      expect(helper.isGoodEnough('bouMgt')).toBe(false);
+      expect(helper.isGoodEnough('mod1')).toBe(false);
     });
 
-    it('returns true once the module threshold is met (bouMgt threshold=1)', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
-      expect(helper.isGoodEnough('bouMgt')).toBe(true);
+    it('returns true once the module threshold is met (mod1 threshold=1)', () => {
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
+      expect(helper.isGoodEnough('mod1')).toBe(true);
     });
 
     it('does not count sessions from other modules', () => {
-      helper.enterModule('emoReg');
-      helper.enterSession('neuBew');
-      helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-      expect(helper.isGoodEnough('bouMgt')).toBe(false);
+      helper.enterModule('mod2');
+      helper.enterSession('ses2a');
+      helper.enterActivity('act2a1'); helper.markActivityCompleted();
+      expect(helper.isGoodEnough('mod1')).toBe(false);
     });
   });
 
   describe('allCompletedSessionsAsCsv', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
     });
 
     it('returns an empty string in the default state', () => {
@@ -255,25 +330,25 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns a single session id when one session is completed', () => {
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
-      expect(helper.allCompletedSessionsAsCsv()).toBe('gesGre');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
+      expect(helper.allCompletedSessionsAsCsv()).toBe('ses1a');
     });
 
     it('does not include partially completed sessions', () => {
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
       expect(helper.allCompletedSessionsAsCsv()).toBe('');
     });
 
     it('returns comma-separated ids across modules in order', () => {
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
-      helper.enterSession('paus');
-      helper.enterActivity('mikPau'); helper.markActivityCompleted();
-      helper.enterModule('emoReg');
-      helper.enterSession('neuBew');
-      helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-      expect(helper.allCompletedSessionsAsCsv()).toBe('gesGre,paus,neuBew');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
+      helper.enterSession('ses1b');
+      helper.enterActivity('act1b1'); helper.markActivityCompleted();
+      helper.enterModule('mod2');
+      helper.enterSession('ses2a');
+      helper.enterActivity('act2a1'); helper.markActivityCompleted();
+      expect(helper.allCompletedSessionsAsCsv()).toBe('ses1a,ses1b,ses2a');
     });
   });
 
@@ -283,82 +358,82 @@ describe('ReactStateHelper', () => {
     });
 
     it('returns "moduleId: sessionId" after entering a module and session', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      expect(helper.getParticipantGroup()).toBe('bouMgt: gesGre');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      expect(helper.getParticipantGroup()).toBe('mod1: ses1a');
     });
 
     it('updates to the most recently entered module and session', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterModule('emoReg');
-      helper.enterSession('neuBew');
-      expect(helper.getParticipantGroup()).toBe('emoReg: neuBew');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterModule('mod2');
+      helper.enterSession('ses2a');
+      expect(helper.getParticipantGroup()).toBe('mod2: ses2a');
     });
 
     it('sets entered_first_at on first enterModule and does not overwrite it', () => {
-      helper.enterModule('bouMgt');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_first_at;
+      helper.enterModule('mod1');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1').entered_first_at;
       expect(first).not.toBeNull();
-      helper.enterModule('bouMgt');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_first_at;
+      helper.enterModule('mod1');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1').entered_first_at;
       expect(second).toBe(first);
     });
 
     it('increments times_entered on each enterModule', () => {
-      helper.enterModule('bouMgt');
-      helper.enterModule('bouMgt');
-      const mod = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt');
+      helper.enterModule('mod1');
+      helper.enterModule('mod1');
+      const mod = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1');
       expect(mod.times_entered).toBe(2);
     });
 
     it('updates entered_last_at on every enterModule', () => {
-      helper.enterModule('bouMgt');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_last_at;
+      helper.enterModule('mod1');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1').entered_last_at;
       expect(first).not.toBeNull();
-      helper.enterModule('bouMgt');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt').entered_last_at;
+      helper.enterModule('mod1');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1').entered_last_at;
       expect(second).not.toBeNull();
     });
 
     it('sets entered_first_at on first enterSession and does not overwrite it', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre').entered_first_at;
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a').entered_first_at;
       expect(first).not.toBeNull();
-      helper.enterSession('gesGre');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre').entered_first_at;
+      helper.enterSession('ses1a');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a').entered_first_at;
       expect(second).toBe(first);
     });
 
     it('increments times_entered on each enterSession', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterSession('gesGre');
-      const session = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterSession('ses1a');
+      const session = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a');
       expect(session.times_entered).toBe(2);
     });
 
     it('updates entered_last_at on every enterSession', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre').entered_last_at;
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a').entered_last_at;
       expect(first).not.toBeNull();
-      helper.enterSession('gesGre');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre').entered_last_at;
+      helper.enterSession('ses1a');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a').entered_last_at;
       expect(second).not.toBeNull();
     });
 
     it('persists through serialization', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.getParticipantGroup()).toBe('bouMgt: gesGre');
+      expect(restored.getParticipantGroup()).toBe('mod1: ses1a');
     });
 
     it('throws if the moduleId does not exist', () => {
@@ -366,88 +441,88 @@ describe('ReactStateHelper', () => {
     });
 
     it('throws if enterSession is called without a current module', () => {
-      expect(() => helper.enterSession('gesGre')).toThrow('No module entered yet');
+      expect(() => helper.enterSession('ses1a')).toThrow('No module entered yet');
     });
 
     it('throws if the sessionId is not in the current module', () => {
-      helper.enterModule('bouMgt');
-      expect(() => helper.enterSession('neuBew')).toThrow('Session neuBew not found in module bouMgt');
+      helper.enterModule('mod1');
+      expect(() => helper.enterSession('ses2a')).toThrow('Session ses2a not found in module mod1');
     });
 
     it('enterModule resets currentSessionId and currentActivityId', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes');
-      helper.enterModule('emoReg');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1');
+      helper.enterModule('mod2');
       const state = JSON.parse(helper.toString());
       expect(state.currentSessionId).toBeNull();
       expect(state.currentActivityId).toBeNull();
     });
 
     it('enterSession resets currentActivityId', () => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes');
-      helper.enterSession('paus');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1');
+      helper.enterSession('ses1b');
       expect(JSON.parse(helper.toString()).currentActivityId).toBeNull();
     });
   });
 
   describe('enterActivity', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
+      helper.enterModule('mod1');
     });
 
     it('sets the current activity', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes');
-      expect(JSON.parse(helper.toString()).currentActivityId).toBe('rolGes');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1');
+      expect(JSON.parse(helper.toString()).currentActivityId).toBe('act1a1');
     });
 
     it('throws if enterActivity is called without a current session', () => {
-      expect(() => helper.enterActivity('rolGes')).toThrow('No session entered yet');
+      expect(() => helper.enterActivity('act1a1')).toThrow('No session entered yet');
     });
 
     it('throws if the activityId is not in the current session', () => {
-      helper.enterSession('gesGre');
-      expect(() => helper.enterActivity('neuBewAct')).toThrow('Activity neuBewAct not found in session gesGre');
+      helper.enterSession('ses1a');
+      expect(() => helper.enterActivity('act2a1')).toThrow('Activity act2a1 not found in session ses1a');
     });
 
     it('sets entered_first_at on first enterActivity and does not overwrite it', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre')
-        .activities.find(a => a.id === 'rolGes').entered_first_at;
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a')
+        .activities.find(a => a.id === 'act1a1').entered_first_at;
       expect(first).not.toBeNull();
-      helper.enterActivity('rolGes');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre')
-        .activities.find(a => a.id === 'rolGes').entered_first_at;
+      helper.enterActivity('act1a1');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a')
+        .activities.find(a => a.id === 'act1a1').entered_first_at;
       expect(second).toBe(first);
     });
 
     it('increments times_entered on each enterActivity', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes');
-      helper.enterActivity('rolGes');
-      const activity = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre')
-        .activities.find(a => a.id === 'rolGes');
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1');
+      helper.enterActivity('act1a1');
+      const activity = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a')
+        .activities.find(a => a.id === 'act1a1');
       expect(activity.times_entered).toBe(2);
     });
 
     it('updates entered_last_at on every enterActivity', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes');
-      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre')
-        .activities.find(a => a.id === 'rolGes').entered_last_at;
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1');
+      const first = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a')
+        .activities.find(a => a.id === 'act1a1').entered_last_at;
       expect(first).not.toBeNull();
-      helper.enterActivity('rolGes');
-      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'bouMgt')
-        .sessions.find(s => s.id === 'gesGre')
-        .activities.find(a => a.id === 'rolGes').entered_last_at;
+      helper.enterActivity('act1a1');
+      const second = JSON.parse(helper.toString()).modules.find(m => m.id === 'mod1')
+        .sessions.find(s => s.id === 'ses1a')
+        .activities.find(a => a.id === 'act1a1').entered_last_at;
       expect(second).not.toBeNull();
     });
   });
@@ -455,8 +530,8 @@ describe('ReactStateHelper', () => {
   describe('populateMenuLabelsForModule', () => {
     it('marks the first incomplete module as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForModule();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Boundary Management:bouMgt');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Emotionsregulation:emoReg');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Module One:mod1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Module Two:mod2');
     });
 
     it('fills unused slots with empty string', () => {
@@ -465,48 +540,45 @@ describe('ReactStateHelper', () => {
     });
 
     it('marks a completed module with ✅', () => {
-      helper.enterModule('bouMgt');
-      const sessions = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt').sessions;
-      for (const session of sessions) {
-        helper.enterSession(session.id);
-        for (const activity of session.activities) {
-          helper.enterActivity(activity.id);
-          helper.markActivityCompleted();
+      helper.enterModule('mod1');
+      const mod1Data = testState.modules.find(m => m.id === 'mod1');
+      for (const ses of mod1Data.sessions) {
+        helper.enterSession(ses.id);
+        for (const act of ses.activities) {
+          helper.enterActivity(act.id); helper.markActivityCompleted();
         }
       }
       const vars = helper.populateMenuLabelsForModule();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Boundary Management:bouMgt');
-      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Emotionsregulation:emoReg');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Module One:mod1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Module Two:mod2');
     });
 
     it('marks no module as 👉 when all are ✅', () => {
-      for (const module of ReactStateHelper.initialState().modules) {
-        helper.enterModule(module.id);
-        for (const session of module.sessions) {
-          helper.enterSession(session.id);
-          for (const activity of session.activities) {
-            helper.enterActivity(activity.id);
-            helper.markActivityCompleted();
+      for (const mod of testState.modules) {
+        helper.enterModule(mod.id);
+        for (const ses of mod.sessions) {
+          helper.enterSession(ses.id);
+          for (const act of ses.activities) {
+            helper.enterActivity(act.id); helper.markActivityCompleted();
           }
         }
       }
       const vars = helper.populateMenuLabelsForModule();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Boundary Management:bouMgt');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Emotionsregulation:emoReg');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Module One:mod1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Module Two:mod2');
     });
-
   });
 
   describe('populateMenuLabelsForSession', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
+      helper.enterModule('mod1');
     });
 
     it('marks the first incomplete session as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForSession();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Einführung:bouIntro');
-      expect(vars.jsStateHelperMenuLabel2).toBe('gesunde Grenzen setzen:gesGre');
-      expect(vars.jsStateHelperMenuLabel3).toBe('Pausen:paus');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro One:ses1intro');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Session One A:ses1a');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Session One B:ses1b');
     });
 
     it('fills unused slots with empty string', () => {
@@ -515,48 +587,45 @@ describe('ReactStateHelper', () => {
     });
 
     it('marks a completed session with ✅', () => {
-      helper.enterSession('gesGre');
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
+      helper.enterSession('ses1a');
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForSession();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Einführung:bouIntro');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ gesunde Grenzen setzen:gesGre');
-      expect(vars.jsStateHelperMenuLabel3).toBe('Pausen:paus');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro One:ses1intro');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Session One A:ses1a');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Session One B:ses1b');
     });
 
     it('marks content sessions as ✅ when all are done (intro session without activities stays as 👉)', () => {
-      const module = ReactStateHelper.initialState().modules.find(m => m.id === 'bouMgt');
-      helper.enterModule('bouMgt');
-      for (const session of module.sessions) {
-        helper.enterSession(session.id);
-        for (const activity of session.activities) {
-          helper.enterActivity(activity.id);
-          helper.markActivityCompleted();
+      const mod1Data = testState.modules.find(m => m.id === 'mod1');
+      for (const ses of mod1Data.sessions) {
+        helper.enterSession(ses.id);
+        for (const act of ses.activities) {
+          helper.enterActivity(act.id); helper.markActivityCompleted();
         }
       }
       const vars = helper.populateMenuLabelsForSession();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Einführung:bouIntro');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ gesunde Grenzen setzen:gesGre');
-      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Pausen:paus');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro One:ses1intro');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Session One A:ses1a');
+      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Session One B:ses1b');
     });
 
     it('throws if no module has been entered', () => {
-      helper = ReactStateHelper.initDefaultState();
+      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
       expect(() => helper.populateMenuLabelsForSession()).toThrow('No module entered yet');
     });
-
   });
 
   describe('populateMenuLabelsForActivity', () => {
     beforeEach(() => {
-      helper.enterModule('bouMgt');
-      helper.enterSession('gesGre');
+      helper.enterModule('mod1');
+      helper.enterSession('ses1a');
     });
 
     it('marks the first incomplete activity as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForActivity();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Rollenwechsel bewusst gestalten:rolGes');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Abgrenzen mit Klarheit: Das Konsequenzengitter:abgKon');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Activity 1a-1:act1a1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Activity 1a-2: Subtitle:act1a2');
     });
 
     it('fills unused slots with empty string', () => {
@@ -565,31 +634,30 @@ describe('ReactStateHelper', () => {
     });
 
     it('marks a completed activity with ✅', () => {
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForActivity();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst gestalten:rolGes');
-      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Abgrenzen mit Klarheit: Das Konsequenzengitter:abgKon');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Activity 1a-1:act1a1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Activity 1a-2: Subtitle:act1a2');
     });
 
     it('throws if no module has been entered', () => {
-      helper = ReactStateHelper.initDefaultState();
+      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
       expect(() => helper.populateMenuLabelsForActivity()).toThrow('No module entered yet');
     });
 
     it('marks no activity as 👉 when all are ✅', () => {
-      helper.enterActivity('rolGes'); helper.markActivityCompleted();
-      helper.enterActivity('abgKon'); helper.markActivityCompleted();
+      helper.enterActivity('act1a1'); helper.markActivityCompleted();
+      helper.enterActivity('act1a2'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForActivity();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Rollenwechsel bewusst gestalten:rolGes');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Abgrenzen mit Klarheit: Das Konsequenzengitter:abgKon');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Activity 1a-1:act1a1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Activity 1a-2: Subtitle:act1a2');
     });
 
     it('throws if no session has been entered', () => {
-      helper = ReactStateHelper.initDefaultState();
-      helper.enterModule('bouMgt');
+      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
+      helper.enterModule('mod1');
       expect(() => helper.populateMenuLabelsForActivity()).toThrow('No session entered yet');
     });
-
   });
 
 
@@ -598,13 +666,13 @@ describe('ReactStateHelper', () => {
       expect(() => helper.getProgressAdvice()).toThrow('No module entered yet');
     });
 
-    describe('module-level advice (bouMgt: threshold 1, 2 completable sessions)', () => {
+    describe('module-level advice (mod1: threshold 1, 2 completable sessions)', () => {
       beforeEach(() => {
-        helper.enterModule('bouMgt');
+        helper.enterModule('mod1');
       });
 
       it('returns a start-with message when no session has been entered yet', () => {
-        expect(helper.getProgressAdvice()).toBe('Start with one of the available 📑 sessions in module 🗂️ "Boundary Management".');
+        expect(helper.getProgressAdvice()).toBe('Start with one of the available 📑 sessions in module 🗂️ "Module One".');
       });
 
       // Requires a module with sessions_needed_for_adequate_use >= 2 so completing one session leaves it below threshold.
@@ -614,72 +682,72 @@ describe('ReactStateHelper', () => {
       });
 
       it('returns good-progress message when threshold met but sessions remain', () => {
-        helper.enterSession('gesGre'); helper.enterActivity('rolGes'); helper.markActivityCompleted(); helper.enterActivity('abgKon'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Boundary Management". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Emotionsregulation".');
+        helper.enterSession('ses1a'); helper.enterActivity('act1a1'); helper.markActivityCompleted(); helper.enterActivity('act1a2'); helper.markActivityCompleted();
+        helper.enterModule('mod1');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Module One". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Module Two".');
       });
 
       it('returns all-completed message when all sessions are done', () => {
-        helper.enterSession('gesGre'); helper.enterActivity('rolGes'); helper.markActivityCompleted(); helper.enterActivity('abgKon'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        helper.enterSession('paus'); helper.enterActivity('mikPau'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Boundary Management". You can re-visit them as often as you like, or skip to module 🗂️ "Emotionsregulation".');
+        helper.enterSession('ses1a'); helper.enterActivity('act1a1'); helper.markActivityCompleted(); helper.enterActivity('act1a2'); helper.markActivityCompleted();
+        helper.enterModule('mod1');
+        helper.enterSession('ses1b'); helper.enterActivity('act1b1'); helper.markActivityCompleted();
+        helper.enterModule('mod1');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Module One". You can re-visit them as often as you like, or skip to module 🗂️ "Module Two".');
       });
     });
 
-    describe('module-level advice on the last module — all modules covered (emoReg: threshold 1, 2 completable sessions)', () => {
+    describe('module-level advice on the last module — all modules covered (mod2: threshold 1, 2 completable sessions)', () => {
       it('returns good-progress message when threshold met but sessions remain', () => {
-        helper.enterModule('emoReg');
-        helper.enterSession('neuBew'); helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-        helper.enterModule('emoReg');
-        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Emotionsregulation" — and in every other module, too. You can stay and complete more 📑 sessions.');
+        helper.enterModule('mod2');
+        helper.enterSession('ses2a'); helper.enterActivity('act2a1'); helper.markActivityCompleted();
+        helper.enterModule('mod2');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Module Two" — and in every other module, too. You can stay and complete more 📑 sessions.');
       });
 
       it('returns all-completed message when all sessions are done', () => {
-        helper.enterModule('emoReg');
-        helper.enterSession('neuBew'); helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-        helper.enterModule('emoReg');
-        helper.enterSession('umgEmo');
-        helper.enterActivity('akzep'); helper.markActivityCompleted();
-        helper.enterActivity('emoSit'); helper.markActivityCompleted();
-        helper.enterActivity('umgSup'); helper.markActivityCompleted();
-        helper.enterModule('emoReg');
-        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Emotionsregulation" — and in every other module, too. You can re-visit them as often as you like.');
+        helper.enterModule('mod2');
+        helper.enterSession('ses2a'); helper.enterActivity('act2a1'); helper.markActivityCompleted();
+        helper.enterModule('mod2');
+        helper.enterSession('ses2b');
+        helper.enterActivity('act2b1'); helper.markActivityCompleted();
+        helper.enterActivity('act2b2'); helper.markActivityCompleted();
+        helper.enterActivity('act2b3'); helper.markActivityCompleted();
+        helper.enterModule('mod2');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Module Two" — and in every other module, too. You can re-visit them as often as you like.');
       });
     });
 
-    describe('session-level advice: below threshold (gesGre in bouMgt: threshold 1, 2 activities)', () => {
+    describe('session-level advice: below threshold (ses1a in mod1: threshold 1, 2 activities)', () => {
       beforeEach(() => {
-        helper.enterModule('bouMgt');
-        helper.enterSession('gesGre');
+        helper.enterModule('mod1');
+        helper.enterSession('ses1a');
       });
 
       it('returns a start-with message when no activity has been entered yet', () => {
-        expect(helper.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "gesunde Grenzen setzen".');
+        expect(helper.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "Session One A".');
       });
 
       it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
-        helper.enterActivity('rolGes'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Rollenwechsel bewusst gestalten", you have now adequately progressed in 📑 session "gesunde Grenzen setzen". You can proceed with more activities if you like, or skip ahead to 📑 session "Pausen".');
+        helper.enterActivity('act1a1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in 📑 session "Session One A". You can proceed with more activities if you like, or skip ahead to 📑 session "Session One B".');
       });
     });
 
-    describe('session-level advice: keep going (umgEmo in emoReg: threshold 2, 3 activities)', () => {
+    describe('session-level advice: keep going (ses2b in mod2: threshold 2, 3 activities)', () => {
       beforeEach(() => {
-        helper.enterModule('emoReg');
-        helper.enterSession('umgEmo');
+        helper.enterModule('mod2');
+        helper.enterSession('ses2b');
       });
 
       it('returns a keep-going message when an activity is entered but below threshold', () => {
-        helper.enterActivity('akzep'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Umgang mit schwierigen Emotionen" — next up is 🎯 activity "Emotionsregulation in schwierigen Situationen".');
+        helper.enterActivity('act2b1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Session Two B" — next up is 🎯 activity "Activity 2b-2".');
       });
 
       it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
-        helper.enterActivity('akzep'); helper.markActivityCompleted();
-        helper.enterActivity('emoSit'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Emotionsregulation in schwierigen Situationen", you have now adequately progressed in 📑 session "Umgang mit schwierigen Emotionen". You can proceed with more activities if you like.');
+        helper.enterActivity('act2b1'); helper.markActivityCompleted();
+        helper.enterActivity('act2b2'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 2b-2", you have now adequately progressed in 📑 session "Session Two B". You can proceed with more activities if you like.');
       });
     });
 
@@ -691,29 +759,29 @@ describe('ReactStateHelper', () => {
     });
 
     describe('cascade: completing a session also triggers module adequate use (case C)', () => {
-      it('with next module: session complete AND module adequate — references the finishing session (paus in bouMgt)', () => {
-        helper.enterModule('bouMgt');
-        helper.enterSession('paus');
-        helper.enterActivity('mikPau'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Pausen", you have now adequately progressed in 🗂️ module "Boundary Management". You can proceed with more sessions if you like, or skip ahead to 🗂️ module "Emotionsregulation".');
+      it('with next module: session complete AND module adequate — references the finishing session (ses1b in mod1)', () => {
+        helper.enterModule('mod1');
+        helper.enterSession('ses1b');
+        helper.enterActivity('act1b1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session One B", you have now adequately progressed in 🗂️ module "Module One". You can proceed with more sessions if you like, or skip ahead to 🗂️ module "Module Two".');
       });
 
-      it('without next module: session complete AND module adequate — no skip option (neuBew in emoReg)', () => {
-        helper.enterModule('emoReg');
-        helper.enterSession('neuBew');
-        helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Neubewertung", you have now adequately progressed in 🗂️ module "Emotionsregulation". You can proceed with more sessions if you like.');
+      it('without next module: session complete AND module adequate — no skip option (ses2a in mod2)', () => {
+        helper.enterModule('mod2');
+        helper.enterSession('ses2a');
+        helper.enterActivity('act2a1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session Two A", you have now adequately progressed in 🗂️ module "Module Two". You can proceed with more sessions if you like.');
       });
     });
 
     describe('case D: session adequate (not complete) while module was already adequate', () => {
       it('references the finishing activity and mentions both session and module', () => {
-        helper.enterModule('bouMgt');
-        helper.enterSession('paus'); helper.enterActivity('mikPau'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        helper.enterSession('gesGre');
-        helper.enterActivity('rolGes'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Rollenwechsel bewusst gestalten", you have now adequately progressed in both 📑 session "gesunde Grenzen setzen" and 🗂️ module "Boundary Management". You can proceed with more activities if you like, or skip ahead to 🗂️ module "Emotionsregulation".');
+        helper.enterModule('mod1');
+        helper.enterSession('ses1b'); helper.enterActivity('act1b1'); helper.markActivityCompleted();
+        helper.enterModule('mod1');
+        helper.enterSession('ses1a');
+        helper.enterActivity('act1a1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in both 📑 session "Session One A" and 🗂️ module "Module One". You can proceed with more activities if you like, or skip ahead to 🗂️ module "Module Two".');
       });
     });
   });
@@ -738,6 +806,132 @@ describe('ReactStateHelper', () => {
       helper.markSuggestionSeen();
       helper.markSuggestionSeen();
       expect(helper.isSuggestionSeen()).toBe(true);
+    });
+  });
+
+  describe('production data (ReactStateHelper.initialState())', () => {
+    let p;
+    beforeEach(() => {
+      p = ReactStateHelper.initDefaultState();
+    });
+
+    it('has modules bouMgt and emoReg in order', () => {
+      const state = JSON.parse(p.toString());
+      expect(state.modules.map(m => m.id)).toEqual(['bouMgt', 'emoReg']);
+    });
+
+    it('bouMgt has sessions bouIntro, gesGre, paus', () => {
+      const state = JSON.parse(p.toString());
+      expect(state.modules.find(m => m.id === 'bouMgt').sessions.map(s => s.id)).toEqual(['bouIntro', 'gesGre', 'paus']);
+    });
+
+    it('emoReg has sessions emoIntro, neuBew, umgEmo', () => {
+      const state = JSON.parse(p.toString());
+      expect(state.modules.find(m => m.id === 'emoReg').sessions.map(s => s.id)).toEqual(['emoIntro', 'neuBew', 'umgEmo']);
+    });
+
+    it('bouIntro and emoIntro are empty intro sessions (no activities)', () => {
+      const state = JSON.parse(p.toString());
+      expect(state.modules.find(m => m.id === 'bouMgt').sessions.find(s => s.id === 'bouIntro').activities).toEqual([]);
+      expect(state.modules.find(m => m.id === 'emoReg').sessions.find(s => s.id === 'emoIntro').activities).toEqual([]);
+    });
+
+    it('all module thresholds are 1', () => {
+      const state = JSON.parse(p.toString());
+      for (const m of state.modules) expect(m.sessions_needed_for_adequate_use).toBe(1);
+    });
+
+    it('umgEmo requires 2 activities for adequate progress; all other content sessions require 1', () => {
+      const state = JSON.parse(p.toString());
+      const umgEmo = state.modules.find(m => m.id === 'emoReg').sessions.find(s => s.id === 'umgEmo');
+      expect(umgEmo.activities_needed_for_adequate_use).toBe(2);
+      const otherContent = state.modules.flatMap(m => m.sessions).filter(s => s.id !== 'umgEmo' && s.activities.length > 0);
+      for (const s of otherContent) expect(s.activities_needed_for_adequate_use).toBe(1);
+    });
+
+    describe('happy path: completing the full program', () => {
+      it('getProgress starts at 0', () => {
+        expect(p.getProgress()).toBe(0);
+      });
+
+      it('completing all content sessions reaches getProgress 1', () => {
+        for (const mod of ReactStateHelper.initialState().modules) {
+          p.enterModule(mod.id);
+          for (const ses of mod.sessions) {
+            p.enterSession(ses.id);
+            for (const act of ses.activities) {
+              p.enterActivity(act.id); p.markActivityCompleted();
+            }
+          }
+        }
+        expect(p.getProgress()).toBe(1);
+      });
+
+      it('getProgressAdvice on entry to bouMgt returns a start-with message', () => {
+        p.enterModule('bouMgt');
+        expect(p.getProgressAdvice()).toBe('Start with one of the available 📑 sessions in module 🗂️ "Boundary Management".');
+      });
+
+      it('getProgressAdvice on entry to gesGre returns a start-with message', () => {
+        p.enterModule('bouMgt');
+        p.enterSession('gesGre');
+        expect(p.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "gesunde Grenzen setzen".');
+      });
+
+      it('getProgressAdvice after adequately completing bouMgt advises skipping to emoReg', () => {
+        p.enterModule('bouMgt');
+        p.enterSession('gesGre'); p.enterActivity('rolGes'); p.markActivityCompleted(); p.enterActivity('abgKon'); p.markActivityCompleted();
+        p.enterModule('bouMgt');
+        p.enterSession('paus'); p.enterActivity('mikPau'); p.markActivityCompleted();
+        p.enterModule('bouMgt');
+        const advice = p.getProgressAdvice();
+        expect(advice).toContain('Boundary Management');
+        expect(advice).toContain('Emotionsregulation');
+      });
+
+      it('getProgressAdvice after completing all modules mentions all modules covered', () => {
+        for (const mod of ReactStateHelper.initialState().modules) {
+          p.enterModule(mod.id);
+          for (const ses of mod.sessions) {
+            p.enterSession(ses.id);
+            for (const act of ses.activities) {
+              p.enterActivity(act.id); p.markActivityCompleted();
+            }
+          }
+          p.enterModule(mod.id);
+        }
+        expect(p.getProgressAdvice()).toContain('and in every other module, too');
+      });
+    });
+
+    describe('edge cases', () => {
+      it('intro sessions do not count toward getProgress', () => {
+        p.enterModule('bouMgt');
+        p.enterSession('bouIntro');
+        expect(p.getProgress()).toBe(0);
+      });
+
+      it('one completed session is enough for bouMgt adequate use (threshold=1)', () => {
+        p.enterModule('bouMgt');
+        p.enterSession('gesGre'); p.enterActivity('rolGes'); p.markActivityCompleted(); p.enterActivity('abgKon'); p.markActivityCompleted();
+        expect(p.isGoodEnough('bouMgt')).toBe(true);
+      });
+
+      it('completing all non-intro sessions marks bouMgt as completed', () => {
+        p.enterModule('bouMgt');
+        p.enterSession('gesGre'); p.enterActivity('rolGes'); p.markActivityCompleted(); p.enterActivity('abgKon'); p.markActivityCompleted();
+        p.enterSession('paus'); p.enterActivity('mikPau'); p.markActivityCompleted();
+        expect(p.isModuleCompleted('bouMgt')).toBe(true);
+      });
+
+      it('umgEmo requires 2 completed activities for adequate progress', () => {
+        p.enterModule('emoReg');
+        p.enterSession('umgEmo');
+        p.enterActivity('akzep'); p.markActivityCompleted();
+        expect(p.hasSessionAdequateProgress('umgEmo')).toBe(false);
+        p.enterActivity('emoSit'); p.markActivityCompleted();
+        expect(p.hasSessionAdequateProgress('umgEmo')).toBe(true);
+      });
     });
   });
 });
