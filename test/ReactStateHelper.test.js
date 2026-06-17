@@ -71,6 +71,48 @@ const testState = {
         },
       ],
     },
+    {
+      id: 'mod3',
+      title: 'Module Three',
+      sessions_needed_for_adequate_use: 2,
+      entered_first_at: null, entered_last_at: null, times_entered: 0,
+      sessions: [
+        {
+          id: 'ses3intro',
+          title: 'Intro Three',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [],
+        },
+        {
+          id: 'ses3a',
+          title: 'Session Three A',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act3a1', title: 'Activity 3a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+        {
+          id: 'ses3b',
+          title: 'Session Three B',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act3b1', title: 'Activity 3b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+        {
+          id: 'ses3c',
+          title: 'Session Three C',
+          activities_needed_for_adequate_use: 1,
+          entered_first_at: null, entered_last_at: null, times_entered: 0,
+          activities: [
+            { id: 'act3c1', title: 'Activity 3c-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+          ],
+        },
+      ],
+    },
   ],
   suggestionSeen: false,
   currentModuleId: null,
@@ -536,7 +578,7 @@ describe('ReactStateHelper', () => {
 
     it('fills unused slots with empty string', () => {
       const vars = helper.populateMenuLabelsForModule();
-      for (let i = 3; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
+      for (let i = 4; i <= 9; i++) expect(vars[`jsStateHelperMenuLabel${i}`]).toBe('');
     });
 
     it('marks a completed module with ✅', () => {
@@ -675,10 +717,11 @@ describe('ReactStateHelper', () => {
         expect(helper.getProgressAdvice()).toBe('Start with one of the available 📑 sessions in module 🗂️ "Module One".');
       });
 
-      // Requires a module with sessions_needed_for_adequate_use >= 2 so completing one session leaves it below threshold.
-      it.skip('returns a keep-going message when some sessions done but below threshold', () => {
-        // Set up: enter a module with threshold >= 2, complete one session, re-enter the module.
-        // expect(helper.getProgressAdvice()).toBe('Keep going in module 🗂️ "…" — next up is 📑 session "…".');
+      it('returns a keep-going message when some sessions done but below threshold (mod3: threshold 2)', () => {
+        helper.enterModule('mod3');
+        helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        expect(helper.getProgressAdvice()).toBe('Keep going in module 🗂️ "Module Three" — next up is 📑 session "Session Three B".');
       });
 
       it('returns good-progress message when threshold met but sessions remain', () => {
@@ -696,24 +739,25 @@ describe('ReactStateHelper', () => {
       });
     });
 
-    describe('module-level advice on the last module — all modules covered (mod2: threshold 1, 2 completable sessions)', () => {
+    describe('module-level advice on the last module — all modules covered (mod3: threshold 2, 3 completable sessions)', () => {
       it('returns good-progress message when threshold met but sessions remain', () => {
-        helper.enterModule('mod2');
-        helper.enterSession('ses2a'); helper.enterActivity('act2a1'); helper.markActivityCompleted();
-        helper.enterModule('mod2');
-        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Module Two" — and in every other module, too. You can stay and complete more 📑 sessions.');
+        helper.enterModule('mod3');
+        helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        helper.enterSession('ses3b'); helper.enterActivity('act3b1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Module Three" — and in every other module, too. You can stay and complete more 📑 sessions.');
       });
 
       it('returns all-completed message when all sessions are done', () => {
-        helper.enterModule('mod2');
-        helper.enterSession('ses2a'); helper.enterActivity('act2a1'); helper.markActivityCompleted();
-        helper.enterModule('mod2');
-        helper.enterSession('ses2b');
-        helper.enterActivity('act2b1'); helper.markActivityCompleted();
-        helper.enterActivity('act2b2'); helper.markActivityCompleted();
-        helper.enterActivity('act2b3'); helper.markActivityCompleted();
-        helper.enterModule('mod2');
-        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Module Two" — and in every other module, too. You can re-visit them as often as you like.');
+        helper.enterModule('mod3');
+        helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        helper.enterSession('ses3b'); helper.enterActivity('act3b1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        helper.enterSession('ses3c'); helper.enterActivity('act3c1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Module Three" — and in every other module, too. You can re-visit them as often as you like.');
       });
     });
 
@@ -751,11 +795,11 @@ describe('ReactStateHelper', () => {
       });
     });
 
-    // Requires a module with sessions_needed_for_adequate_use >= 2 so completing one session leaves the module not yet adequate.
-    it.skip('case B: session complete, module not adequate — references the finishing session', () => {
-      // Set up: enter a module with threshold >= 2, complete exactly one session (all its activities),
-      // so sessionComplete=true but countCompletedSessions < threshold → moduleAdequate=false.
-      // expect(helper.getProgressAdvice()).toBe('By finishing 📑 session "…", you have now completed all its 🎯 activities. You can re-visit them if you like, or skip ahead to 📑 session "…".');
+    it('case B: session complete, module not adequate — references the finishing session (ses3a in mod3: threshold 2)', () => {
+      helper.enterModule('mod3');
+      helper.enterSession('ses3a');
+      helper.enterActivity('act3a1'); helper.markActivityCompleted();
+      expect(helper.getProgressAdvice()).toBe('By finishing 📑 session "Session Three A", you have now completed all its 🎯 activities. You can re-visit them if you like, or skip ahead to 📑 session "Session Three B".');
     });
 
     describe('cascade: completing a session also triggers module adequate use (case C)', () => {
@@ -766,11 +810,13 @@ describe('ReactStateHelper', () => {
         expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session One B", you have now adequately progressed in 🗂️ module "Module One". You can proceed with more sessions if you like, or skip ahead to 🗂️ module "Module Two".');
       });
 
-      it('without next module: session complete AND module adequate — no skip option (ses2a in mod2)', () => {
-        helper.enterModule('mod2');
-        helper.enterSession('ses2a');
-        helper.enterActivity('act2a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session Two A", you have now adequately progressed in 🗂️ module "Module Two". You can proceed with more sessions if you like.');
+      it('without next module: session complete AND module adequate — no skip option (ses3b in mod3: threshold 2)', () => {
+        helper.enterModule('mod3');
+        helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
+        helper.enterModule('mod3');
+        helper.enterSession('ses3b');
+        helper.enterActivity('act3b1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session Three B", you have now adequately progressed in 🗂️ module "Module Three". You can proceed with more sessions if you like.');
       });
     });
 

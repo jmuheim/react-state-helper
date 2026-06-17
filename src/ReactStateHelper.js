@@ -425,17 +425,19 @@ class ReactStateHelper {
       const module = this.#findModule(this.#state.currentModuleId);
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
       const completableSessions = module.sessions.filter(s => s.activities.length > 0);
-      return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
+      const nextUncompletedSession = completableSessions.find(s => !s.isCompleted());
+      return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subLabelSingular: 'session', subEmoji: s, completed: module.countCompletedSessions(), total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1], nextItem: nextUncompletedSession });
     }
     throw new Error('No module entered yet');
   }
 
-  #buildProgressAdviceString({ label, emoji, title, subLabel, subEmoji, completed, total, threshold, next }) {
+  #buildProgressAdviceString({ label, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, next, nextItem }) {
     const skipPart = next ? `, or skip to ${label} ${emoji} "${next.title}"` : '';
     const allCoveredPart = next ? '' : ` — and in every other ${label}, too`;
     if (completed >= total) return `You have completed all ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}"${allCoveredPart}. You can re-visit them as often as you like${skipPart}.`;
     if (completed >= threshold) return `You have good progress in ${label} ${emoji} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
     if (completed === 0) return `Start with one of the available ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}".`;
+    if (nextItem) return `Keep going in ${label} ${emoji} "${title}" — next up is ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
     return '';
   }
 
