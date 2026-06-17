@@ -656,7 +656,7 @@ describe('ReactStateHelper', () => {
       expect(helper.getProgressAdvice()).toBe('');
     });
 
-    describe('session-level advice (rolCha: threshold 1, total 2 activities)', () => {
+    describe('session-level advice (rolCha in bouMgt: activity threshold 1, total 2)', () => {
       beforeEach(() => {
         helper.enterModule('bouMgt');
         helper.enterSession('rolCha');
@@ -666,15 +666,48 @@ describe('ReactStateHelper', () => {
         expect(helper.getProgressAdvice()).toBe('');
       });
 
-      it('returns good-progress message when threshold met but activities remain', () => {
+      it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
         helper.enterActivity('somAct'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('You have good progress in session 📑 "Rollenwechsel bewusst vollziehen". You can stay and complete more 🎯 activities, or skip to session 📑 "Nein sagen üben".');
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Eine erste Übung", you have now adequately progressed in 📑 session "Rollenwechsel bewusst vollziehen". You can proceed with more activities if you like, or skip ahead to 📑 session "Nein sagen üben".');
       });
 
-      it('returns all-completed message when all activities are done', () => {
+      it('case B: session complete, module not adequate — references the finishing session', () => {
         helper.enterActivity('somAct'); helper.markActivityCompleted();
         helper.enterActivity('othAct'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('You have completed all 🎯 activities in session 📑 "Rollenwechsel bewusst vollziehen". You can re-visit them as often as you like, or skip to session 📑 "Nein sagen üben".');
+        expect(helper.getProgressAdvice()).toBe('By finishing 📑 session "Rollenwechsel bewusst vollziehen", you have now completed all its 🎯 activities. You can re-visit them if you like, or skip ahead to 📑 session "Nein sagen üben".');
+      });
+    });
+
+    describe('cascade: completing a session also triggers module adequate use (onboard: session threshold 1, 1 session)', () => {
+      beforeEach(() => {
+        helper.enterModule('onboard');
+        helper.enterSession('introd');
+      });
+
+      it('case A: session adequate but not yet complete — module still not adequate', () => {
+        helper.enterActivity('globGoal'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Globales Ziel definieren", you have now adequately progressed in 📑 session "Einführung". You can proceed with more activities if you like.');
+      });
+
+      it('case C: session complete AND module adequate — references the finishing session', () => {
+        helper.enterActivity('globGoal'); helper.markActivityCompleted();
+        helper.enterActivity('howEdu'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Einführung", you have now adequately progressed in 🗂️ module "Onboarding". You can proceed with more sessions if you like, or skip ahead to 🗂️ module "Boundary Management".');
+      });
+    });
+
+    describe('case D: session adequate (not complete) while module was already adequate (bouMgt)', () => {
+      it('references the finishing activity and mentions both session and module', () => {
+        helper.enterModule('bouMgt');
+        helper.enterSession('sayNo'); helper.enterActivity('sayNoAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('limSet'); helper.enterActivity('limSetAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('worBou'); helper.enterActivity('worBouAct'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('rolCha');
+        helper.enterActivity('somAct'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Eine erste Übung", you have now adequately progressed in both 📑 session "Rollenwechsel bewusst vollziehen" and 🗂️ module "Boundary Management". You can proceed with more activities if you like, or skip ahead to 🗂️ module "Emotionsregulation".');
       });
     });
 

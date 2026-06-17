@@ -484,8 +484,29 @@ class ReactStateHelper {
     if (this.#state.currentSessionId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
-      const idx = module.sessions.findIndex(ss => ss.id === session.id);
-      return this.#buildProgressAdvice({ label: 'session', emoji: s, title: session.title, subLabel: 'activities', subEmoji: a, completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_use, next: module.sessions[idx + 1] });
+      const sessionIdx = module.sessions.findIndex(ss => ss.id === session.id);
+      const nextSession = module.sessions[sessionIdx + 1];
+      const moduleIdx = this.#state.modules.findIndex(mm => mm.id === module.id);
+      const nextModule = this.#state.modules[moduleIdx + 1];
+      const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
+
+      const sessionComplete = session.isCompleted();
+      const sessionAdequate = session.hasAdequateProgress();
+      const moduleAdequate = module.hasAdequateProgress();
+
+      const nextSessionPart = nextSession ? `, or skip ahead to ${s} session "${nextSession.title}"` : '';
+      const nextModulePart = nextModule ? `, or skip ahead to ${m} module "${nextModule.title}"` : '';
+      const actPart = activity ? `${a} activity "${activity.title}"` : 'an activity';
+
+      if (sessionComplete && moduleAdequate)
+        return `Hooray! By finishing ${s} session "${session.title}", you have now adequately progressed in ${m} module "${module.title}". You can proceed with more sessions if you like${nextModulePart}.`;
+      if (sessionAdequate && moduleAdequate)
+        return `Hooray! By finishing ${actPart}, you have now adequately progressed in both ${s} session "${session.title}" and ${m} module "${module.title}". You can proceed with more activities if you like${nextModulePart}.`;
+      if (sessionComplete)
+        return `By finishing ${s} session "${session.title}", you have now completed all its ${a} activities. You can re-visit them if you like${nextSessionPart}.`;
+      if (sessionAdequate)
+        return `Hooray! By finishing ${actPart}, you have now adequately progressed in ${s} session "${session.title}". You can proceed with more activities if you like${nextSessionPart}.`;
+      return '';
     }
     if (this.#state.currentModuleId) {
       const module = this.#findModule(this.#state.currentModuleId);
