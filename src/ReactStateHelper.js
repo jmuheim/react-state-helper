@@ -511,12 +511,12 @@ class ReactStateHelper {
     if (this.#state.currentModuleId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
-      return this.#buildProgressAdvice({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: module.sessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
+      return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subEmoji: s, completed: module.countCompletedSessions(), total: module.sessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1] });
     }
     return '';
   }
 
-  #buildProgressAdvice({ label, emoji, title, subLabel, subEmoji, completed, total, threshold, next }) {
+  #buildProgressAdviceString({ label, emoji, title, subLabel, subEmoji, completed, total, threshold, next }) {
     const nextPart = next ? `, or skip to ${label} ${emoji} "${next.title}"` : '';
     if (completed >= total) return `You have completed all ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}". You can re-visit them as often as you like${nextPart}.`;
     if (completed >= threshold) return `You have good progress in ${label} ${emoji} "${title}". You can stay and complete more ${subEmoji} ${subLabel}${nextPart}.`;

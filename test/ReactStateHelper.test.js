@@ -744,6 +744,32 @@ describe('ReactStateHelper', () => {
         expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Boundary Management". You can re-visit them as often as you like, or skip to module 🗂️ "Emotionsregulation".');
       });
     });
+
+    describe('module-level advice without a next module (emoReg: threshold 3, total 4 sessions)', () => {
+      it('returns good-progress message with no skip option when threshold met but sessions remain', () => {
+        helper.enterModule('emoReg');
+        helper.enterSession('breCon'); helper.enterActivity('breConAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        helper.enterSession('bodSca'); helper.enterActivity('bodScaAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        helper.enterSession('jouWri'); helper.enterActivity('jouWriAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Emotionsregulation". You can stay and complete more 📑 sessions.');
+      });
+
+      it('returns all-completed message with no skip option when all sessions are done', () => {
+        helper.enterModule('emoReg');
+        helper.enterSession('breCon'); helper.enterActivity('breConAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        helper.enterSession('bodSca'); helper.enterActivity('bodScaAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        helper.enterSession('jouWri'); helper.enterActivity('jouWriAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        helper.enterSession('proRel'); helper.enterActivity('proRelAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Emotionsregulation". You can re-visit them as often as you like.');
+      });
+    });
   });
 
   describe('markSuggestionSeen / isSuggestionSeen', () => {

@@ -1,5 +1,15 @@
 # ReactStateHelper
 
+Besprechung mit Pascal:
+
+- Basis-Präferenzen ("wohin möchte man?")
+- Erfahrungs-Präferenzen ("was hat man ausprobiert und findet man gut?")
+- $jsStateHelperMenuLabel1:$jsStateHelperMenuId1
+- $participantNextMicroDialogIdentifier
+   Aneinander reihen für Activity: "bouMgt_rolCha_somAct" => auch für Variable-Präfix nutzen?
+- LLM integrieren?
+   - Datenmodell sowie Challenge/Problem des Nutzenden schicken, und dann LLM nach einem ProgressAdvice fragen?!
+
 A plain JavaScript helper for managing hierarchical app state (modules → sessions → activities) as JSON. Designed to be copy-pasted verbatim into [MobileCoach](https://www.mobilecoach.com/), a mobile health platform that executes JavaScript snippets.
 
 ## Development
