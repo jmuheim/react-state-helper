@@ -598,6 +598,57 @@ describe('ReactStateHelper', () => {
       expect(() => helper.getProgressAdvice()).toThrow('No module entered yet');
     });
 
+    describe('module-level advice (bouMgt: threshold 1, 2 completable sessions)', () => {
+      beforeEach(() => {
+        helper.enterModule('bouMgt');
+      });
+
+      it('returns a start-with message when no session has been entered yet', () => {
+        expect(helper.getProgressAdvice()).toBe('Start with one of the available 📑 sessions in module 🗂️ "Boundary Management".');
+      });
+
+      // Requires a module with sessions_needed_for_adequate_use >= 2 so completing one session leaves it below threshold.
+      it.skip('returns a keep-going message when some sessions done but below threshold', () => {
+        // Set up: enter a module with threshold >= 2, complete one session, re-enter the module.
+        // expect(helper.getProgressAdvice()).toBe('Keep going in module 🗂️ "…" — next up is 📑 session "…".');
+      });
+
+      it('returns good-progress message when threshold met but sessions remain', () => {
+        helper.enterSession('gesGre'); helper.enterActivity('rolGes'); helper.markActivityCompleted(); helper.enterActivity('abgKon'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Boundary Management". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Emotionsregulation".');
+      });
+
+      it('returns all-completed message when all sessions are done', () => {
+        helper.enterSession('gesGre'); helper.enterActivity('rolGes'); helper.markActivityCompleted(); helper.enterActivity('abgKon'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        helper.enterSession('paus'); helper.enterActivity('mikPau'); helper.markActivityCompleted();
+        helper.enterModule('bouMgt');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Boundary Management". You can re-visit them as often as you like, or skip to module 🗂️ "Emotionsregulation".');
+      });
+    });
+
+    describe('module-level advice on the last module — all modules covered (emoReg: threshold 1, 2 completable sessions)', () => {
+      it('returns good-progress message when threshold met but sessions remain', () => {
+        helper.enterModule('emoReg');
+        helper.enterSession('neuBew'); helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Emotionsregulation" — and in every other module, too. You can stay and complete more 📑 sessions.');
+      });
+
+      it('returns all-completed message when all sessions are done', () => {
+        helper.enterModule('emoReg');
+        helper.enterSession('neuBew'); helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        helper.enterSession('umgEmo');
+        helper.enterActivity('akzep'); helper.markActivityCompleted();
+        helper.enterActivity('emoSit'); helper.markActivityCompleted();
+        helper.enterActivity('umgSup'); helper.markActivityCompleted();
+        helper.enterModule('emoReg');
+        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Emotionsregulation" — and in every other module, too. You can re-visit them as often as you like.');
+      });
+    });
+
     describe('session-level advice: below threshold (gesGre in bouMgt: threshold 1, 2 activities)', () => {
       beforeEach(() => {
         helper.enterModule('bouMgt');
@@ -663,51 +714,6 @@ describe('ReactStateHelper', () => {
         helper.enterSession('gesGre');
         helper.enterActivity('rolGes'); helper.markActivityCompleted();
         expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Rollenwechsel bewusst gestalten", you have now adequately progressed in both 📑 session "gesunde Grenzen setzen" and 🗂️ module "Boundary Management". You can proceed with more activities if you like, or skip ahead to 🗂️ module "Emotionsregulation".');
-      });
-    });
-
-    describe('module-level advice (bouMgt: threshold 1, 2 completable sessions)', () => {
-      beforeEach(() => {
-        helper.enterModule('bouMgt');
-      });
-
-      it('returns empty string when below session threshold', () => {
-        expect(helper.getProgressAdvice()).toBe('');
-      });
-
-      it('returns good-progress message when threshold met but sessions remain', () => {
-        helper.enterSession('gesGre'); helper.enterActivity('rolGes'); helper.markActivityCompleted(); helper.enterActivity('abgKon'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Boundary Management". You can stay and complete more 📑 sessions, or skip to module 🗂️ "Emotionsregulation".');
-      });
-
-      it('returns all-completed message when all sessions are done', () => {
-        helper.enterSession('gesGre'); helper.enterActivity('rolGes'); helper.markActivityCompleted(); helper.enterActivity('abgKon'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        helper.enterSession('paus'); helper.enterActivity('mikPau'); helper.markActivityCompleted();
-        helper.enterModule('bouMgt');
-        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Boundary Management". You can re-visit them as often as you like, or skip to module 🗂️ "Emotionsregulation".');
-      });
-    });
-
-    describe('module-level advice without a next module (emoReg: threshold 1, 2 completable sessions)', () => {
-      it('returns good-progress message with no skip option when threshold met but sessions remain', () => {
-        helper.enterModule('emoReg');
-        helper.enterSession('neuBew'); helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-        helper.enterModule('emoReg');
-        expect(helper.getProgressAdvice()).toBe('You have good progress in module 🗂️ "Emotionsregulation". You can stay and complete more 📑 sessions.');
-      });
-
-      it('returns all-completed message with no skip option when all sessions are done', () => {
-        helper.enterModule('emoReg');
-        helper.enterSession('neuBew'); helper.enterActivity('neuBewAct'); helper.markActivityCompleted();
-        helper.enterModule('emoReg');
-        helper.enterSession('umgEmo');
-        helper.enterActivity('akzep'); helper.markActivityCompleted();
-        helper.enterActivity('emoSit'); helper.markActivityCompleted();
-        helper.enterActivity('umgSup'); helper.markActivityCompleted();
-        helper.enterModule('emoReg');
-        expect(helper.getProgressAdvice()).toBe('You have completed all 📑 sessions in module 🗂️ "Emotionsregulation". You can re-visit them as often as you like.');
       });
     });
   });
