@@ -709,7 +709,7 @@ describe('ReactStateHelper', () => {
     });
 
     describe('module-level advice', () => {
-      describe('not last module (mod1: threshold 1, 2 completable sessions)', () => {
+      describe('other modules not yet adequately used (mod1: threshold 1, 2 completable sessions)', () => {
         beforeEach(() => {
           helper.enterModule('mod1');
         });
@@ -740,7 +740,7 @@ describe('ReactStateHelper', () => {
         });
       });
 
-      describe('last module — all modules covered (mod3: threshold 2, 3 completable sessions)', () => {
+      describe('all other modules adequately used (mod3: threshold 2, 3 completable sessions)', () => {
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enterModule('mod3');
           helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
@@ -764,7 +764,7 @@ describe('ReactStateHelper', () => {
     });
 
     describe('session-level advice', () => {
-      describe('below threshold (ses1a in mod1: threshold 1, 2 activities)', () => {
+      describe('other activities not yet adequately used (ses1a in mod1: threshold 1, 2 activities)', () => {
         beforeEach(() => {
           helper.enterModule('mod1');
           helper.enterSession('ses1a');
@@ -780,7 +780,7 @@ describe('ReactStateHelper', () => {
         });
       });
 
-      describe('keep going (ses2b in mod2: threshold 2, 3 activities)', () => {
+      describe('some activities adequately used (ses2b in mod2: threshold 2, 3 activities)', () => {
         beforeEach(() => {
           helper.enterModule('mod2');
           helper.enterSession('ses2b');
