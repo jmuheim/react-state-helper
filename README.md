@@ -21,7 +21,7 @@ ReactStateHelper
 
 - **Completion**: an `Activity` is completed once marked. A `Session` is completed if it has at least one activity and all of them are completed. A `Module` is completed if all of its sessions that have activities are completed (intro sessions don't count either way).
 - **Adequate progress**: a softer bar than full completion — a `Module`/`Session` "has adequate progress" once `sessions_needed_for_adequate_use`/`activities_needed_for_adequate_use` of its children are completed, even if not all of them are. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything.
-- **IDs**: must be unique across the *entire* state, not just within their parent, and are conventionally prefixed by level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`) — see `CLAUDE.md` for why. Loading state validates this and other structural invariants (unachievable thresholds, more than 9 sessions/activities in one collection, a module with no sessions, a module with no non-intro session, a non-intro session with no activities) and throws immediately on a violation.
+- **Ids**: must be unique across the *entire* state, not just within their parent, and are conventionally prefixed by level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`) — see `CLAUDE.md` for why. Loading state validates this and other structural invariants (unachievable thresholds, more than 9 sessions/activities in one collection, a module with no sessions, a module with no non-intro session, a non-intro session with no activities) and throws immediately on a violation.
 - **Navigation**: before most methods can be called, the helper must be told where the participant currently is via `enterModule(id)` → `enterSession(id)` → `enterActivity(id)`, which also records `entered_first_at`/`entered_last_at`/`times_entered` on the way in.
 
 ## Development
@@ -42,7 +42,7 @@ npm run test:watch    # re-run on file changes
    | `$jsStateHelperResult` | Return value of the last command |
    | `$jsStateHelperStatus` | `success` or `error` |
    | `$jsStateHelperError` | Error message if status is `error`, otherwise `none` |
-   | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session IDs across all modules |
+   | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session ids across all modules |
    | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel9` | Dynamic menu entry labels populated by `populateMenuLabelsForModule()` / `populateMenuLabelsForSession()` / `populateMenuLabelsForActivity()` |
    | `$participantGroup` | `"<currentModuleId>: <currentSessionId>"` once navigated, otherwise `null` — populated by `getParticipantGroup()`, intended for participant segmentation |
 
