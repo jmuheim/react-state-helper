@@ -444,10 +444,16 @@ class ReactStateHelper {
       .join(',');
   }
 
-  static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉', moduleEmoji: '🗂️', sessionEmoji: '📑', activityEmoji: '🎯' };
+  static #MENU_EMOJIS = {
+    completed: '✅',
+    next: '👉',
+    module: '🗂️',
+    session: '📑',
+    activity: '🎯',
+  };
 
   getProgressAdvice() {
-    const { moduleEmoji: m, sessionEmoji: s, activityEmoji: a } = ReactStateHelper.#MENU_EMOJIS;
+    const { module: m, session: s, activity: a } = ReactStateHelper.#MENU_EMOJIS;
     if (this.#state.currentSessionId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
@@ -498,7 +504,7 @@ class ReactStateHelper {
   }
 
   #buildMenuVars(items) {
-    const { completedEmoji, nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
+    const { completed: completedEmoji, next: nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
     const vars = {};
     let nextAssigned = false;
     for (let i = 0; i < MAX_MENU_SLOTS; i++) {
