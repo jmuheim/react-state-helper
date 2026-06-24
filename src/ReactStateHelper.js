@@ -468,11 +468,11 @@ class ReactStateHelper {
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       return this.#buildProgressAdviceString({
-        label: 'session', emoji: s, title: session.title,
-        subLabel: 'activities', subLabelSingular: 'activity', subEmoji: a,
+        label: 'Sitzung', labelPlural: 'Sitzungen', emoji: s, title: session.title,
+        subLabel: 'Aktivitäten', subLabelSingular: 'Aktivität', subEmoji: a,
         completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_use,
         notStartedYet: !activity, nextItem: nextActivity,
-        next: { label: 'module', emoji: m, title: module.title }, nextVerb: 'go back to',
+        next: { label: 'Modul', emoji: m, title: module.title }, nextVerb: 'zurückgehen',
       });
     }
     if (this.#state.currentModuleId) {
@@ -483,24 +483,24 @@ class ReactStateHelper {
       const nextModule = this.#state.modules[idx + 1];
       const completedSessions = module.countCompletedSessions();
       return this.#buildProgressAdviceString({
-        label: 'module', emoji: m, title: module.title,
-        subLabel: 'sessions', subLabelSingular: 'session', subEmoji: s,
+        label: 'Modul', labelPlural: 'Module', emoji: m, title: module.title,
+        subLabel: 'Sitzungen', subLabelSingular: 'Sitzung', subEmoji: s,
         completed: completedSessions, total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use,
         notStartedYet: completedSessions === 0, nextItem: nextUncompletedSession,
-        next: nextModule ? { label: 'module', emoji: m, title: nextModule.title } : null, nextVerb: 'move on to',
+        next: nextModule ? { label: 'Modul', emoji: m, title: nextModule.title } : null, nextVerb: 'weitergehen',
       });
     }
     throw new Error('No module entered yet');
   }
 
-  #buildProgressAdviceString({ label, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
-    const skipPart = next ? `, or ${nextVerb} ${next.emoji} ${next.label} "${next.title}"` : '';
-    const allCoveredPart = next ? '' : ` — and in every other ${label}, too`;
-    if (completed >= total) return `You have completed ${emoji} ${label} "${title}"${allCoveredPart}. You can re-visit the contained ${subLabel} as often as you like${skipPart}.`;
-    if (completed >= threshold) return `You have good enough progress in ${emoji} ${label} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
-    if (notStartedYet) return `Start with one of the available ${subEmoji} ${subLabel} in ${emoji} ${label} "${title}".`;
+  #buildProgressAdviceString({ label, labelPlural, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
+    const skipPart = next ? `, oder zu ${next.emoji} ${next.label} "${next.title}" ${nextVerb}` : '';
+    const allCoveredPart = next ? '' : ` — und das gilt auch für alle anderen ${labelPlural}`;
+    if (completed >= total) return `Du hast ${emoji} ${label} "${title}" abgeschlossen${allCoveredPart}. Die enthaltenen ${subLabel} kannst du jederzeit erneut besuchen${skipPart}.`;
+    if (completed >= threshold) return `Du hast in ${emoji} ${label} "${title}" ausreichend Fortschritt gemacht${allCoveredPart}. Du kannst bleiben und weitere ${subEmoji} ${subLabel} abschließen${skipPart}.`;
+    if (notStartedYet) return `Beginne mit einer der verfügbaren ${subEmoji} ${subLabel} in ${emoji} ${label} "${title}".`;
     if (!nextItem) throw new Error(`No uncompleted ${subLabelSingular} found in ${label} "${title}" despite being below threshold`);
-    return `Keep going in ${emoji} ${label} "${title}" — for example with ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
+    return `Mach weiter in ${emoji} ${label} "${title}" — zum Beispiel mit ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
   }
 
   populateMenuLabelsForModule() {
