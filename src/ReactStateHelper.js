@@ -5,7 +5,12 @@ const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $jsStateHelperM
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
 // within their parent, since the same registry is threaded through the whole Module/Session/Activity tree.
-function registerId(idRegistry, id) {
+// `prefix` enforces the m_/s_/a_ convention that makes cross-level collisions impossible by construction
+// (see "ID conventions" in CLAUDE.md) — checked here, at the same point ids are registered, rather than
+// trusting callers to follow the convention.
+function registerId(idRegistry, id, levelPrefix) {
+  const prefix = `${levelPrefix}_`;
+  if (!id.startsWith(prefix)) throw new Error(`Id ${id} must start with "${prefix}"`);
   if (idRegistry.has(id)) throw new Error(`Duplicate id found in state: ${id}`);
   idRegistry.add(id);
 }
@@ -64,7 +69,7 @@ class Module {
   }
 
   static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }, idRegistry) {
-    registerId(idRegistry, id);
+    registerId(idRegistry, id, 'm');
     const module = new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s, idRegistry)) });
     if (module.sessions.length === 0) throw new Error(`Module ${id} has no sessions`);
     if (module.sessions.length > MAX_MENU_SLOTS) throw new Error(`Module ${id} has ${module.sessions.length} sessions, but at most ${MAX_MENU_SLOTS} are supported`);
@@ -113,7 +118,7 @@ class Session {
   }
 
   static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities, isIntro }, idRegistry) {
-    registerId(idRegistry, id);
+    registerId(idRegistry, id, 's');
     const session = new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), isIntro });
     if (session.activities.length > MAX_MENU_SLOTS) throw new Error(`Session ${id} has ${session.activities.length} activities, but at most ${MAX_MENU_SLOTS} are supported`);
     // Only intro sessions (isIntro: true) may have no activities; every other session needs at least one.
@@ -155,7 +160,7 @@ class Activity {
   }
 
   static fromJSON(obj, idRegistry) {
-    registerId(idRegistry, obj.id);
+    registerId(idRegistry, obj.id, 'a');
     return new Activity(obj);
   }
 }
