@@ -4,13 +4,13 @@ const testState = {
   modules: [
     {
       id: 'm_mod1',
-      title: 'Module One',
+      title: 'Modul Eins',
       sessions_needed_for_adequate_use: 1,
       entered_first_at: null, entered_last_at: null, times_entered: 0,
       sessions: [
         {
           id: 's_ses1intro',
-          title: 'Intro One',
+          title: 'Intro Eins',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
@@ -18,34 +18,34 @@ const testState = {
         },
         {
           id: 's_ses1a',
-          title: 'Session One A',
+          title: 'Session Eins A',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act1a1', title: 'Activity 1a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
-            { id: 'a_act1a2', title: 'Activity 1a-2: Subtitle', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act1a1', title: 'Aktivität 1a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act1a2', title: 'Aktivität 1a-2: Untertitel', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
         {
           id: 's_ses1b',
-          title: 'Session One B',
+          title: 'Session Eins B',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act1b1', title: 'Activity 1b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act1b1', title: 'Aktivität 1b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
       ],
     },
     {
       id: 'm_mod2',
-      title: 'Module Two',
+      title: 'Modul Zwei',
       sessions_needed_for_adequate_use: 1,
       entered_first_at: null, entered_last_at: null, times_entered: 0,
       sessions: [
         {
           id: 's_ses2intro',
-          title: 'Intro Two',
+          title: 'Intro Zwei',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
@@ -53,35 +53,35 @@ const testState = {
         },
         {
           id: 's_ses2a',
-          title: 'Session Two A',
+          title: 'Session Zwei A',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act2a1', title: 'Activity 2a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act2a1', title: 'Aktivität 2a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
         {
           id: 's_ses2b',
-          title: 'Session Two B',
+          title: 'Session Zwei B',
           activities_needed_for_adequate_use: 2,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act2b1', title: 'Activity 2b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
-            { id: 'a_act2b2', title: 'Activity 2b-2', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
-            { id: 'a_act2b3', title: 'Activity 2b-3', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act2b1', title: 'Aktivität 2b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act2b2', title: 'Aktivität 2b-2', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act2b3', title: 'Aktivität 2b-3', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
       ],
     },
     {
       id: 'm_mod3',
-      title: 'Module Three',
+      title: 'Modul Drei',
       sessions_needed_for_adequate_use: 2,
       entered_first_at: null, entered_last_at: null, times_entered: 0,
       sessions: [
         {
           id: 's_ses3intro',
-          title: 'Intro Three',
+          title: 'Intro Drei',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
@@ -89,29 +89,29 @@ const testState = {
         },
         {
           id: 's_ses3a',
-          title: 'Session Three A',
+          title: 'Session Drei A',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act3a1', title: 'Activity 3a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act3a1', title: 'Aktivität 3a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
         {
           id: 's_ses3b',
-          title: 'Session Three B',
+          title: 'Session Drei B',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act3b1', title: 'Activity 3b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act3b1', title: 'Aktivität 3b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
         {
           id: 's_ses3c',
-          title: 'Session Three C',
+          title: 'Session Drei C',
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
-            { id: 'a_act3c1', title: 'Activity 3c-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act3c1', title: 'Aktivität 3c-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
       ],
@@ -575,8 +575,8 @@ describe('ReactStateHelper', () => {
   describe('populateMenuLabelsForModule', () => {
     it('marks the first incomplete module as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForModule();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Module One:m_mod1');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Module Two:m_mod2');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Modul Eins:m_mod1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Modul Zwei:m_mod2');
     });
 
     it('fills unused slots with empty string', () => {
@@ -594,8 +594,8 @@ describe('ReactStateHelper', () => {
         }
       }
       const vars = helper.populateMenuLabelsForModule();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Module One:m_mod1');
-      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Module Two:m_mod2');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Modul Eins:m_mod1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Modul Zwei:m_mod2');
     });
 
     it('marks no module as 👉 when all are ✅', () => {
@@ -609,8 +609,8 @@ describe('ReactStateHelper', () => {
         }
       }
       const vars = helper.populateMenuLabelsForModule();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Module One:m_mod1');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Module Two:m_mod2');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Modul Eins:m_mod1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Modul Zwei:m_mod2');
     });
   });
 
@@ -621,9 +621,9 @@ describe('ReactStateHelper', () => {
 
     it('marks the first incomplete session as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForSession();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro One:s_ses1intro');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Session One A:s_ses1a');
-      expect(vars.jsStateHelperMenuLabel3).toBe('Session One B:s_ses1b');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro Eins:s_ses1intro');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Session Eins A:s_ses1a');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Session Eins B:s_ses1b');
     });
 
     it('fills unused slots with empty string', () => {
@@ -636,9 +636,9 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForSession();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro One:s_ses1intro');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Session One A:s_ses1a');
-      expect(vars.jsStateHelperMenuLabel3).toBe('Session One B:s_ses1b');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro Eins:s_ses1intro');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Session Eins A:s_ses1a');
+      expect(vars.jsStateHelperMenuLabel3).toBe('Session Eins B:s_ses1b');
     });
 
     it('marks content sessions as ✅ when all are done (intro session without activities stays as 👉)', () => {
@@ -650,9 +650,9 @@ describe('ReactStateHelper', () => {
         }
       }
       const vars = helper.populateMenuLabelsForSession();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro One:s_ses1intro');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Session One A:s_ses1a');
-      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Session One B:s_ses1b');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Intro Eins:s_ses1intro');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Session Eins A:s_ses1a');
+      expect(vars.jsStateHelperMenuLabel3).toBe('✅ Session Eins B:s_ses1b');
     });
 
     it('throws if no module has been entered', () => {
@@ -669,8 +669,8 @@ describe('ReactStateHelper', () => {
 
     it('marks the first incomplete activity as 👉 and leaves the rest plain', () => {
       const vars = helper.populateMenuLabelsForActivity();
-      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Activity 1a-1:a_act1a1');
-      expect(vars.jsStateHelperMenuLabel2).toBe('Activity 1a-2: Subtitle:a_act1a2');
+      expect(vars.jsStateHelperMenuLabel1).toBe('👉 Aktivität 1a-1:a_act1a1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('Aktivität 1a-2: Untertitel:a_act1a2');
     });
 
     it('fills unused slots with empty string', () => {
@@ -681,8 +681,8 @@ describe('ReactStateHelper', () => {
     it('marks a completed activity with ✅', () => {
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForActivity();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Activity 1a-1:a_act1a1');
-      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Activity 1a-2: Subtitle:a_act1a2');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Aktivität 1a-1:a_act1a1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('👉 Aktivität 1a-2: Untertitel:a_act1a2');
     });
 
     it('throws if no module has been entered', () => {
@@ -694,8 +694,8 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
       const vars = helper.populateMenuLabelsForActivity();
-      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Activity 1a-1:a_act1a1');
-      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Activity 1a-2: Subtitle:a_act1a2');
+      expect(vars.jsStateHelperMenuLabel1).toBe('✅ Aktivität 1a-1:a_act1a1');
+      expect(vars.jsStateHelperMenuLabel2).toBe('✅ Aktivität 1a-2: Untertitel:a_act1a2');
     });
 
     it('throws if no session has been entered', () => {
@@ -718,20 +718,20 @@ describe('ReactStateHelper', () => {
         });
 
         it('returns a start-with message when no session has been entered yet', () => {
-          expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 📑 Sessions in 🗂️ Modul "Module One".');
+          expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 📑 Sessions in 🗂️ Modul "Modul Eins".');
         });
 
         it('returns a keep-going message when some sessions done but below threshold (m_mod3: threshold 2)', () => {
           helper.enterModule('m_mod3');
           helper.enterSession('s_ses3a'); helper.enterActivity('a_act3a1'); helper.markActivityCompleted();
           helper.enterModule('m_mod3');
-          expect(helper.getProgressAdvice()).toBe('Mach weiter in 🗂️ Modul "Module Three" — zum Beispiel mit 📑 Session "Session Three B".');
+          expect(helper.getProgressAdvice()).toBe('Mach weiter in 🗂️ Modul "Modul Drei" — zum Beispiel mit 📑 Session "Session Drei B".');
         });
 
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enterSession('s_ses1a'); helper.enterActivity('a_act1a1'); helper.markActivityCompleted(); helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
           helper.enterModule('m_mod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Module One" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschließen, oder zu 🗂️ Modul "Module Two" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschließen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -739,7 +739,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('m_mod1');
           helper.enterSession('s_ses1b'); helper.enterActivity('a_act1b1'); helper.markActivityCompleted();
           helper.enterModule('m_mod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Module One" abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Module Two" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Eins" abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
         });
       });
 
@@ -750,7 +750,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('m_mod3');
           helper.enterSession('s_ses3b'); helper.enterActivity('a_act3b1'); helper.markActivityCompleted();
           helper.enterModule('m_mod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Module Three" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschließen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschließen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -761,7 +761,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('m_mod3');
           helper.enterSession('s_ses3c'); helper.enterActivity('a_act3c1'); helper.markActivityCompleted();
           helper.enterModule('m_mod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Module Three" abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Drei" abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
         });
       });
     });
@@ -770,28 +770,28 @@ describe('ReactStateHelper', () => {
       it('returns a start-with message when no activity has been entered yet', () => {
         helper.enterModule('m_mod1');
         helper.enterSession('s_ses1a');
-        expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 🎯 Aktivitäten in 📑 Session "Session One A".');
+        expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 🎯 Aktivitäten in 📑 Session "Session Eins A".');
       });
 
       it('returns a keep-going message when an activity is done but below threshold (s_ses2b: threshold 2)', () => {
         helper.enterModule('m_mod2');
         helper.enterSession('s_ses2b');
         helper.enterActivity('a_act2b1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Mach weiter in 📑 Session "Session Two B" — zum Beispiel mit 🎯 Aktivität "Activity 2b-2".');
+        expect(helper.getProgressAdvice()).toBe('Mach weiter in 📑 Session "Session Zwei B" — zum Beispiel mit 🎯 Aktivität "Aktivität 2b-2".');
       });
 
       it('returns an adequate-progress message once the threshold is met but not all activities are done (s_ses1a: threshold 1, 2 activities)', () => {
         helper.enterModule('m_mod1');
         helper.enterSession('s_ses1a');
         helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Du hast in 📑 Session "Session One A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschließen, oder zu 🗂️ Modul "Module One" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast in 📑 Session "Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschließen, oder zu 🗂️ Modul "Modul Eins" zurückgehen.');
       });
 
       it('returns a session-complete message when all activities are done (s_ses3a: threshold 1, 1 activity)', () => {
         helper.enterModule('m_mod3');
         helper.enterSession('s_ses3a');
         helper.enterActivity('a_act3a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Du hast 📑 Session "Session Three A" abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Module Three" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast 📑 Session "Session Drei A" abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Drei" zurückgehen.');
       });
     });
   });
