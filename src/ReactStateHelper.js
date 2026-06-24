@@ -497,7 +497,7 @@ class ReactStateHelper {
     const skipPart = next ? `, oder zu ${next.emoji} ${next.label} "${next.title}" ${nextVerb}` : '';
     const allCoveredPart = next ? '' : ` — und das gilt auch für alle anderen ${labelPlural}`;
     if (completed >= total) return `Du hast ${emoji} ${label} "${title}" abgeschlossen${allCoveredPart}. Die enthaltenen ${subLabel} kannst du jederzeit erneut besuchen${skipPart}.`;
-    if (completed >= threshold) return `Du hast in ${emoji} ${label} "${title}" ausreichend Fortschritt gemacht${allCoveredPart}. Du kannst bleiben und weitere ${subEmoji} ${subLabel} abschließen${skipPart}.`;
+    if (completed >= threshold) return `Du hast in ${emoji} ${label} "${title}" ausreichend Fortschritt gemacht${allCoveredPart}. Du kannst bleiben und weitere ${subEmoji} ${subLabel} abschliessen${skipPart}.`;
     if (notStartedYet) return `Beginne mit einer der verfügbaren ${subEmoji} ${subLabel} in ${emoji} ${label} "${title}".`;
     if (!nextItem) throw new Error(`No uncompleted ${subLabelSingular} found in ${label} "${title}" despite being below threshold`);
     return `Mach weiter in ${emoji} ${label} "${title}" — zum Beispiel mit ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;

@@ -731,7 +731,7 @@ describe('ReactStateHelper', () => {
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enterSession('s_ses1a'); helper.enterActivity('a_act1a1'); helper.markActivityCompleted(); helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
           helper.enterModule('m_mod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschließen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschliessen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -750,7 +750,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('m_mod3');
           helper.enterSession('s_ses3b'); helper.enterActivity('a_act3b1'); helper.markActivityCompleted();
           helper.enterModule('m_mod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschließen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschliessen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -784,7 +784,7 @@ describe('ReactStateHelper', () => {
         helper.enterModule('m_mod1');
         helper.enterSession('s_ses1a');
         helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Du hast in 📑 Session "Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschließen, oder zu 🗂️ Modul "Modul Eins" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast in 📑 Session "Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder zu 🗂️ Modul "Modul Eins" zurückgehen.');
       });
 
       it('returns a session-complete message when all activities are done (s_ses3a: threshold 1, 1 activity)', () => {
