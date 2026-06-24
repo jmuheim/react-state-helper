@@ -466,34 +466,41 @@ class ReactStateHelper {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
-
-      if (session.isCompleted())
-        return `You have now completed all ${a} activities in ${s} session "${session.title}". You can proceed in ${m} module "${module.title}".`;
-      if (session.hasAdequateProgress())
-        return `Hooray! You have now adequately progressed in ${s} session "${session.title}". You can proceed here with more ${a} activities if you like, or go back to ${m} module "${module.title}".`;
-      if (!activity) return `Start with one of the available ${a} activities in ${s} session "${session.title}".`;
       const nextActivity = session.activities.find(act => !act.isCompleted());
-      if (!nextActivity) throw new Error(`No uncompleted activity found in session "${session.title}" despite being below threshold`);
-      return `Keep going in ${s} session "${session.title}" — for example with ${a} activity "${nextActivity.title}".`;
+      return this.#buildProgressAdviceString({
+        label: 'session', emoji: s, title: session.title,
+        subLabel: 'activities', subLabelSingular: 'activity', subEmoji: a,
+        completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_use,
+        notStartedYet: !activity, nextItem: nextActivity,
+        next: { label: 'module', emoji: m, title: module.title }, nextVerb: 'go back to',
+      });
     }
     if (this.#state.currentModuleId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
       const completableSessions = module.sessions.filter(s => s.activities.length > 0);
       const nextUncompletedSession = completableSessions.find(s => !s.isCompleted());
-      return this.#buildProgressAdviceString({ label: 'module', emoji: m, title: module.title, subLabel: 'sessions', subLabelSingular: 'session', subEmoji: s, completed: module.countCompletedSessions(), total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use, next: this.#state.modules[idx + 1], nextItem: nextUncompletedSession });
+      const nextModule = this.#state.modules[idx + 1];
+      const completedSessions = module.countCompletedSessions();
+      return this.#buildProgressAdviceString({
+        label: 'module', emoji: m, title: module.title,
+        subLabel: 'sessions', subLabelSingular: 'session', subEmoji: s,
+        completed: completedSessions, total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use,
+        notStartedYet: completedSessions === 0, nextItem: nextUncompletedSession,
+        next: nextModule ? { label: 'module', emoji: m, title: nextModule.title } : null, nextVerb: 'move on to',
+      });
     }
     throw new Error('No module entered yet');
   }
 
-  #buildProgressAdviceString({ label, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, next, nextItem }) {
-    const skipPart = next ? `, or move on to ${label} ${emoji} "${next.title}"` : '';
+  #buildProgressAdviceString({ label, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
+    const skipPart = next ? `, or ${nextVerb} ${next.emoji} ${next.label} "${next.title}"` : '';
     const allCoveredPart = next ? '' : ` — and in every other ${label}, too`;
-    if (completed >= total) return `You have completed ${label} ${emoji} "${title}"${allCoveredPart}. You can re-visit the contained ${subLabel} as often as you like${skipPart}.`;
-    if (completed >= threshold) return `You have good enough progress in ${label} ${emoji} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
-    if (completed === 0) return `Start with one of the available ${subEmoji} ${subLabel} in ${label} ${emoji} "${title}".`;
-    if (nextItem) return `Keep going in ${label} ${emoji} "${title}" — for example with ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
-    return '';
+    if (completed >= total) return `You have completed ${emoji} ${label} "${title}"${allCoveredPart}. You can re-visit the contained ${subLabel} as often as you like${skipPart}.`;
+    if (completed >= threshold) return `You have good enough progress in ${emoji} ${label} "${title}"${allCoveredPart}. You can stay and complete more ${subEmoji} ${subLabel}${skipPart}.`;
+    if (notStartedYet) return `Start with one of the available ${subEmoji} ${subLabel} in ${emoji} ${label} "${title}".`;
+    if (!nextItem) throw new Error(`No uncompleted ${subLabelSingular} found in ${label} "${title}" despite being below threshold`);
+    return `Keep going in ${emoji} ${label} "${title}" — for example with ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
   }
 
   populateMenuLabelsForModule() {
