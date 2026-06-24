@@ -29,6 +29,20 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 | `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
 | `ReactStateHelper` | Public API; holds `#state` (private); navigated via `currentModuleId / currentSessionId / currentActivityId` |
 
+### ID conventions
+
+Module, session, and activity ids must be unique across the *entire* state, not just within their parent — MobileCoach maps each one to a separate dialog, and menu routing (see "Menus are static by default" below) keys off a single flat namespace of ids. Ids are kept short and mnemonic (e.g. `gesGre`, `akzep`).
+
+Convention: prefix every id with its level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`).
+
+Id collisions are prevented at runtime, at the point each id is actually instantiated. A shared `idRegistry` (`Set`) is threaded through `Module.fromJSON → Session.fromJSON → Activity.fromJSON`; each registers its own id via the top-level `registerId()` helper and throws immediately on a collision, and each checks its own threshold/slot-limit right after building its children.
+
+### State validation
+
+`loadExistingState` (and therefore `initDefaultState`, which delegates to it) creates the registry and also checks the top-level module count. A violation throws on load; the MobileCoach wrapper at the bottom of the file catches this and surfaces it through `$jsStateHelperError` instead of crashing the whole script silently — see "Command dispatch" below. `test/ReactStateHelper.test.js` exercises each of these checks against minimal synthetic states; `initialState()` itself isn't re-asserted invariant-by-invariant, since `initDefaultState` already can't return a state that violates them — it's instead covered by a behavioral test confirming every activity can be completed without throwing.
+
+Every module needs at least one session, and every session needs at least one activity — except an intro session (one with no activities of its own, just a stepping stone into its module's content, e.g. `s_bouIntro`), which must set `isIntro: true` to opt out of that check. `Session.isCompleted()`/`hasAdequateProgress()` already treat such sessions as not completable (see `Module.getProgress`/`isCompleted`, which filter to `sessions.filter(s => s.activities.length > 0)`); `isIntro` only exists so `Session.fromJSON` can tell an intentionally-empty intro session apart from one that's missing activities by mistake. A module made up entirely of intro sessions would be vacuously "complete" by that same filter before the participant has done anything, so `Module.fromJSON` additionally requires at least one session with activities.
+
 ### Navigation model
 
 Before calling most methods the caller must `enterModule → enterSession → enterActivity` in order. These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `countCompletedSessions`, etc.) implicitly use the `currentModuleId` stored in state.
@@ -65,9 +79,9 @@ MobileCoach has no way to call specific JS functions directly. Instead, inside M
 
 MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` variables and populate them from JS. This can be done for each hierarchy level: modules → sessions → activities (i.e. `populateMenuLabelsForModule()`).
 
-The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('bouMgt')` before calling `populateMenuLabelsForSession()`; and to `populateMenuLabelsForActivity()`, you also first need to `enterSession('rolCha')`.
+The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('m_bouMgt')` before calling `populateMenuLabelsForSession()`; and to `populateMenuLabelsForActivity()`, you also first need to `enterSession('s_gesGre')`.
 
-Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter.
+Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:m_emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "m_emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter. See README.md for the `#MENU_EMOJIS` legend.
 
 Good to know:
 

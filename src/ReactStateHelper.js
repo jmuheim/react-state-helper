@@ -1,4 +1,20 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
+
+const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $jsStateHelperMenuLabel slots exist
+
+// Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
+// constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
+// within their parent, since the same registry is threaded through the whole Module/Session/Activity tree.
+// `prefix` enforces the m_/s_/a_ convention that makes cross-level collisions impossible by construction
+// (see "ID conventions" in CLAUDE.md) — checked here, at the same point ids are registered, rather than
+// trusting callers to follow the convention.
+function registerId(idRegistry, id, levelPrefix) {
+  const prefix = `${levelPrefix}_`;
+  if (!id.startsWith(prefix)) throw new Error(`Id ${id} must start with "${prefix}"`);
+  if (idRegistry.has(id)) throw new Error(`Duplicate id found in state: ${id}`);
+  idRegistry.add(id);
+}
+
 class Module {
   constructor({ id, title, sessions_needed_for_adequate_use = 1, sessions = [], entered_first_at = null, entered_last_at = null, times_entered = 0 }) {
     this.id = id;
@@ -26,7 +42,8 @@ class Module {
   }
 
   isCompleted() {
-    return this.sessions.length > 0 && this.sessions.every(s => s.isCompleted());
+    const completable = this.sessions.filter(s => s.activities.length > 0);
+    return completable.length > 0 && completable.every(s => s.isCompleted());
   }
 
   hasAdequateProgress() {
@@ -34,8 +51,9 @@ class Module {
   }
 
   getProgress() {
-    if (this.sessions.length === 0) return 0;
-    return this.sessions.filter(s => s.isCompleted()).length / this.sessions.length;
+    const completable = this.sessions.filter(s => s.activities.length > 0);
+    if (completable.length === 0) return 0;
+    return completable.filter(s => s.isCompleted()).length / completable.length;
   }
 
   toJSON() {
@@ -50,13 +68,21 @@ class Module {
     };
   }
 
-  static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }) {
-    return new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s)) });
+  static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }, idRegistry) {
+    registerId(idRegistry, id, 'm');
+    const module = new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s, idRegistry)) });
+    if (module.sessions.length === 0) throw new Error(`Module ${id} has no sessions`);
+    // Without at least one session that has activities, isCompleted()/getProgress() (which filter to such
+    // sessions) would treat the module as vacuously complete — mirrors the analogous check on Session.
+    if (module.sessions.every(s => s.activities.length === 0)) throw new Error(`Module ${id} has no sessions with activities (every module needs at least one non-intro session)`);
+    if (module.sessions.length > MAX_MENU_SLOTS) throw new Error(`Module ${id} has ${module.sessions.length} sessions, but at most ${MAX_MENU_SLOTS} are supported`);
+    if (module.sessions_needed_for_adequate_use < 1 || module.sessions_needed_for_adequate_use > module.sessions.length) throw new Error(`Module ${id} has an unachievable sessions_needed_for_adequate_use (${module.sessions_needed_for_adequate_use}) for its ${module.sessions.length} session(s)`);
+    return module;
   }
 }
 
 class Session {
-  constructor({ id, title, activities_needed_for_adequate_use = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [] }) {
+  constructor({ id, title, activities_needed_for_adequate_use = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [], isIntro = false }) {
     this.id = id;
     this.title = title;
     this.activities_needed_for_adequate_use = activities_needed_for_adequate_use;
@@ -64,6 +90,7 @@ class Session {
     this.entered_last_at = entered_last_at;
     this.times_entered = times_entered;
     this.activities = activities;
+    this.isIntro = isIntro;
   }
 
   enter() {
@@ -90,11 +117,19 @@ class Session {
   }
 
   toJSON() {
-    return { id: this.id, title: this.title, activities_needed_for_adequate_use: this.activities_needed_for_adequate_use, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities };
+    return { id: this.id, title: this.title, activities_needed_for_adequate_use: this.activities_needed_for_adequate_use, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities, isIntro: this.isIntro };
   }
 
-  static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities }) {
-    return new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
+  static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities, isIntro }, idRegistry) {
+    registerId(idRegistry, id, 's');
+    const session = new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), isIntro });
+    if (session.activities.length > MAX_MENU_SLOTS) throw new Error(`Session ${id} has ${session.activities.length} activities, but at most ${MAX_MENU_SLOTS} are supported`);
+    // Only intro sessions (isIntro: true) may have no activities; every other session needs at least one.
+    if (!session.isIntro && session.activities.length === 0) throw new Error(`Session ${id} has no activities (set isIntro: true if this is intentional)`);
+    // Sessions without activities (i.e. intros) have no achievable threshold to check.
+    if (session.activities.length > 0 && (session.activities_needed_for_adequate_use < 1 || session.activities_needed_for_adequate_use > session.activities.length))
+      throw new Error(`Session ${id} has an unachievable activities_needed_for_adequate_use (${session.activities_needed_for_adequate_use}) for its ${session.activities.length} activity/activities`);
+    return session;
   }
 }
 
@@ -127,7 +162,8 @@ class Activity {
     return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, completed: this.completed };
   }
 
-  static fromJSON(obj) {
+  static fromJSON(obj, idRegistry) {
+    registerId(idRegistry, obj.id, 'a');
     return new Activity(obj);
   }
 }
@@ -142,7 +178,10 @@ class ReactStateHelper {
   static loadExistingState(json) {
     const helper = new this();
     const data = JSON.parse(json);
-    helper.#state = { ...data, modules: data.modules.map(m => Module.fromJSON(m)) };
+    const idRegistry = new Set();
+    const modules = data.modules.map(m => Module.fromJSON(m, idRegistry));
+    if (modules.length > MAX_MENU_SLOTS) throw new Error(`State has ${modules.length} modules, but at most ${MAX_MENU_SLOTS} are supported`);
+    helper.#state = { ...data, modules };
     return helper;
   }
 
@@ -150,228 +189,164 @@ class ReactStateHelper {
     return {
       modules: [
         {
-          id: "onboard",
-          title: "Onboarding",
+          id: "m_bouMgt",
+          title: "Boundary Management",
           sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
           sessions: [
             {
-              id: "introd",
+              id: "s_bouIntro",
               title: "Einführung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
+              activities: [],
+              isIntro: true,
+            },
+            {
+              id: "s_gesGre",
+              title: "Gesunde Grenzen setzen",
+              activities_needed_for_adequate_use: 1,
+              entered_first_at: null,
+              entered_last_at: null,
+              times_entered: 0,
               activities: [
                 {
-                  id: "globGoal",
-                  title: "Globales Ziel definieren",
+                  id: "a_rolGes",
+                  title: "Rollenwechsel bewusst gestalten",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
                 {
-                  id: "howEdu",
-                  title: "Psychoedukation: wie bewandert...?",
+                  id: "a_abgKon",
+                  title: "Abgrenzen mit Klarheit: Das Konsequenzengitter",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
               ],
+              isIntro: false,
+            },
+            {
+              id: "s_paus",
+              title: "Pausen",
+              activities_needed_for_adequate_use: 1,
+              entered_first_at: null,
+              entered_last_at: null,
+              times_entered: 0,
+              activities: [
+                {
+                  id: "a_mikPau",
+                  title: "Mikropausen im Schulalltag",
+                  entered_first_at: null,
+                  entered_last_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
+              isIntro: false,
             },
           ],
         },
         {
-          id: "bouMgt",
-          title: "Boundary Management",
-          sessions_needed_for_adequate_use: 3,
-          entered_first_at: null,
-          entered_last_at: null,
-          times_entered: 0,
-          sessions: [
-            {
-              id: "rolCha",
-              title: "Rollenwechsel bewusst vollziehen",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "somAct",
-                  title: "Eine erste Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-                {
-                  id: "othAct",
-                  title: "Eine andere Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "sayNo",
-              title: "Nein sagen üben",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "sayNoAct",
-                  title: "Nein sagen Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "limSet",
-              title: "Grenzen setzen",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "limSetAct",
-                  title: "Grenzen setzen Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "worBou",
-              title: "Arbeitliche Grenzen kommunizieren",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "worBouAct",
-                  title: "Arbeitsgrenzen Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-            {
-              id: "digDet",
-              title: "Digitale Auszeiten einhalten",
-              activities_needed_for_adequate_use: 1,
-              entered_first_at: null,
-              entered_last_at: null,
-              times_entered: 0,
-              activities: [
-                {
-                  id: "digDetAct",
-                  title: "Digitale Auszeit Übung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: "emoReg",
+          id: "m_emoReg",
           title: "Emotionsregulation",
-          sessions_needed_for_adequate_use: 3,
+          sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
           entered_last_at: null,
           times_entered: 0,
           sessions: [
             {
-              id: "breCon",
-              title: "Bewusstes Atmen",
+              id: "s_emoIntro",
+              title: "Einführung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
-              activities: [
-                {
-                  id: "breConAct",
-                  title: "Atemübung",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
-              ],
+              activities: [],
+              isIntro: true,
             },
             {
-              id: "bodSca",
-              title: "Body-Scan-Übung",
+              id: "s_akzep",
+              title: "Akzeptanz",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "bodScaAct",
-                  title: "Body-Scan",
+                  id: "a_akzepAct",
+                  title: "Akzeptanz",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
             {
-              id: "jouWri",
-              title: "Tagebuch schreiben",
+              id: "s_neuBew",
+              title: "Neubewertung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "jouWriAct",
-                  title: "Tagebucheintrag",
+                  id: "a_neuBewAct",
+                  title: "Neubewertung",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
             {
-              id: "proRel",
-              title: "Progressive Muskelentspannung",
+              id: "s_umgEmo",
+              title: "Umgang mit schwierigen Emotionen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
                 {
-                  id: "proRelAct",
-                  title: "Entspannungsübung",
+                  id: "a_emoSit",
+                  title: "Emotionsregulation in schwierigen Situationen",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
                   completed: false,
                 },
               ],
+              isIntro: false,
+            },
+            {
+              id: "s_umgSup",
+              title: "Umgang mit unterdrückten Gefühlen",
+              activities_needed_for_adequate_use: 1,
+              entered_first_at: null,
+              entered_last_at: null,
+              times_entered: 0,
+              activities: [
+                {
+                  id: "a_umgSupAct",
+                  title: "Umgang mit Suppression",
+                  entered_first_at: null,
+                  entered_last_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
+              isIntro: false,
             },
           ],
         },
@@ -417,7 +392,7 @@ class ReactStateHelper {
 
   // Returns a value between 0 and 1
   getProgress() {
-    const all = this.#state.modules.flatMap(m => m.sessions);
+    const all = this.#state.modules.flatMap(m => m.sessions.filter(s => s.activities.length > 0));
     if (all.length === 0) return 0;
     return all.filter(s => s.isCompleted()).length / all.length;
   }
@@ -463,10 +438,10 @@ class ReactStateHelper {
     activity.enter();
   }
 
-  getParticipantGroup() {
-    const { currentModuleId, currentSessionId } = this.#state;
-    if (!currentModuleId || !currentSessionId) return null;
-    return currentModuleId + ': ' + currentSessionId;
+  getParticipantLocation() {
+    const { currentModuleId, currentSessionId, currentActivityId } = this.#state;
+    if (!currentModuleId) return null;
+    return [currentModuleId, currentSessionId, currentActivityId].filter(Boolean).join(': ');
   }
 
   allCompletedSessionsAsCsv() {
@@ -477,7 +452,56 @@ class ReactStateHelper {
       .join(',');
   }
 
-  static #MENU_EMOJIS = { completedEmoji: '✅', nextEmoji: '👉' };
+  static #MENU_EMOJIS = {
+    completed: '✅',
+    next: '👉',
+    module: '🗂️',
+    session: '📑',
+    activity: '🎯',
+  };
+
+  getProgressAdvice() {
+    const { module: m, session: s, activity: a } = ReactStateHelper.#MENU_EMOJIS;
+    if (this.#state.currentSessionId) {
+      const module = this.#findModule(this.#state.currentModuleId);
+      const session = this.#findSession(this.#state.currentSessionId);
+      const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
+      const nextActivity = session.activities.find(act => !act.isCompleted());
+      return this.#buildProgressAdviceString({
+        label: 'Session', labelPlural: 'Sessions', emoji: s, title: session.title,
+        subLabel: 'Aktivitäten', subLabelSingular: 'Aktivität', subEmoji: a,
+        completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_use,
+        notStartedYet: !activity, nextItem: nextActivity,
+        next: { label: 'Modul', emoji: m, title: module.title }, nextVerb: 'zurückgehen',
+      });
+    }
+    if (this.#state.currentModuleId) {
+      const module = this.#findModule(this.#state.currentModuleId);
+      const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
+      const completableSessions = module.sessions.filter(s => s.activities.length > 0);
+      const nextUncompletedSession = completableSessions.find(s => !s.isCompleted());
+      const nextModule = this.#state.modules[idx + 1];
+      const completedSessions = module.countCompletedSessions();
+      return this.#buildProgressAdviceString({
+        label: 'Modul', labelPlural: 'Module', emoji: m, title: module.title,
+        subLabel: 'Sessions', subLabelSingular: 'Session', subEmoji: s,
+        completed: completedSessions, total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use,
+        notStartedYet: completedSessions === 0, nextItem: nextUncompletedSession,
+        next: nextModule ? { label: 'Modul', emoji: m, title: nextModule.title } : null, nextVerb: 'weitergehen',
+      });
+    }
+    throw new Error('No module entered yet');
+  }
+
+  #buildProgressAdviceString({ label, labelPlural, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
+    const skipPart = next ? `, oder zu ${next.emoji} ${next.label} "${next.title}" ${nextVerb}` : '';
+    const allCoveredPart = next ? '' : ` — und das gilt auch für alle anderen ${labelPlural}`;
+    if (completed >= total) return `Du hast ${emoji} ${label} "${title}" erfolgreich abgeschlossen${allCoveredPart}. Die enthaltenen ${subLabel} kannst du jederzeit erneut besuchen${skipPart}.`;
+    if (completed >= threshold) return `Du hast in ${emoji} ${label} "${title}" ausreichend Fortschritt gemacht${allCoveredPart}. Du kannst bleiben und weitere ${subEmoji} ${subLabel} abschliessen${skipPart}.`;
+    if (notStartedYet) return `Beginne mit einer der verfügbaren ${subEmoji} ${subLabel} in ${emoji} ${label} "${title}".`;
+    if (!nextItem) throw new Error(`No uncompleted ${subLabelSingular} found in ${label} "${title}" despite being below threshold`);
+    return `Mach weiter in ${emoji} ${label} "${title}" — zum Beispiel mit ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
+  }
 
   populateMenuLabelsForModule() {
     return this.#buildMenuVars(this.#state.modules);
@@ -495,8 +519,7 @@ class ReactStateHelper {
   }
 
   #buildMenuVars(items) {
-    const { completedEmoji, nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
-    const MAX_MENU_SLOTS = 9;
+    const { completed: completedEmoji, next: nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
     const vars = {};
     let nextAssigned = false;
     for (let i = 0; i < MAX_MENU_SLOTS; i++) {
@@ -550,39 +573,51 @@ if (typeof process === 'undefined') {
   // Initialises the helper with the state from the previous run (if $jsStateHelperJson contains valid JSON);
   // otherwise initialise default state (fresh start of the app).
   let helper;
+
+  // If any error surfaces, it will be reported via $jsStateHelperError instead of crashing the whole script with no output at all.
+  let error;
+
   try {
     if (jsStateHelperJson === '0') throw new Error(); // MobileCoach default for uninitialised variables
     JSON.parse(jsStateHelperJson);
     helper = ReactStateHelper.loadExistingState(jsStateHelperJson);
   } catch {
-    helper = ReactStateHelper.initDefaultState();
+    try {
+      helper = ReactStateHelper.initDefaultState();
+    } catch (e) {
+      error = e.message;
+    }
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
-  // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'rolCha')"
+  // - $jsStateHelperCmd = "isSessionCompleted('s_gesGre')"
   // - $jsStateHelperCmd = "markActivityCompleted()"
-  // - $jsStateHelperCmd = "countCompletedSessions('bouMgt')"
-  // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
-  // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
+  // - $jsStateHelperCmd = "countCompletedSessions()"
+  // - $jsStateHelperCmd = "isGoodEnough('m_bouMgt')"
+  // - $jsStateHelperCmd = "getModuleProgress('m_bouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
-  let result, status, error;
-  try {
-    result = eval(`helper.$jsStateHelperCmd`);
-    status = 'success';
-  } catch (e) { // If there's any error, details about it can be inspected through $jsStateHelperError
+  let result, status;
+  if (error) {
     status = 'error';
-    error = e.message;
+  } else {
+    try {
+      result = eval(`helper.$jsStateHelperCmd`);
+      status = 'success';
+    } catch (e) { // If there's any error, details about it can be inspected through $jsStateHelperError
+      status = 'error';
+      error = e.message;
+    }
   }
 
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. jsStateHelperJson becomes $jsStateHelperJson.
-    jsStateHelperJson:              helper.toString(),
+    jsStateHelperJson:              helper ? helper.toString() : jsStateHelperJson,
     jsStateHelperResult:            result,
     jsStateHelperStatus:            status,
     jsStateHelperError:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    jsStateHelperSessionsCompleted: helper.allCompletedSessionsAsCsv(),
-    participantGroup:               helper.getParticipantGroup()
+    jsStateHelperSessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
+    participantGroup:               helper ? helper.getParticipantLocation() : null
   };
   o
 }
