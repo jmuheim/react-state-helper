@@ -394,28 +394,12 @@ class ReactStateHelper {
     if (this.#state.currentSessionId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
-      const sessionIdx = module.sessions.findIndex(ss => ss.id === session.id);
-      const nextSession = module.sessions[sessionIdx + 1];
-      const moduleIdx = this.#state.modules.findIndex(mm => mm.id === module.id);
-      const nextModule = this.#state.modules[moduleIdx + 1];
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
 
-      const sessionComplete = session.isCompleted();
-      const sessionAdequate = session.hasAdequateProgress();
-      const moduleAdequate = module.hasAdequateProgress();
-
-      const nextSessionPart = nextSession ? `, or move on to ${s} session "${nextSession.title}"` : '';
-      const nextModulePart = nextModule ? `, or move on to ${m} module "${nextModule.title}"` : '';
-      const actPart = activity ? `${a} activity "${activity.title}"` : 'an activity';
-
-      if (sessionComplete && moduleAdequate)
-        return `Hooray! By finishing ${s} session "${session.title}", you have now adequately progressed in ${m} module "${module.title}". You can proceed with more sessions if you like${nextModulePart}.`;
-      if (sessionAdequate && moduleAdequate)
-        return `Hooray! By finishing ${actPart}, you have now adequately progressed in both ${s} session "${session.title}" and ${m} module "${module.title}". You can proceed with more activities if you like${nextModulePart}.`;
-      if (sessionComplete)
-        return `By finishing ${s} session "${session.title}", you have now completed all its ${a} activities. You can re-visit them if you like${nextSessionPart}.`;
-      if (sessionAdequate)
-        return `Hooray! By finishing ${actPart}, you have now adequately progressed in ${s} session "${session.title}". You can proceed with more activities if you like${nextSessionPart}.`;
+      if (session.isCompleted())
+        return `You have now completed all ${a} activities in ${s} session "${session.title}". You can go back to ${m} module "${module.title}".`;
+      if (session.hasAdequateProgress())
+        return `Hooray! You have now adequately progressed in ${s} session "${session.title}". You can proceed here with more ${a} activities if you like, or go back to ${m} module "${module.title}".`;
       if (!activity) return `Start with one of the available ${a} activities in ${s} session "${session.title}".`;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       if (!nextActivity) throw new Error(`No uncompleted activity found in session "${session.title}" despite being below threshold`);

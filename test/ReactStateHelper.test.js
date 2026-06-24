@@ -764,76 +764,31 @@ describe('ReactStateHelper', () => {
     });
 
     describe('session-level advice', () => {
-      describe('other sessions not yet adequately used (ses1a in mod1: threshold 1, 2 activities)', () => {
-        beforeEach(() => {
-          helper.enterModule('mod1');
-          helper.enterSession('ses1a');
-        });
-
-        it('returns a start-with message when no activity has been entered yet', () => {
-          expect(helper.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "Session One A".');
-        });
-
-        it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
-          helper.enterActivity('act1a1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in 📑 session "Session One A". You can proceed with more activities if you like, or move on to 📑 session "Session One B".');
-        });
+      it('returns a start-with message when no activity has been entered yet', () => {
+        helper.enterModule('mod1');
+        helper.enterSession('ses1a');
+        expect(helper.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "Session One A".');
       });
 
-      describe('all other sessions adequately used (ses2b in mod2: threshold 2, 3 activities)', () => {
-        beforeEach(() => {
-          helper.enterModule('mod2');
-          helper.enterSession('ses2b');
-        });
-
-        it('returns a keep-going message when an activity is entered but below threshold', () => {
-          helper.enterActivity('act2b1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Session Two B" — for example with 🎯 activity "Activity 2b-2".');
-        });
-
-        it('case A: session adequate, not complete, module not adequate — references the finishing activity', () => {
-          helper.enterActivity('act2b1'); helper.markActivityCompleted();
-          helper.enterActivity('act2b2'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 2b-2", you have now adequately progressed in 📑 session "Session Two B". You can proceed with more activities if you like.');
-        });
+      it('returns a keep-going message when an activity is done but below threshold (ses2b: threshold 2)', () => {
+        helper.enterModule('mod2');
+        helper.enterSession('ses2b');
+        helper.enterActivity('act2b1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Keep going in 📑 session "Session Two B" — for example with 🎯 activity "Activity 2b-2".');
       });
-    });
 
-    describe('activity-level advice', () => {
-      it('case B: session complete, module not adequate — references the finishing session (ses3a in mod3: threshold 2)', () => {
+      it('returns an adequate-progress message once the threshold is met but not all activities are done (ses1a: threshold 1, 2 activities)', () => {
+        helper.enterModule('mod1');
+        helper.enterSession('ses1a');
+        helper.enterActivity('act1a1'); helper.markActivityCompleted();
+        expect(helper.getProgressAdvice()).toBe('Hooray! You have now adequately progressed in 📑 session "Session One A". You can proceed here with more 🎯 activities if you like, or go back to 🗂️ module "Module One".');
+      });
+
+      it('returns a session-complete message when all activities are done (ses3a: threshold 1, 1 activity)', () => {
         helper.enterModule('mod3');
         helper.enterSession('ses3a');
         helper.enterActivity('act3a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('By finishing 📑 session "Session Three A", you have now completed all its 🎯 activities. You can re-visit them if you like, or move on to 📑 session "Session Three B".');
-      });
-
-      describe('cascade: completing a session also triggers module adequate use (case C)', () => {
-        it('with next module: session complete AND module adequate — references the finishing session (ses1b in mod1)', () => {
-          helper.enterModule('mod1');
-          helper.enterSession('ses1b');
-          helper.enterActivity('act1b1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session One B", you have now adequately progressed in 🗂️ module "Module One". You can proceed with more sessions if you like, or move on to 🗂️ module "Module Two".');
-        });
-
-        it('without next module: session complete AND module adequate — no skip option (ses3b in mod3: threshold 2)', () => {
-          helper.enterModule('mod3');
-          helper.enterSession('ses3a'); helper.enterActivity('act3a1'); helper.markActivityCompleted();
-          helper.enterModule('mod3');
-          helper.enterSession('ses3b');
-          helper.enterActivity('act3b1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 📑 session "Session Three B", you have now adequately progressed in 🗂️ module "Module Three". You can proceed with more sessions if you like.');
-        });
-      });
-
-      describe('case D: session adequate (not complete) while module was already adequate', () => {
-        it('references the finishing activity and mentions both session and module', () => {
-          helper.enterModule('mod1');
-          helper.enterSession('ses1b'); helper.enterActivity('act1b1'); helper.markActivityCompleted();
-          helper.enterModule('mod1');
-          helper.enterSession('ses1a');
-          helper.enterActivity('act1a1'); helper.markActivityCompleted();
-          expect(helper.getProgressAdvice()).toBe('Hooray! By finishing 🎯 activity "Activity 1a-1", you have now adequately progressed in both 📑 session "Session One A" and 🗂️ module "Module One". You can proceed with more activities if you like, or move on to 🗂️ module "Module Two".');
-        });
+        expect(helper.getProgressAdvice()).toBe('You have now completed all 🎯 activities in 📑 session "Session Three A". You can go back to 🗂️ module "Module Three".');
       });
     });
   });
