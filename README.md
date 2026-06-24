@@ -1,15 +1,5 @@
 # ReactStateHelper
 
-Besprechung mit Pascal:
-
-- Basis-Präferenzen ("wohin möchte man?")
-- Erfahrungs-Präferenzen ("was hat man ausprobiert und findet man gut?")
-- $jsStateHelperMenuLabel1:$jsStateHelperMenuId1
-- $participantNextMicroDialogIdentifier
-   Aneinander reihen für Activity: "bouMgt_rolCha_somAct" => auch für Variable-Präfix nutzen?
-- LLM integrieren?
-   - Datenmodell sowie Challenge/Problem des Nutzenden schicken, und dann LLM nach einem ProgressAdvice fragen?!
-
 A plain JavaScript helper for managing hierarchical app state (modules → sessions → activities) as JSON. Designed to be copy-pasted verbatim into [MobileCoach](https://www.mobilecoach.com/), a mobile health platform that executes JavaScript snippets.
 
 ## Data model
@@ -31,7 +21,7 @@ ReactStateHelper
 
 - **Completion**: an `Activity` is completed once marked. A `Session` is completed if it has at least one activity and all of them are completed. A `Module` is completed if all of its sessions that have activities are completed (intro sessions don't count either way).
 - **Adequate progress**: a softer bar than full completion — a `Module`/`Session` "has adequate progress" once `sessions_needed_for_adequate_use`/`activities_needed_for_adequate_use` of its children are completed, even if not all of them are. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything.
-- **IDs**: must be unique across the *entire* state, not just within their parent, and are conventionally prefixed by level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`) — see `CLAUDE.md` for why. Loading state validates this and other structural invariants (unachievable thresholds, more than 9 sessions/activities in one collection, a module with no sessions, a non-intro session with no activities) and throws immediately on a violation.
+- **IDs**: must be unique across the *entire* state, not just within their parent, and are conventionally prefixed by level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`) — see `CLAUDE.md` for why. Loading state validates this and other structural invariants (unachievable thresholds, more than 9 sessions/activities in one collection, a module with no sessions, a module with no non-intro session, a non-intro session with no activities) and throws immediately on a violation.
 - **Navigation**: before most methods can be called, the helper must be told where the participant currently is via `enterModule(id)` → `enterSession(id)` → `enterActivity(id)`, which also records `entered_first_at`/`entered_last_at`/`times_entered` on the way in.
 
 ## Development

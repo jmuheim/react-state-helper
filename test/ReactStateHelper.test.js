@@ -791,7 +791,7 @@ describe('ReactStateHelper', () => {
         helper.enterModule('m_mod3');
         helper.enterSession('s_ses3a');
         helper.enterActivity('a_act3a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('You have now completed all 🎯 activities in 📑 session "Session Three A". You can go back to 🗂️ module "Module Three".');
+        expect(helper.getProgressAdvice()).toBe('You have now completed all 🎯 activities in 📑 session "Session Three A". You can proceed in 🗂️ module "Module Three".');
       });
     });
   });
@@ -950,6 +950,8 @@ describe('ReactStateHelper', () => {
       state.modules[0].sessions[0].activities = [];
       state.modules[0].sessions[0].activities_needed_for_adequate_use = 5;
       state.modules[0].sessions[0].isIntro = true;
+      // The module needs at least one session with activities besides the intro session under test.
+      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_use: 1, activities: [{ id: 'a_a2', title: 'A2' }] });
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
     });
 
@@ -957,6 +959,13 @@ describe('ReactStateHelper', () => {
       const state = minimalValidState();
       state.modules[0].sessions = [];
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 has no sessions');
+    });
+
+    it('throws when a module has only sessions without activities', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities = [];
+      state.modules[0].sessions[0].isIntro = true;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 has no sessions with activities (every module needs at least one non-intro session)');
     });
 
     it('throws when a non-intro session has no activities', () => {
@@ -969,6 +978,8 @@ describe('ReactStateHelper', () => {
       const state = minimalValidState();
       state.modules[0].sessions[0].activities = [];
       state.modules[0].sessions[0].isIntro = true;
+      // The module needs at least one session with activities besides the intro session under test.
+      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_use: 1, activities: [{ id: 'a_a2', title: 'A2' }] });
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
     });
 
@@ -979,14 +990,18 @@ describe('ReactStateHelper', () => {
         id: `m_m${i}`,
         title: `M${i}`,
         sessions_needed_for_adequate_use: 1,
-        sessions: [{ id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [], isIntro: true }],
+        sessions: [{ id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [{ id: `a_a${i}`, title: `A${i}` }] }],
       }));
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('State has 10 modules, but at most 9 are supported');
     });
 
     it('throws when a module has more than 9 sessions', () => {
       const state = minimalValidState();
-      state.modules[0].sessions = Array.from({ length: 10 }, (_, i) => ({ id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [], isIntro: true }));
+      state.modules[0].sessions = Array.from({ length: 10 }, (_, i) =>
+        i === 0
+          ? { id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [{ id: `a_a${i}`, title: `A${i}` }] }
+          : { id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [], isIntro: true }
+      );
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 has 10 sessions, but at most 9 are supported');
     });
 

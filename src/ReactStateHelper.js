@@ -72,6 +72,9 @@ class Module {
     registerId(idRegistry, id, 'm');
     const module = new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s, idRegistry)) });
     if (module.sessions.length === 0) throw new Error(`Module ${id} has no sessions`);
+    // Without at least one session that has activities, isCompleted()/getProgress() (which filter to such
+    // sessions) would treat the module as vacuously complete — mirrors the analogous check on Session.
+    if (module.sessions.every(s => s.activities.length === 0)) throw new Error(`Module ${id} has no sessions with activities (every module needs at least one non-intro session)`);
     if (module.sessions.length > MAX_MENU_SLOTS) throw new Error(`Module ${id} has ${module.sessions.length} sessions, but at most ${MAX_MENU_SLOTS} are supported`);
     if (module.sessions_needed_for_adequate_use < 1 || module.sessions_needed_for_adequate_use > module.sessions.length) throw new Error(`Module ${id} has an unachievable sessions_needed_for_adequate_use (${module.sessions_needed_for_adequate_use}) for its ${module.sessions.length} session(s)`);
     return module;
@@ -465,7 +468,7 @@ class ReactStateHelper {
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
 
       if (session.isCompleted())
-        return `You have now completed all ${a} activities in ${s} session "${session.title}". You can go back to ${m} module "${module.title}".`;
+        return `You have now completed all ${a} activities in ${s} session "${session.title}". You can proceed in ${m} module "${module.title}".`;
       if (session.hasAdequateProgress())
         return `Hooray! You have now adequately progressed in ${s} session "${session.title}". You can proceed here with more ${a} activities if you like, or go back to ${m} module "${module.title}".`;
       if (!activity) return `Start with one of the available ${a} activities in ${s} session "${session.title}".`;
