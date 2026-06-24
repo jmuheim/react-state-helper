@@ -48,4 +48,16 @@ npm run test:watch    # re-run on file changes
 
 The script reads `$jsStateHelperJson` (persisted state from the previous run), executes the command in `$jsStateHelperCmd` (e.g. `markActivityCompleted()`, `isGoodEnough('m_bouMgt')`, `getProgressAdvice()`), and writes results back to the variables above — the command's return value always goes to `$jsStateHelperResult`, regardless of which command was run.
 
+Menu labels and `getProgressAdvice()` text are prefixed with an emoji from the `#MENU_EMOJIS` map in `src/ReactStateHelper.js`:
+
+| Key | Emoji | Used for |
+|---|---|---|
+| `completed` | ✅ | a completed item in a menu, and prefixed to the current level's name in `getProgressAdvice()` |
+| `next` | 👉 | the first not-yet-completed item in a menu (menus only) |
+| `module` | 🗂️ | module references in `getProgressAdvice()` |
+| `session` | 📑 | session references in `getProgressAdvice()` |
+| `activity` | 🎯 | activity references in `getProgressAdvice()` |
+
+Menu items that are neither completed nor the next one get no emoji prefix.
+
 On the very first run (when `$jsStateHelperJson` is `0`), the script initialises fresh default state automatically.
