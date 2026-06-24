@@ -83,6 +83,18 @@ The right context needs to be set up before invoking these commands — otherwis
 
 Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:m_emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "m_emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter.
 
+The emoji comes from the `#MENU_EMOJIS` map in `src/ReactStateHelper.js`:
+
+| Key | Emoji | Used for |
+|---|---|---|
+| `completed` | ✅ | a completed item in a menu, and prefixed to the current level's name in `getProgressAdvice()` |
+| `next` | 👉 | the first not-yet-completed item in a menu (menus only) |
+| `module` | 🗂️ | module references in `getProgressAdvice()` |
+| `session` | 📑 | session references in `getProgressAdvice()` |
+| `activity` | 🎯 | activity references in `getProgressAdvice()` |
+
+Menu items that are neither completed nor the next one get no emoji prefix.
+
 Good to know:
 
 - Unused slots are set to `""` so MobileCoach can hide them.
