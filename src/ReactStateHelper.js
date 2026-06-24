@@ -438,10 +438,10 @@ class ReactStateHelper {
     activity.enter();
   }
 
-  getParticipantGroup() {
-    const { currentModuleId, currentSessionId } = this.#state;
-    if (!currentModuleId || !currentSessionId) return null;
-    return currentModuleId + ': ' + currentSessionId;
+  getParticipantLocation() {
+    const { currentModuleId, currentSessionId, currentActivityId } = this.#state;
+    if (!currentModuleId) return null;
+    return [currentModuleId, currentSessionId, currentActivityId].filter(Boolean).join(': ');
   }
 
   allCompletedSessionsAsCsv() {
@@ -617,7 +617,7 @@ if (typeof process === 'undefined') {
     jsStateHelperStatus:            status,
     jsStateHelperError:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
     jsStateHelperSessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
-    participantGroup:               helper ? helper.getParticipantGroup() : null
+    participantGroup:               helper ? helper.getParticipantLocation() : null
   };
   o
 }

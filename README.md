@@ -44,7 +44,7 @@ npm run test:watch    # re-run on file changes
    | `$jsStateHelperError` | Error message if status is `error`, otherwise `none` |
    | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session ids across all modules |
    | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel9` | Dynamic menu entry labels populated by `populateMenuLabelsForModule()` / `populateMenuLabelsForSession()` / `populateMenuLabelsForActivity()` |
-   | `$participantGroup` | `"<currentModuleId>: <currentSessionId>"` once navigated, otherwise `null` — populated by `getParticipantGroup()`, intended for participant segmentation |
+   | `$participantGroup` | `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — populated by `getParticipantLocation()` (we "mis-use" this variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
 The script reads `$jsStateHelperJson` (persisted state from the previous run), executes the command in `$jsStateHelperCmd` (e.g. `markActivityCompleted()`, `isGoodEnough('m_bouMgt')`, `getProgressAdvice()`), and writes results back to the variables above — the command's return value always goes to `$jsStateHelperResult`, regardless of which command was run.
 
