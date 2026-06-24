@@ -468,7 +468,7 @@ class ReactStateHelper {
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       return this.#buildProgressAdviceString({
-        label: 'Sitzung', labelPlural: 'Sitzungen', emoji: s, title: session.title,
+        label: 'Session', labelPlural: 'Sessions', emoji: s, title: session.title,
         subLabel: 'Aktivitäten', subLabelSingular: 'Aktivität', subEmoji: a,
         completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_use,
         notStartedYet: !activity, nextItem: nextActivity,
@@ -484,7 +484,7 @@ class ReactStateHelper {
       const completedSessions = module.countCompletedSessions();
       return this.#buildProgressAdviceString({
         label: 'Modul', labelPlural: 'Module', emoji: m, title: module.title,
-        subLabel: 'Sitzungen', subLabelSingular: 'Sitzung', subEmoji: s,
+        subLabel: 'Sessions', subLabelSingular: 'Session', subEmoji: s,
         completed: completedSessions, total: completableSessions.length, threshold: module.sessions_needed_for_adequate_use,
         notStartedYet: completedSessions === 0, nextItem: nextUncompletedSession,
         next: nextModule ? { label: 'Modul', emoji: m, title: nextModule.title } : null, nextVerb: 'weitergehen',
