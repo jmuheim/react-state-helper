@@ -872,9 +872,15 @@ describe('ReactStateHelper', () => {
       expect(() => ReactStateHelper.initDefaultState()).not.toThrow();
     });
 
-    it('throws naming the colliding id when two sessions in the same module reuse an id', () => {
+    it('throws naming the colliding id when sessions in different modules reuse an id', () => {
       const state = minimalValidState();
-      state.modules[0].sessions.push({ ...state.modules[0].sessions[0] }); // same-level collision: both sessions are 's_s1'
+      // The id registry is global, not per-module — a same-level collision across modules must be caught too.
+      state.modules.push({
+        id: 'm_m2',
+        title: 'M2',
+        sessions_needed_for_adequate_use: 1,
+        sessions: [{ id: 's_s1', title: 'S1 dup', activities_needed_for_adequate_use: 1, activities: [{ id: 'a_a2', title: 'A2' }] }],
+      });
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Duplicate id found in state: s_s1');
     });
 
@@ -937,7 +943,7 @@ describe('ReactStateHelper', () => {
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s_s1 has no activities (set isIntro: true if this is intentional)');
     });
 
-    it('does not throw when a session marked isIntro has no activities', () => {
+    it('does not throw when an intro-session has no activities', () => {
       const state = minimalValidState();
       state.modules[0].sessions[0].activities = [];
       state.modules[0].sessions[0].isIntro = true;
