@@ -14,6 +14,7 @@ const testState = {
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
+          isIntro: true,
         },
         {
           id: 'ses1a',
@@ -48,6 +49,7 @@ const testState = {
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
+          isIntro: true,
         },
         {
           id: 'ses2a',
@@ -83,6 +85,7 @@ const testState = {
           activities_needed_for_adequate_use: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
+          isIntro: true,
         },
         {
           id: 'ses3a',
@@ -872,6 +875,107 @@ describe('ReactStateHelper', () => {
         }
       }
       expect(p.getProgress()).toBe(1);
+    });
+  });
+
+  describe('state validation', () => {
+    const minimalValidState = () => ({
+      modules: [
+        {
+          id: 'm1',
+          title: 'M1',
+          sessions_needed_for_adequate_use: 1,
+          sessions: [
+            {
+              id: 's1',
+              title: 'S1',
+              activities_needed_for_adequate_use: 1,
+              activities: [{ id: 'a1', title: 'A1' }],
+            },
+          ],
+        },
+      ],
+      suggestionSeen: false,
+      currentModuleId: null,
+      currentSessionId: null,
+      currentActivityId: null,
+    });
+
+    it('loads a minimal valid state without throwing', () => {
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(minimalValidState()))).not.toThrow();
+    });
+
+    it('also validates production data when constructing the default state', () => {
+      expect(() => ReactStateHelper.initDefaultState()).not.toThrow();
+    });
+
+    it('throws naming the colliding id when an id collides across levels', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].id = 'm1'; // collides with the module id
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Duplicate id found in state: m1');
+    });
+
+    it('throws when a module threshold exceeds its own session count', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions_needed_for_adequate_use = 2;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m1 has an unachievable sessions_needed_for_adequate_use (2) for its 1 session(s)');
+    });
+
+    it('throws when a session threshold exceeds its own activity count', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities_needed_for_adequate_use = 2;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s1 has an unachievable activities_needed_for_adequate_use (2) for its 1 activity/activities');
+    });
+
+    it('does not enforce a threshold for intro sessions without activities', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities = [];
+      state.modules[0].sessions[0].activities_needed_for_adequate_use = 5;
+      state.modules[0].sessions[0].isIntro = true;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
+    });
+
+    it('throws when a module has no sessions', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions = [];
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m1 has no sessions');
+    });
+
+    it('throws when a non-intro session has no activities', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities = [];
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s1 has no activities (set isIntro: true if this is intentional)');
+    });
+
+    it('does not throw when a session marked isIntro has no activities', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities = [];
+      state.modules[0].sessions[0].isIntro = true;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
+    });
+
+    it('throws when more than 9 modules are present', () => {
+      const state = minimalValidState();
+      // Each module must be individually valid — the per-module checks fire before this top-level count check does.
+      state.modules = Array.from({ length: 10 }, (_, i) => ({
+        id: `m${i}`,
+        title: `M${i}`,
+        sessions_needed_for_adequate_use: 1,
+        sessions: [{ id: `s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [], isIntro: true }],
+      }));
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('State has 10 modules, but at most 9 are supported');
+    });
+
+    it('throws when a module has more than 9 sessions', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions = Array.from({ length: 10 }, (_, i) => ({ id: `s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [], isIntro: true }));
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m1 has 10 sessions, but at most 9 are supported');
+    });
+
+    it('throws when a session has more than 9 activities', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities = Array.from({ length: 10 }, (_, i) => ({ id: `a${i}`, title: `A${i}` }));
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s1 has 10 activities, but at most 9 are supported');
     });
   });
 });

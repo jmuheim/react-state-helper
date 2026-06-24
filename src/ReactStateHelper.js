@@ -1,4 +1,15 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
+
+const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $jsStateHelperMenuLabel slots exist
+
+// Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
+// constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
+// within their parent, since the same registry is threaded through the whole Module/Session/Activity tree.
+function registerId(idRegistry, id) {
+  if (idRegistry.has(id)) throw new Error(`Duplicate id found in state: ${id}`);
+  idRegistry.add(id);
+}
+
 class Module {
   constructor({ id, title, sessions_needed_for_adequate_use = 1, sessions = [], entered_first_at = null, entered_last_at = null, times_entered = 0 }) {
     this.id = id;
@@ -52,13 +63,18 @@ class Module {
     };
   }
 
-  static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }) {
-    return new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s)) });
+  static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }, idRegistry) {
+    registerId(idRegistry, id);
+    const module = new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s, idRegistry)) });
+    if (module.sessions.length === 0) throw new Error(`Module ${id} has no sessions`);
+    if (module.sessions.length > MAX_MENU_SLOTS) throw new Error(`Module ${id} has ${module.sessions.length} sessions, but at most ${MAX_MENU_SLOTS} are supported`);
+    if (module.sessions_needed_for_adequate_use < 1 || module.sessions_needed_for_adequate_use > module.sessions.length) throw new Error(`Module ${id} has an unachievable sessions_needed_for_adequate_use (${module.sessions_needed_for_adequate_use}) for its ${module.sessions.length} session(s)`);
+    return module;
   }
 }
 
 class Session {
-  constructor({ id, title, activities_needed_for_adequate_use = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [] }) {
+  constructor({ id, title, activities_needed_for_adequate_use = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [], isIntro = false }) {
     this.id = id;
     this.title = title;
     this.activities_needed_for_adequate_use = activities_needed_for_adequate_use;
@@ -66,6 +82,7 @@ class Session {
     this.entered_last_at = entered_last_at;
     this.times_entered = times_entered;
     this.activities = activities;
+    this.isIntro = isIntro;
   }
 
   enter() {
@@ -92,11 +109,19 @@ class Session {
   }
 
   toJSON() {
-    return { id: this.id, title: this.title, activities_needed_for_adequate_use: this.activities_needed_for_adequate_use, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities };
+    return { id: this.id, title: this.title, activities_needed_for_adequate_use: this.activities_needed_for_adequate_use, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities, isIntro: this.isIntro };
   }
 
-  static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities }) {
-    return new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a)) });
+  static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities, isIntro }, idRegistry) {
+    registerId(idRegistry, id);
+    const session = new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), isIntro });
+    if (session.activities.length > MAX_MENU_SLOTS) throw new Error(`Session ${id} has ${session.activities.length} activities, but at most ${MAX_MENU_SLOTS} are supported`);
+    // Only intro sessions (isIntro: true) may have no activities; every other session needs at least one.
+    if (!session.isIntro && session.activities.length === 0) throw new Error(`Session ${id} has no activities (set isIntro: true if this is intentional)`);
+    // Sessions without activities (i.e. intros) have no achievable threshold to check.
+    if (session.activities.length > 0 && (session.activities_needed_for_adequate_use < 1 || session.activities_needed_for_adequate_use > session.activities.length))
+      throw new Error(`Session ${id} has an unachievable activities_needed_for_adequate_use (${session.activities_needed_for_adequate_use}) for its ${session.activities.length} activity/activities`);
+    return session;
   }
 }
 
@@ -129,7 +154,8 @@ class Activity {
     return { id: this.id, title: this.title, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, completed: this.completed };
   }
 
-  static fromJSON(obj) {
+  static fromJSON(obj, idRegistry) {
+    registerId(idRegistry, obj.id);
     return new Activity(obj);
   }
 }
@@ -144,7 +170,10 @@ class ReactStateHelper {
   static loadExistingState(json) {
     const helper = new this();
     const data = JSON.parse(json);
-    helper.#state = { ...data, modules: data.modules.map(m => Module.fromJSON(m)) };
+    const idRegistry = new Set();
+    const modules = data.modules.map(m => Module.fromJSON(m, idRegistry));
+    if (modules.length > MAX_MENU_SLOTS) throw new Error(`State has ${modules.length} modules, but at most ${MAX_MENU_SLOTS} are supported`);
+    helper.#state = { ...data, modules };
     return helper;
   }
 
@@ -167,6 +196,7 @@ class ReactStateHelper {
               entered_last_at: null,
               times_entered: 0,
               activities: [],
+              isIntro: true,
             },
             {
               id: "s_gesGre",
@@ -193,6 +223,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
             {
               id: "s_paus",
@@ -211,6 +242,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
           ],
         },
@@ -230,6 +262,7 @@ class ReactStateHelper {
               entered_last_at: null,
               times_entered: 0,
               activities: [],
+              isIntro: true,
             },
             {
               id: "s_akzep",
@@ -248,6 +281,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
             {
               id: "s_neuBew",
@@ -266,6 +300,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
             {
               id: "s_umgEmo",
@@ -284,6 +319,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
             {
               id: "s_umgSup",
@@ -302,6 +338,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
+              isIntro: false,
             },
           ],
         },
@@ -462,7 +499,6 @@ class ReactStateHelper {
 
   #buildMenuVars(items) {
     const { completedEmoji, nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
-    const MAX_MENU_SLOTS = 9;
     const vars = {};
     let nextAssigned = false;
     for (let i = 0; i < MAX_MENU_SLOTS; i++) {
@@ -516,12 +552,20 @@ if (typeof process === 'undefined') {
   // Initialises the helper with the state from the previous run (if $jsStateHelperJson contains valid JSON);
   // otherwise initialise default state (fresh start of the app).
   let helper;
+
+  // If any error surfaces, it will be reported via $jsStateHelperError instead of crashing the whole script with no output at all.
+  let error;
+
   try {
     if (jsStateHelperJson === '0') throw new Error(); // MobileCoach default for uninitialised variables
     JSON.parse(jsStateHelperJson);
     helper = ReactStateHelper.loadExistingState(jsStateHelperJson);
   } catch {
-    helper = ReactStateHelper.initDefaultState();
+    try {
+      helper = ReactStateHelper.initDefaultState();
+    } catch (e) {
+      error = e.message;
+    }
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
@@ -531,24 +575,28 @@ if (typeof process === 'undefined') {
   // - $jsStateHelperCmd = "isGoodEnough('m_bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('m_bouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
-  let result, status, error;
-  try {
-    result = eval(`helper.$jsStateHelperCmd`);
-    status = 'success';
-  } catch (e) { // If there's any error, details about it can be inspected through $jsStateHelperError
+  let result, status;
+  if (error) {
     status = 'error';
-    error = e.message;
+  } else {
+    try {
+      result = eval(`helper.$jsStateHelperCmd`);
+      status = 'success';
+    } catch (e) { // If there's any error, details about it can be inspected through $jsStateHelperError
+      status = 'error';
+      error = e.message;
+    }
   }
 
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. jsStateHelperJson becomes $jsStateHelperJson.
-    jsStateHelperJson:              helper.toString(),
+    jsStateHelperJson:              helper ? helper.toString() : jsStateHelperJson,
     jsStateHelperResult:            result,
     jsStateHelperStatus:            status,
     jsStateHelperError:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    jsStateHelperSessionsCompleted: helper.allCompletedSessionsAsCsv(),
-    participantGroup:               helper.getParticipantGroup()
+    jsStateHelperSessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
+    participantGroup:               helper ? helper.getParticipantGroup() : null
   };
   o
 }
