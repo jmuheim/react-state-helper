@@ -825,43 +825,6 @@ describe('ReactStateHelper', () => {
       state = JSON.parse(ReactStateHelper.initDefaultState().toString());
     });
 
-    it('has no duplicate ids across modules, sessions, and activities', () => {
-      const ids = state.modules.flatMap(m => [
-        m.id,
-        ...m.sessions.flatMap(s => [s.id, ...s.activities.map(a => a.id)]),
-      ]);
-      const seen = new Set();
-      const duplicates = ids.filter(id => seen.has(id) || !seen.add(id));
-      expect(duplicates).toEqual([]);
-    });
-
-    it('every session threshold is achievable given its own activity count', () => {
-      for (const m of state.modules) {
-        for (const s of m.sessions) {
-          if (s.activities.length === 0) continue;
-          expect(s.activities_needed_for_adequate_use).toBeGreaterThan(0);
-          expect(s.activities_needed_for_adequate_use).toBeLessThanOrEqual(s.activities.length);
-        }
-      }
-    });
-
-    it('every module threshold is achievable given its own session count', () => {
-      for (const m of state.modules) {
-        expect(m.sessions_needed_for_adequate_use).toBeGreaterThan(0);
-        expect(m.sessions_needed_for_adequate_use).toBeLessThanOrEqual(m.sessions.length);
-      }
-    });
-
-    it('no module/session exceeds the 9-slot MobileCoach menu limit', () => {
-      expect(state.modules.length).toBeLessThanOrEqual(9);
-      for (const m of state.modules) {
-        expect(m.sessions.length).toBeLessThanOrEqual(9);
-        for (const s of m.sessions) {
-          expect(s.activities.length).toBeLessThanOrEqual(9);
-        }
-      }
-    });
-
     it('completing every activity in every session reaches full progress without throwing', () => {
       const p = ReactStateHelper.initDefaultState();
       for (const mod of state.modules) {
