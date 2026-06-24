@@ -739,7 +739,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('m_mod1');
           helper.enterSession('s_ses1b'); helper.enterActivity('a_act1b1'); helper.markActivityCompleted();
           helper.enterModule('m_mod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Eins" abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Eins" erfolgreich abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
         });
       });
 
@@ -761,7 +761,7 @@ describe('ReactStateHelper', () => {
           helper.enterModule('m_mod3');
           helper.enterSession('s_ses3c'); helper.enterActivity('a_act3c1'); helper.markActivityCompleted();
           helper.enterModule('m_mod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Drei" abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Drei" erfolgreich abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
         });
       });
     });
@@ -791,7 +791,7 @@ describe('ReactStateHelper', () => {
         helper.enterModule('m_mod3');
         helper.enterSession('s_ses3a');
         helper.enterActivity('a_act3a1'); helper.markActivityCompleted();
-        expect(helper.getProgressAdvice()).toBe('Du hast 📑 Session "Session Drei A" abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Drei" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast 📑 Session "Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Drei" zurückgehen.');
       });
     });
   });
