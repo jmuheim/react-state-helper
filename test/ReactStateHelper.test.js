@@ -827,7 +827,9 @@ describe('ReactStateHelper', () => {
         m.id,
         ...m.sessions.flatMap(s => [s.id, ...s.activities.map(a => a.id)]),
       ]);
-      expect(new Set(ids).size).toBe(ids.length);
+      const seen = new Set();
+      const duplicates = ids.filter(id => seen.has(id) || !seen.add(id));
+      expect(duplicates).toEqual([]);
     });
 
     it('every session threshold is achievable given its own activity count', () => {

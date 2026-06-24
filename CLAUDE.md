@@ -29,6 +29,10 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 | `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
 | `ReactStateHelper` | Public API; holds `#state` (private); navigated via `currentModuleId / currentSessionId / currentActivityId` |
 
+### ID conventions
+
+Module, session, and activity ids must be unique across the *entire* state, not just within their parent — MobileCoach maps each one to a separate dialog, and menu routing (see "Menus are static by default" below) keys off a single flat namespace of ids. Ids are kept short and mnemonic (e.g. `gesGre`, `akzep`), which makes accidental collisions likely, especially across different hierarchy levels. Convention: prefix every id with its level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`). This makes cross-level collisions impossible by construction. Same-level collisions (e.g. two modules each picking `s_intro` for their intro session) are still possible and are caught by the uniqueness test under "production data ... structural invariants" in `test/ReactStateHelper.test.js`.
+
 ### Navigation model
 
 Before calling most methods the caller must `enterModule → enterSession → enterActivity` in order. These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `countCompletedSessions`, etc.) implicitly use the `currentModuleId` stored in state.
@@ -65,9 +69,9 @@ MobileCoach has no way to call specific JS functions directly. Instead, inside M
 
 MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` variables and populate them from JS. This can be done for each hierarchy level: modules → sessions → activities (i.e. `populateMenuLabelsForModule()`).
 
-The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('bouMgt')` before calling `populateMenuLabelsForSession()`; and to `populateMenuLabelsForActivity()`, you also first need to `enterSession('rolCha')`.
+The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('m_bouMgt')` before calling `populateMenuLabelsForSession()`; and to `populateMenuLabelsForActivity()`, you also first need to `enterSession('s_gesGre')`.
 
-Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter.
+Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulation:m_emoReg"`). MobileCoach splits on `:` — the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable when the button is tapped. This allows routing: for each possible id, a hard-coded `if <that variable> == "m_emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter.
 
 Good to know:
 

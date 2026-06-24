@@ -152,7 +152,7 @@ class ReactStateHelper {
     return {
       modules: [
         {
-          id: "bouMgt",
+          id: "m_bouMgt",
           title: "Boundary Management",
           sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
@@ -160,7 +160,7 @@ class ReactStateHelper {
           times_entered: 0,
           sessions: [
             {
-              id: "bouIntro",
+              id: "s_bouIntro",
               title: "Einführung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -169,7 +169,7 @@ class ReactStateHelper {
               activities: [],
             },
             {
-              id: "gesGre",
+              id: "s_gesGre",
               title: "Gesunde Grenzen setzen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -177,7 +177,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "rolGes",
+                  id: "a_rolGes",
                   title: "Rollenwechsel bewusst gestalten",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -185,7 +185,7 @@ class ReactStateHelper {
                   completed: false,
                 },
                 {
-                  id: "abgKon",
+                  id: "a_abgKon",
                   title: "Abgrenzen mit Klarheit: Das Konsequenzengitter",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -195,7 +195,7 @@ class ReactStateHelper {
               ],
             },
             {
-              id: "paus",
+              id: "s_paus",
               title: "Pausen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -203,7 +203,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "mikPau",
+                  id: "a_mikPau",
                   title: "Mikropausen im Schulalltag",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -215,7 +215,7 @@ class ReactStateHelper {
           ],
         },
         {
-          id: "emoReg",
+          id: "m_emoReg",
           title: "Emotionsregulation",
           sessions_needed_for_adequate_use: 1,
           entered_first_at: null,
@@ -223,7 +223,7 @@ class ReactStateHelper {
           times_entered: 0,
           sessions: [
             {
-              id: "emoIntro",
+              id: "s_emoIntro",
               title: "Einführung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -232,7 +232,7 @@ class ReactStateHelper {
               activities: [],
             },
             {
-              id: "akzep",
+              id: "s_akzep",
               title: "Akzeptanz",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -240,7 +240,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "akzepAct",
+                  id: "a_akzepAct",
                   title: "Akzeptanz",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -250,7 +250,7 @@ class ReactStateHelper {
               ],
             },
             {
-              id: "neuBew",
+              id: "s_neuBew",
               title: "Neubewertung",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -258,7 +258,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "neuBewAct",
+                  id: "a_neuBewAct",
                   title: "Neubewertung",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -268,7 +268,7 @@ class ReactStateHelper {
               ],
             },
             {
-              id: "umgEmo",
+              id: "s_umgEmo",
               title: "Umgang mit schwierigen Emotionen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -276,7 +276,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "emoSit",
+                  id: "a_emoSit",
                   title: "Emotionsregulation in schwierigen Situationen",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -286,7 +286,7 @@ class ReactStateHelper {
               ],
             },
             {
-              id: "umgSup",
+              id: "s_umgSup",
               title: "Umgang mit unterdrückten Gefühlen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
@@ -294,7 +294,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "umgSupAct",
+                  id: "a_umgSupAct",
                   title: "Umgang mit Suppression",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -525,11 +525,11 @@ if (typeof process === 'undefined') {
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
-  // - $jsStateHelperCmd = "isSessionCompleted('bouMgt', 'rolCha')"
+  // - $jsStateHelperCmd = "isSessionCompleted('s_gesGre')"
   // - $jsStateHelperCmd = "markActivityCompleted()"
-  // - $jsStateHelperCmd = "countCompletedSessions('bouMgt')"
-  // - $jsStateHelperCmd = "isGoodEnough('bouMgt')"
-  // - $jsStateHelperCmd = "getModuleProgress('bouMgt')"
+  // - $jsStateHelperCmd = "countCompletedSessions()"
+  // - $jsStateHelperCmd = "isGoodEnough('m_bouMgt')"
+  // - $jsStateHelperCmd = "getModuleProgress('m_bouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
   let result, status, error;
   try {

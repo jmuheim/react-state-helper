@@ -34,6 +34,6 @@ npm run test:watch    # re-run on file changes
    | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel9` | Dynamic menu entry labels populated by `populateMenuLabelsForModule()` / `populateMenuLabelsForSession()` |
    | `$jsStateHelperMenuAdvice` | Context-sensitive progress nudge populated by `getProgressAdvice()` — empty string when no advice applies |
 
-The script reads `$jsStateHelperJson` (persisted state from the previous run), executes the command in `$jsStateHelperCmd` (e.g. `markActivityCompleted()`, `isGoodEnough('bouMgt')`), and writes results back to the variables above.
+The script reads `$jsStateHelperJson` (persisted state from the previous run), executes the command in `$jsStateHelperCmd` (e.g. `markActivityCompleted()`, `isGoodEnough('m_bouMgt')`), and writes results back to the variables above.
 
 On the very first run (when `$jsStateHelperJson` is `0`), the script initialises fresh default state automatically.
