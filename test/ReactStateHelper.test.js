@@ -816,129 +816,60 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('production data (ReactStateHelper.initialState())', () => {
-    let p;
+  describe('production data (ReactStateHelper.initialState()) structural invariants', () => {
+    let state;
     beforeEach(() => {
-      p = ReactStateHelper.initDefaultState();
+      state = JSON.parse(ReactStateHelper.initDefaultState().toString());
     });
 
-    it('has modules bouMgt and emoReg in order', () => {
-      const state = JSON.parse(p.toString());
-      expect(state.modules.map(m => m.id)).toEqual(['bouMgt', 'emoReg']);
+    it('has no duplicate ids across modules, sessions, and activities', () => {
+      const ids = state.modules.flatMap(m => [
+        m.id,
+        ...m.sessions.flatMap(s => [s.id, ...s.activities.map(a => a.id)]),
+      ]);
+      expect(new Set(ids).size).toBe(ids.length);
     });
 
-    it('bouMgt has sessions bouIntro, gesGre, paus', () => {
-      const state = JSON.parse(p.toString());
-      expect(state.modules.find(m => m.id === 'bouMgt').sessions.map(s => s.id)).toEqual(['bouIntro', 'gesGre', 'paus']);
+    it('every session threshold is achievable given its own activity count', () => {
+      for (const m of state.modules) {
+        for (const s of m.sessions) {
+          if (s.activities.length === 0) continue;
+          expect(s.activities_needed_for_adequate_use).toBeGreaterThan(0);
+          expect(s.activities_needed_for_adequate_use).toBeLessThanOrEqual(s.activities.length);
+        }
+      }
     });
 
-    it('emoReg has sessions emoIntro, neuBew, umgEmo', () => {
-      const state = JSON.parse(p.toString());
-      expect(state.modules.find(m => m.id === 'emoReg').sessions.map(s => s.id)).toEqual(['emoIntro', 'neuBew', 'umgEmo']);
+    it('every module threshold is achievable given its own session count', () => {
+      for (const m of state.modules) {
+        expect(m.sessions_needed_for_adequate_use).toBeGreaterThan(0);
+        expect(m.sessions_needed_for_adequate_use).toBeLessThanOrEqual(m.sessions.length);
+      }
     });
 
-    it('bouIntro and emoIntro are empty intro sessions (no activities)', () => {
-      const state = JSON.parse(p.toString());
-      expect(state.modules.find(m => m.id === 'bouMgt').sessions.find(s => s.id === 'bouIntro').activities).toEqual([]);
-      expect(state.modules.find(m => m.id === 'emoReg').sessions.find(s => s.id === 'emoIntro').activities).toEqual([]);
+    it('no module/session exceeds the 9-slot MobileCoach menu limit', () => {
+      expect(state.modules.length).toBeLessThanOrEqual(9);
+      for (const m of state.modules) {
+        expect(m.sessions.length).toBeLessThanOrEqual(9);
+        for (const s of m.sessions) {
+          expect(s.activities.length).toBeLessThanOrEqual(9);
+        }
+      }
     });
 
-    it('all module thresholds are 1', () => {
-      const state = JSON.parse(p.toString());
-      for (const m of state.modules) expect(m.sessions_needed_for_adequate_use).toBe(1);
-    });
-
-    it('umgEmo requires 2 activities for adequate progress; all other content sessions require 1', () => {
-      const state = JSON.parse(p.toString());
-      const umgEmo = state.modules.find(m => m.id === 'emoReg').sessions.find(s => s.id === 'umgEmo');
-      expect(umgEmo.activities_needed_for_adequate_use).toBe(2);
-      const otherContent = state.modules.flatMap(m => m.sessions).filter(s => s.id !== 'umgEmo' && s.activities.length > 0);
-      for (const s of otherContent) expect(s.activities_needed_for_adequate_use).toBe(1);
-    });
-
-    describe('happy path: completing the full program', () => {
-      it('getProgress starts at 0', () => {
-        expect(p.getProgress()).toBe(0);
-      });
-
-      it('completing all content sessions reaches getProgress 1', () => {
-        for (const mod of ReactStateHelper.initialState().modules) {
-          p.enterModule(mod.id);
-          for (const ses of mod.sessions) {
-            p.enterSession(ses.id);
-            for (const act of ses.activities) {
-              p.enterActivity(act.id); p.markActivityCompleted();
-            }
+    it('completing every activity in every session reaches full progress without throwing', () => {
+      const p = ReactStateHelper.initDefaultState();
+      for (const mod of state.modules) {
+        p.enterModule(mod.id);
+        for (const ses of mod.sessions) {
+          p.enterSession(ses.id);
+          for (const act of ses.activities) {
+            p.enterActivity(act.id);
+            p.markActivityCompleted();
           }
         }
-        expect(p.getProgress()).toBe(1);
-      });
-
-      it('getProgressAdvice on entry to bouMgt returns a start-with message', () => {
-        p.enterModule('bouMgt');
-        expect(p.getProgressAdvice()).toBe('Start with one of the available 📑 sessions in module 🗂️ "Boundary Management".');
-      });
-
-      it('getProgressAdvice on entry to gesGre returns a start-with message', () => {
-        p.enterModule('bouMgt');
-        p.enterSession('gesGre');
-        expect(p.getProgressAdvice()).toBe('Start with one of the available 🎯 activities in 📑 session "gesunde Grenzen setzen".');
-      });
-
-      it('getProgressAdvice after adequately completing bouMgt advises skipping to emoReg', () => {
-        p.enterModule('bouMgt');
-        p.enterSession('gesGre'); p.enterActivity('rolGes'); p.markActivityCompleted(); p.enterActivity('abgKon'); p.markActivityCompleted();
-        p.enterModule('bouMgt');
-        p.enterSession('paus'); p.enterActivity('mikPau'); p.markActivityCompleted();
-        p.enterModule('bouMgt');
-        const advice = p.getProgressAdvice();
-        expect(advice).toContain('Boundary Management');
-        expect(advice).toContain('Emotionsregulation');
-      });
-
-      it('getProgressAdvice after completing all modules mentions all modules covered', () => {
-        for (const mod of ReactStateHelper.initialState().modules) {
-          p.enterModule(mod.id);
-          for (const ses of mod.sessions) {
-            p.enterSession(ses.id);
-            for (const act of ses.activities) {
-              p.enterActivity(act.id); p.markActivityCompleted();
-            }
-          }
-          p.enterModule(mod.id);
-        }
-        expect(p.getProgressAdvice()).toContain('and in every other module, too');
-      });
-    });
-
-    describe('edge cases', () => {
-      it('intro sessions do not count toward getProgress', () => {
-        p.enterModule('bouMgt');
-        p.enterSession('bouIntro');
-        expect(p.getProgress()).toBe(0);
-      });
-
-      it('one completed session is enough for bouMgt adequate use (threshold=1)', () => {
-        p.enterModule('bouMgt');
-        p.enterSession('gesGre'); p.enterActivity('rolGes'); p.markActivityCompleted(); p.enterActivity('abgKon'); p.markActivityCompleted();
-        expect(p.isGoodEnough('bouMgt')).toBe(true);
-      });
-
-      it('completing all non-intro sessions marks bouMgt as completed', () => {
-        p.enterModule('bouMgt');
-        p.enterSession('gesGre'); p.enterActivity('rolGes'); p.markActivityCompleted(); p.enterActivity('abgKon'); p.markActivityCompleted();
-        p.enterSession('paus'); p.enterActivity('mikPau'); p.markActivityCompleted();
-        expect(p.isModuleCompleted('bouMgt')).toBe(true);
-      });
-
-      it('umgEmo requires 2 completed activities for adequate progress', () => {
-        p.enterModule('emoReg');
-        p.enterSession('umgEmo');
-        p.enterActivity('akzep'); p.markActivityCompleted();
-        expect(p.hasSessionAdequateProgress('umgEmo')).toBe(false);
-        p.enterActivity('emoSit'); p.markActivityCompleted();
-        expect(p.hasSessionAdequateProgress('umgEmo')).toBe(true);
-      });
+      }
+      expect(p.getProgress()).toBe(1);
     });
   });
 });

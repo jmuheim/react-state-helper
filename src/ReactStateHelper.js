@@ -170,7 +170,7 @@ class ReactStateHelper {
             },
             {
               id: "gesGre",
-              title: "gesunde Grenzen setzen",
+              title: "Gesunde Grenzen setzen",
               activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
@@ -232,6 +232,24 @@ class ReactStateHelper {
               activities: [],
             },
             {
+              id: "akzep",
+              title: "Akzeptanz",
+              activities_needed_for_adequate_use: 1,
+              entered_first_at: null,
+              entered_last_at: null,
+              times_entered: 0,
+              activities: [
+                {
+                  id: "akzepAct",
+                  title: "Akzeptanz",
+                  entered_first_at: null,
+                  entered_last_at: null,
+                  times_entered: 0,
+                  completed: false,
+                },
+              ],
+            },
+            {
               id: "neuBew",
               title: "Neubewertung",
               activities_needed_for_adequate_use: 1,
@@ -252,19 +270,11 @@ class ReactStateHelper {
             {
               id: "umgEmo",
               title: "Umgang mit schwierigen Emotionen",
-              activities_needed_for_adequate_use: 2,
+              activities_needed_for_adequate_use: 1,
               entered_first_at: null,
               entered_last_at: null,
               times_entered: 0,
               activities: [
-                {
-                  id: "akzep",
-                  title: "Akzeptanz",
-                  entered_first_at: null,
-                  entered_last_at: null,
-                  times_entered: 0,
-                  completed: false,
-                },
                 {
                   id: "emoSit",
                   title: "Emotionsregulation in schwierigen Situationen",
@@ -273,8 +283,18 @@ class ReactStateHelper {
                   times_entered: 0,
                   completed: false,
                 },
+              ],
+            },
+            {
+              id: "umgSup",
+              title: "Umgang mit unterdrückten Gefühlen",
+              activities_needed_for_adequate_use: 1,
+              entered_first_at: null,
+              entered_last_at: null,
+              times_entered: 0,
+              activities: [
                 {
-                  id: "umgSup",
+                  id: "umgSupAct",
                   title: "Umgang mit Suppression",
                   entered_first_at: null,
                   entered_last_at: null,
