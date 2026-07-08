@@ -18,6 +18,17 @@ Run a single test by name:
 npx vitest run -t "returns true when all activities are completed"
 ```
 
+## Decision log & open questions
+
+Design decisions and their rationale (including rejected alternatives) live in `docs/decisions.md` — append-only and numbered. Check it before re-opening a settled question; add entries via the `/log-decision` command, which also propagates the decision to affected docs. Unresolved items live in `docs/open-questions.md`; when one is settled, graduate it into the decision log and delete it there.
+
+## Pre-merge checklist
+
+- New/changed behavior has tests; `npm test` is green.
+- Any new wrapper variable is added to README's variable table **and** declared in MobileCoach (default `0`, access "manageable by service") before deploy.
+- `src/ReactStateHelper.js` is still one self-contained script — enforced by `test/MobileCoachPlatformConstraints.test.js`.
+- README / CLAUDE.md / `docs/decisions.md` are updated wherever the change makes them stale.
+
 ## Architecture
 
 All logic lives in `src/ReactStateHelper.js`. There are four classes:
@@ -54,6 +65,8 @@ Before calling most methods the caller must `enterModule → enterSession → en
 ### Test setup
 
 `vitest.config.js` lists `src/ReactStateHelper.js` as a `setupFile`, which causes it to execute before every test file and register `ReactStateHelper` as `globalThis.ReactStateHelper`. This mirrors the MobileCoach environment where the class is a plain global — tests therefore import nothing and call `ReactStateHelper` directly.
+
+`test/MobileCoachPlatformConstraints.test.js` reads `src/ReactStateHelper.js` and `README.md` as *text* and fails on platform-constraint violations (module syntax in the source; a wrapper variable missing from README's table). It shares its variable-extraction logic with the PostToolUse hook in `.claude/hooks/check-wrapper-variables.mjs`, which raises the same warning already at edit time.
 
 ## MobileCoach / Pathmate platform constraints
 

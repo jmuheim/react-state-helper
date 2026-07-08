@@ -1,0 +1,15 @@
+---
+description: Append a numbered entry to docs/decisions.md and propagate it to affected docs
+---
+
+Log a new decision in `docs/decisions.md`: $ARGUMENTS
+
+1. Read `docs/decisions.md`; the new entry number is the highest existing one + 1. The log is append-only — never rewrite an existing entry. If this decision changes an earlier one, add `> Superseded by #N: …` (or `> Refined by #N: …`) directly under the old entry.
+2. Challenge before recording: is there a simpler alternative? Does it conflict with an existing entry or with an item in `docs/open-questions.md`? Is there a hidden cost? Raise concerns first; if overruled, record the decision as made and do not relitigate it later.
+3. Append the entry in house format:
+   - `## <n>. <assertive title>`
+   - `**Decision:** …`
+   - `**Why:** …` — include alternatives considered and rejected, so they are not re-explored later.
+   - `**Watch for:** …` — only when there is a real implication or revisit trigger.
+4. Propagate in the same pass: update README.md, CLAUDE.md, code comments, and `docs/open-questions.md` (graduate or delete a question this decision resolves) wherever the decision makes them stale. A decision that changes behavior but leaves the docs describing the old behavior has already drifted.
+5. Report which files were updated and which were checked and unaffected.
