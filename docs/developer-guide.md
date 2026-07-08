@@ -1,6 +1,6 @@
 # Developer guide
 
-Architecture and platform internals of ReactStateHelper. If you define content inside MobileCoach rather than working on the code, the [content editor guide](content-editor-guide.md) is for you.
+Architecture and platform internals of ReactStateHelper. If you define content inside [MobileCoach](https://mobile-coach.eu/) rather than working on the underlying high-level logic, the [content editor guide](content-editor-guide.md) is for you.
 
 ## Data model
 
@@ -13,14 +13,14 @@ ReactStateHelper
         └── activities: Activity[]
 ```
 
-| Class | Fields (beyond `id`/`title`/`entered_first_at`/`entered_last_at`/`times_entered`) | Notes |
-|---|---|---|
-| `Module` | `sessions_needed_for_adequate_use`, `sessions[]` | Top-level grouping, e.g. "Boundary Management" |
-| `Session` | `activities_needed_for_adequate_use`, `activities[]`, `isIntro` | `isIntro: true` marks a session that has no activities by design (e.g. an introduction); every other session must have at least one activity |
-| `Activity` | `completed` | Leaf node; flips to `true` via `markActivityCompleted()` |
+| Class | Emoji | Fields (beyond `id`/`title`/`entered_first_at`/`entered_last_at`/`times_entered`) | Notes |
+|---|---|---|---|
+| `Module` | 🗂️ | `sessions_needed_for_adequate_progress`, `sessions[]` | Top-level grouping, e.g. "Boundary Management" |
+| `Session` | 📑 | `activities_needed_for_adequate_progress`, `activities[]`, `isIntro` | `isIntro: true` marks a session that has no activities by design (e.g. an introduction) and counts as completed once entered; it must be the module's first session, and every other session must have at least one activity |
+| `Activity` | 🎯 | `completed` | Bottom of the hierarchy — contains no children; flips to `true` via `markActivityCompleted()` |
 
-- **Completion**: an `Activity` is completed once marked. A `Session` is completed if it has at least one activity and all of them are completed. A `Module` is completed if all of its sessions that have activities are completed (intro sessions don't count either way).
-- **Adequate progress**: a softer bar than full completion — a `Module`/`Session` "has adequate progress" once `sessions_needed_for_adequate_use`/`activities_needed_for_adequate_use` of its children are completed, even if not all of them are. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything.
+- **Completion**: activities are the only things marked completed directly; sessions and modules derive their completion by aggregating their children. An `Activity` is completed once marked. A regular `Session` is completed if it has at least one activity and all of them are completed; an **intro session** (`isIntro: true`) has no activities and is instead completed the moment it has been entered once. A `Module` is completed if **all** of its sessions are completed — intro sessions included, which is why they must be entered rather than being skipped.
+- **Adequate progress**: a softer bar than full completion — a `Module`/`Session` "has adequate progress" once `sessions_needed_for_adequate_progress`/`activities_needed_for_adequate_progress` of its children are completed, even if not all of them are. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything.
 
 ## Architecture
 
@@ -28,14 +28,14 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 
 | Class | Role |
 |---|---|
-| `Activity` | Leaf node — tracks `completed`, `times_entered`, timestamps |
-| `Session` | Contains activities; `isCompleted()` iff all activities completed |
+| `Activity` | Bottom of the hierarchy — tracks `completed`, `times_entered`, timestamps |
+| `Session` | Contains activities; `isCompleted()` if all activities completed (or, for an intro session, once entered) |
 | `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
 | `ReactStateHelper` | Public API; holds `#state` (private); navigated via `currentModuleId / currentSessionId / currentActivityId` |
 
 ### ID conventions
 
-Module, session, and activity ids must be unique across the *entire* state, not just within their parent — MobileCoach maps each one to a separate dialog, and menu routing (see "Menus are static by default" below) keys off a single flat namespace of ids. Ids are kept short and mnemonic (e.g. `gesGre`, `akzep`).
+Module, session, and activity ids must be unique across the *entire* state, not just within their parent — MobileCoach maps each one to a separate dialog, and menu routing (see "Menus are static by default" below) navigates directly to the dialog named after the tapped id — one flat namespace, so a duplicate would be ambiguous. Ids are kept short and mnemonic (e.g. `gesGre`, `akzep`).
 
 Convention: prefix every id with its level — `m_` for modules, `s_` for sessions, `a_` for activities (e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`).
 
@@ -45,7 +45,7 @@ Id collisions are prevented at runtime, at the point each id is actually instant
 
 `loadExistingState` (and therefore `initDefaultState`, which delegates to it) creates the registry and also checks the top-level module count. A violation throws on load; the MobileCoach wrapper at the bottom of the file catches this and surfaces it through `$jsStateHelperError` instead of crashing the whole script silently — see "Command dispatch" below. `test/ReactStateHelper.test.js` exercises each of these checks against minimal synthetic states; `initialState()` itself isn't re-asserted invariant-by-invariant, since `initDefaultState` already can't return a state that violates them — it's instead covered by a behavioral test confirming every activity can be completed without throwing.
 
-Every module needs at least one session, and every session needs at least one activity — except an intro session (one with no activities of its own, just a stepping stone into its module's content, e.g. `s_bouIntro`), which must set `isIntro: true` to opt out of that check. `Session.isCompleted()`/`hasAdequateProgress()` already treat such sessions as not completable (see `Module.getProgress`/`isCompleted`, which filter to `sessions.filter(s => s.activities.length > 0)`); `isIntro` only exists so `Session.fromJSON` can tell an intentionally-empty intro session apart from one that's missing activities by mistake. A module made up entirely of intro sessions would be vacuously "complete" by that same filter before the participant has done anything, so `Module.fromJSON` additionally requires at least one session with activities.
+Every module needs at least one session, and every session needs at least one activity — except an intro session (one with no activities of its own, just a stepping stone into its module's content, e.g. `s_bouIntro`), which must set `isIntro: true` to opt out of that check and must be its module's **first** session (both enforced in `Module.fromJSON`). Because an intro has no activities to complete, `Session.isCompleted()` treats it as completed the moment it has been entered once (`entered_first_at !== null`); this way an intro *does* count toward its module's completion — `Module.isCompleted()` requires every session to be completed, intros included — while adding no busywork. The finer-grained progress *fraction* still ignores intros: `Module.getProgress` and `ReactStateHelper.getProgress` filter to `sessions.filter(s => s.activities.length > 0)`, so an unentered intro doesn't drag the percentage down. `isIntro` also lets `Session.fromJSON` tell an intentionally-empty intro session apart from one that's missing activities by mistake. A module made up entirely of intro sessions would let a participant "complete" it without doing anything, so `Module.fromJSON` additionally requires at least one session with activities.
 
 ### Navigation model
 
@@ -89,13 +89,13 @@ MobileCoach has no dynamic list/loop constructs for building menus. Menu entries
 
 The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('m_bouMgt')` before calling `populateMenuForSession()`; and to `populateMenuForActivity()`, you also first need to `enterSession('s_gesGre')`.
 
-Each label is formatted as `"<emoji> <title>"` (e.g. `"✅ Emotionsregulation"`); the matching id (e.g. `m_emoReg`) is written separately to `$jsStateHelperMenuIdN`. The menu definition in MobileCoach concatenates the two per slot — `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1` — and MobileCoach splits on `:` when the button is tapped: the left side is displayed to the user, the right side (the id) is stored to a developer-chosen variable. This allows routing: for each possible id, a hard-coded `if <that variable> == "m_emoReg" → jump to element X` rule handles navigation. Tedious to set up once, but fully dynamic thereafter. (Titles are rejected at state load if they contain a colon, so the concatenated entry always contains exactly one.) See the [content editor guide](content-editor-guide.md#menus) for the `#MENU_EMOJIS` legend and the editor-facing setup steps.
+Each label is formatted as `"<emoji> <title>"` (e.g. `"✅ Emotionsregulation"`); the matching id (e.g. `m_emoReg`) is written separately to `$jsStateHelperMenuIdN`. The menu definition in MobileCoach concatenates the two per slot — `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1` — and MobileCoach splits on `:` when the button is tapped: the left side is displayed to the user, the right side (the id) is stored to a variable with a specific, reserved name. (TODO: document the exact variable name) Because of this split, titles are rejected at state load if they contain a colon, so the concatenated entry always contains exactly one — we don't know yet how MobileCoach behaves when the entry contains multiple colons (e.g. whether it splits on the first or the last one), so guaranteeing exactly one sidesteps the question entirely. MobileCoach then reads that variable and navigates directly to the dialog with that id. This direct id-to-dialog navigation is also why module, session, and activity ids must be unique across the entire state. See the [content editor guide](content-editor-guide.md#menus) for the `#MENU_EMOJIS` legend and the editor-facing setup steps.
 
 Good to know:
 
 - Unused slots are set to `""` so MobileCoach can hide them.
 - The wrapper writes all nine label and all nine id variables on **every** run — a run whose command isn't one of the `populateMenuFor…()` methods resets them to `""`. Stale entries can't survive, but a menu must be (re)populated right before it is displayed.
-- The maximum of 9 slots is a hard constraint and should offer enough headroom.
+- The number of slots (9) is a self-imposed choice, not a MobileCoach platform limit — it could be fewer or more, but 9 seems reasonable headroom.
 - There are three separate methods rather than one auto-detecting `populateMenu()`.
     - This allows displaying a higher-level menu while the user is navigated deeper — for example, a "go back" screen.
     - Explicit method names also make the MobileCoach command variable self-documenting.

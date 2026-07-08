@@ -54,6 +54,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 8. Intro sessions opt out via `isIntro`, and every module needs at least one non-intro session
 
+> Refined by #22: an intro session now completes on first entry and *does* count toward module completion (only the progress fraction still ignores it), and it must be the module's first session. The `isIntro` opt-out and the "at least one non-intro session" rule still stand.
+
 **Decision:** A session with no activities must set `isIntro: true`. Completion and progress math filter to sessions that have activities. `Module.fromJSON` additionally requires at least one session with activities (`030b62b`).
 
 **Why:** `isIntro` exists solely so `Session.fromJSON` can tell an intentionally-empty stepping-stone session apart from one that is missing activities by mistake. Without the module-level rule, a module made up entirely of intro sessions would be vacuously "complete" before the participant has done anything.
@@ -83,6 +85,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Watch for:** titles containing `:` — see `docs/open-questions.md`.
 
 ## 12. "Adequate progress" is a softer bar than completion
+
+> Refined by #21: the threshold fields are renamed `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress`. The softer-bar concept itself stands.
 
 **Decision:** `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` thresholds; `hasAdequateProgress()` / `isGoodEnough()` report once that many children are completed, even if not all are.
 
@@ -155,3 +159,23 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** it puts the concatenation under MobileCoach-side control, and together with the load-time rejection of colons in titles (commit c304cee) it guarantees the concatenated entry contains **exactly one** colon — so where MobileCoach splits (first vs. last colon) no longer matters, settling the former open question "Colons inside titles vs. the `:`-split of menu labels". The title validation stays, because the displayed string is still `label:id` after concatenation and a colon in a title would still corrupt the split. **Rejected:** dropping the title-colon validation as "no longer JS's concern" — the library is still the only place that can catch the corruption before it silently breaks routing.
 
 **Watch for:** nine new MobileCoach variables `$jsStateHelperMenuId1`–`$jsStateHelperMenuId9` must be declared (default `0`, access "manageable by service") **before** deploying the updated script — a missing one fails silently mid-flow.
+
+## 21. The threshold concept is uniformly called "adequate progress", including in field names
+
+*(2026-07-08)*
+
+**Decision:** The JSON threshold fields `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` are renamed to `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress` (refines #12). "Adequate progress" is now the single term for the softer-than-completion bar everywhere: field names, `hasAdequateProgress()`, the `hasSessionAdequateProgress` command, and docs prose.
+
+**Why:** the codebase used two names for one concept — "adequate progress" in every method name, command, docs heading, and even #12's own title, versus "adequate use" only in the two field names — forcing readers to learn that both mean the same thing. Renaming the two fields is the minimal unification; **rejected:** renaming the methods/command to "adequate use" instead, which would have touched far more surface (public API, content-editor cheat-sheet, prose) to standardize on the less descriptive term. Nothing is deployed to MobileCoach yet, so breaking the persisted `$jsStateHelperJson` shape is free; no `$`-wrapper variables are affected.
+
+**Watch for:** nothing — once state is live in MobileCoach, any future field rename needs a migration path instead (see the no-backward-compat window closing with the first deployment).
+
+## 22. An intro session completes on first entry and counts toward module completion
+
+*(2026-07-08)*
+
+**Decision:** `Session.isCompleted()` returns `true` for an intro session (`isIntro: true`) as soon as it has been entered once (`entered_first_at !== null`), and `Module.isCompleted()` now requires **all** sessions to be completed — intros included — rather than filtering to sessions that have activities (refines #8). The progress *fraction* (`getProgress`/`getModuleProgress`) and session counts still filter to sessions with activities, so an intro adds nothing to the denominator. An intro must also be its module's first session, checked in `Module.fromJSON`.
+
+**Why:** intro sessions previously "never counted either way", so there was no way to tell whether a participant had actually seen a module's introduction, and a module could read as fully completed while its intro was never opened. Completing an intro on entry gives that a truthful signal — an intro is "done" precisely when it has been read — and keeping it out of the progress fraction means it still adds no busywork to the percentage. Restricting intros to the first slot matches how they are used (a stepping stone *into* the module) and keeps "was the intro seen" unambiguous. **Rejected:** leaving intros uncounted (loses the "intro seen" signal); marking intros complete unconditionally at load (would report completion before the participant ever entered the module).
+
+**Watch for:** nothing new to declare in MobileCoach — the change is pure library logic over existing `entered_first_at` timestamps. Flows that key off `isModuleCompleted` will now also require the intro to have been entered.

@@ -1,6 +1,6 @@
 # Content editor guide
 
-This guide is for **content editors** — the people who define modules, sessions, and activities inside MobileCoach. No JavaScript knowledge is required. If you are looking for architecture and code internals instead, see the [developer guide](developer-guide.md).
+This guide is for **content editors** — the people who define 🗂️ modules, 📑 sessions, and 🎯 activities inside [MobileCoach](https://mobile-coach.eu/). No JavaScript knowledge is required. If you are looking for architecture and code internals instead, see the [developer guide](developer-guide.md).
 
 ## How content is structured
 
@@ -15,22 +15,22 @@ Module (e.g. "Boundary Management")
 Every module, session, and activity has an **id** and a **title**:
 
 - Ids are short and mnemonic, prefixed by their level: `m_` for modules, `s_` for sessions, `a_` for activities — e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`.
-- Ids must be **unique across the whole state**, not just within their parent. MobileCoach maps each id to a separate dialog, and menu routing (see [Menus](#menus)) matches ids in one flat namespace — so the exact same id string must be used consistently in the state definition **and** in MobileCoach (dialog names, variable prefixes, routing rules).
+- Ids must be **unique across the whole state**, not just within their parent. MobileCoach maps each id to a separate dialog, and menu routing (see [Menus](#menus)) navigates directly to the dialog named after the tapped id — so the exact same id string must be used consistently in the state definition **and** in MobileCoach (dialog names, variable prefixes).
 - A wrongly prefixed or duplicated id makes state loading fail immediately, with the offending id named in `$jsStateHelperError`.
 
 Two progress notions exist per module/session:
 
 - **Completed** — all activities of a session are done; all sessions (that have activities) of a module are done.
-- **Adequate progress** — a softer bar: the item counts as "good enough" once `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` of its children are completed, even if not all of them are. Used to nudge participants onward instead of insisting they finish everything.
+- **Adequate progress** — a softer bar: the item counts as "good enough" once `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress` of its children are completed, even if not all of them are. Used to nudge participants onward instead of insisting they finish everything.
 
-An **intro session** is a session with no activities of its own (just a stepping stone into the module, e.g. `s_bouIntro`). It must be marked `isIntro: true` in the state definition; it never counts toward or against completion.
+An **intro session** is a session with no activities of its own (just a stepping stone into the module, e.g. `s_bouIntro`). It must be marked `isIntro: true` in the state definition and be the module's **first** session. Because it has no activities, it counts as completed as soon as the participant enters it once — so it *does* count toward the module being completed, but it never affects the finer-grained progress percentage.
 
-Structural limits, checked when state loads: at most **9** modules, **9** sessions per module, and **9** activities per session (that's how many menu slots exist); every module needs at least one session with activities; every non-intro session needs at least one activity.
+Structural limits, checked when state loads: at most **9** modules, **9** sessions per module, and **9** activities per session (that's how many menu slots exist); every module needs at least one session with activities; every non-intro session needs at least one activity; an intro session may only be a module's first session.
 
 ## One-time MobileCoach setup
 
 1. Copy the full contents of [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js) **as-is** into MobileCoach.
-2. Create the following variables in your MobileCoach project — every single one, each with default value `0` and access **"manageable by service"**:
+2. Create the following variables in your MobileCoach project — every single one, each with default value `0` and access **"manageable by service"**. The one exception is `$participantGroup`, which already exists by default in MobileCoach; you do not create it (see its row below):
 
    | Variable | Purpose |
    |---|---|
@@ -42,7 +42,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session ids across all modules |
    | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuForModule()` / `populateMenuForSession()` / `populateMenuForActivity()`; written on **every** run — any other command resets all slots to `""` |
    | `$jsStateHelperMenuId1` – `$jsStateHelperMenuId9` | The id belonging to the label in the same slot (e.g. `m_emoReg`); concatenate the two yourself in the menu definition: `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. Written on **every** run, same reset behavior as the labels |
-   | `$participantGroup` | `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — populated by `getParticipantLocation()` (we "mis-use" this variable, as it is one of the few easily inspectable variables from within MobileCoach) |
+   | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — populated by `getParticipantLocation()` (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
 ## ⚠️ The silent-failure gotcha
 
@@ -89,10 +89,10 @@ Many commands require that the participant's current location was set first, in 
 MobileCoach has no dynamic list constructs — menu entries are hard-coded in the flow. The workaround:
 
 1. Call one of the `populateMenuFor…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$jsStateHelperMenuId1`–`$jsStateHelperMenuId9` (the matching id, e.g. `m_emoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
-2. In the menu definition, concatenate label and id per slot with a colon: `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a routing variable of your choice when the button is tapped.
-3. For each possible id, add one hard-coded routing rule: `if <routing variable> == "m_emoReg" → jump to element X`. Tedious to set up once, but fully dynamic thereafter.
+2. In the menu definition, concatenate label and id per slot with a colon: `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a variable with a specific, reserved name when the button is tapped. <!-- TODO: document the exact variable name -->
+3. MobileCoach reads that variable and navigates directly to the dialog with that id. Just make sure each module/session/activity id has a dialog of exactly the same name.
 
-> **Note:** titles must not contain a colon — state loading rejects them, because a colon inside the label would corrupt the `:`-split above. So the concatenated entry always contains exactly one colon.
+> **Note:** titles must not contain a colon — state loading rejects them, because a colon inside the label would corrupt the `:`-split above. It is not known yet how MobileCoach handles an entry with multiple colons (first-colon vs. last-colon split), so the library guarantees the concatenated entry always contains exactly one colon.
 
 Labels (and `getProgressAdvice()` text) are prefixed with an emoji from the `#MENU_EMOJIS` map in the source:
 
