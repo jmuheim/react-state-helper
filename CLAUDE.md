@@ -10,8 +10,8 @@ A plain JavaScript library for managing hierarchical app state (modules → sess
 
 Detailed documentation lives in `docs/`, published via GitHub Pages at https://jmuheim.github.io/react-state-helper/ — **the docs site is the source of truth**; this file and the README only keep essentials plus links. When a change makes a docs page stale, update the page.
 
-- `docs/developer-guide.md` — architecture, data model, state validation, test setup, full MobileCoach platform constraints.
-- `docs/content-editor-guide.md` — MobileCoach setup for content editors; contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/developer-guide.md` — architecture, data model, state validation, flow-logic (query) commands, test setup, full MobileCoach platform constraints.
+- `docs/content-editor-guide.md` — MobileCoach setup for content editors (doer commands only: enter, complete, populate menus); contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
 
 ## Commands
 

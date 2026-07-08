@@ -58,24 +58,19 @@ On the very first run, `$jsStateHelperJson` still has its default value `0`; the
 
 ## Command cheat-sheet
 
-Many commands require that the participant's current location was set first, in strict order: `enterModule(…)` → `enterSession(…)` → `enterActivity(…)`. Calling a command without its preconditions results in `$jsStateHelperStatus` = `error`.
+As a content editor you only ever issue three kinds of commands: **entering** a module/session/activity, **marking an activity completed**, and **populating a menu**. Most commands require that the participant's current location was set first, in strict order: `enterModule(…)` → `enterSession(…)` → `enterActivity(…)`. Calling a command without its preconditions results in `$jsStateHelperStatus` = `error`.
 
-| Command (value of `$jsStateHelperCmd`) | Preconditions | Effect / returns |
+| Command (value of `$jsStateHelperCmd`) | Preconditions | Effect |
 |---|---|---|
 | `enterActivity('a_rolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `enterModule('m_bouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
 | `enterSession('s_gesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
-| `getModuleProgress('m_bouMgt')` | — | That module's progress as a number between 0 and 1 |
-| `getProgress()` | — | Overall progress as a number between 0 and 1 |
-| `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue |
-| `hasModuleAdequateProgress('m_bouMgt')` | — | `true` once the module has adequate progress (threshold, not full completion) |
-| `hasSessionAdequateProgress('s_gesGre')` | module entered | `true` once the session has adequate progress |
-| `isModuleCompleted('m_bouMgt')` | — | `true` if all of the module's sessions (with activities) are completed |
-| `isSessionCompleted('s_gesGre')` | module entered | `true` if all activities of that session (in the current module) are completed |
 | `markActivityCompleted()` | module + session + activity entered | Marks the current activity as completed |
 | `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
 | `populateMenuForModule()` | — | Fills `$jsStateHelperMenuLabel1–9` and `$jsStateHelperMenuId1–9` with one entry per module |
 | `populateMenuForSession()` | module entered | Fills the labels and ids with the current module's sessions |
+
+The library also offers **flow-logic commands** (completion booleans, progress numbers, advice text) that feed MobileCoach's conditional branching. Those are wired into the flows by developers and documented in the [developer guide](developer-guide.md#flow-logic-commands) — as a content editor you never need to issue them.
 
 ## Menus
 
@@ -87,7 +82,7 @@ MobileCoach has no dynamic list constructs — menu entries are hard-coded in th
 
 > **Note:** titles must not contain a colon — state loading rejects them, because a colon inside the label would corrupt the `:`-split above. It is not known yet how MobileCoach handles an entry with multiple colons (first-colon vs. last-colon split), so the library guarantees the concatenated entry always contains exactly one colon.
 
-Labels (and `getProgressAdvice()` text) are prefixed with an emoji from the `#MENU_EMOJIS` map in the source:
+Labels (and the advice text of the developer-facing [`getProgressAdvice()`](developer-guide.md#flow-logic-commands) command) are prefixed with an emoji from the `#MENU_EMOJIS` map in the source:
 
 | Key | Emoji | Used for |
 |---|---|---|

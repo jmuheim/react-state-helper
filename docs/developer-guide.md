@@ -63,6 +63,22 @@ Before calling most methods the caller must `enterModule → enterSession → en
 
 `test/MobileCoachWrapper.test.js` executes the deployment wrapper the way MobileCoach does: it interpolates `$jsStateHelperJson`/`$jsStateHelperCmd` textually into the script, runs it in a `vm` context without Node's `process` global, and asserts on the completion-value object — covering command dispatch, error surfacing, state round-tripping, and that all nine menu label slots are written as top-level keys on every run.
 
+## Flow-logic commands
+
+Content editors only issue the "doer" commands (`enter…`, `markActivityCompleted()`, `populateMenuFor…()` — see the [content editor guide's cheat-sheet](content-editor-guide.md#command-cheat-sheet)). The query commands below are developer territory: they return booleans, numbers, and display strings that feed MobileCoach's variable-based conditional branching (see "No conditional logic in flows beyond variables" below), and wiring that branching is a developer task.
+
+They are issued the same way as every other command — set `$jsStateHelperCmd`, run the script, read `$jsStateHelperResult` (the mechanics are described in the content editor guide under [Running a command](content-editor-guide.md#running-a-command)). The same location preconditions apply: `enterModule(…)` → `enterSession(…)` in order, and a command issued without its preconditions sets `$jsStateHelperStatus` = `error`.
+
+| Command (value of `$jsStateHelperCmd`) | Preconditions | Returns |
+|---|---|---|
+| `getModuleProgress('m_bouMgt')` | — | That module's progress as a number between 0 and 1 |
+| `getProgress()` | — | Overall progress as a number between 0 and 1 |
+| `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue |
+| `hasModuleAdequateProgress('m_bouMgt')` | — | `true` once the module has adequate progress (threshold, not full completion) |
+| `hasSessionAdequateProgress('s_gesGre')` | module entered | `true` once the session has adequate progress |
+| `isModuleCompleted('m_bouMgt')` | — | `true` if all of the module's sessions are completed — an intro session counts once it has been entered |
+| `isSessionCompleted('s_gesGre')` | module entered | `true` if all activities of that session (in the current module) are completed |
+
 ## MobileCoach / Pathmate platform constraints
 
 Understanding these constraints is essential — they drive most design decisions in this library.

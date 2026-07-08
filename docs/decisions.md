@@ -131,6 +131,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 18. Documentation is published via plain GitHub Pages from `docs/`, and the docs site is the source of truth
 
+> Refined by #25: the command cheat-sheet is split by audience — the content editor guide keeps only the editor-facing doer commands; the query/flow-logic commands moved to the developer guide.
+
 *(2026-07-08)*
 
 **Decision:** `docs/` is served by GitHub Pages in "deploy from a branch" mode (`master`, `/docs` folder, GitHub's server-side Jekyll with the built-in `jekyll-theme-primer` — a 3-line `_config.yml`, no front matter, no local build tooling, no new dependencies). Two audience-specific pages were added: `docs/content-editor-guide.md` (for MobileCoach content editors; now holds the canonical wrapper **variable table**, the command cheat-sheet, and menu/routing setup) and `docs/developer-guide.md` (architecture + full platform constraints, promoted from CLAUDE.md). README and CLAUDE.md were slimmed to essentials plus links; the docs pages are the single source of truth. The edit-time hook (`.claude/hooks/check-wrapper-variables.mjs`) and `test/MobileCoachPlatformConstraints.test.js` now check the variable table in `docs/content-editor-guide.md` instead of README.
@@ -202,3 +204,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** the suggestion-seen pair and both count commands date from the very first implementation commit, have no internal callers, and no documented use case in any doc or decision entry — leftover brainstorming surface that content editors would otherwise have to understand. The two cheat-sheet-only removals cut commands whose outputs are written automatically after every run anyway. Nothing is deployed to MobileCoach yet, so deleting public commands (and the `suggestionSeen` field from the persisted `$jsStateHelperJson` shape) is free. **Rejected:** keeping `countCompletedSessionsOverall()` "just in case" a future flow wants a "≥ N sessions completed in total" rule — note that the `$jsStateHelperSessionsCompleted` CSV is *not* a substitute (MobileCoach branching cannot count CSV entries), so if such a rule is ever designed, re-add the command then.
 
 **Watch for:** no MobileCoach variables need declaring or removing — `$jsStateHelperSessionsCompleted` and `$participantGroup` are still written every run. If a "suggestion" feature returns, design it with a documented flow use case first.
+
+## 25. The command cheat-sheet is split by audience: doer commands stay with content editors, flow-logic commands move to the developer guide
+
+*(2026-07-08)*
+
+**Decision:** The cheat-sheet in `docs/content-editor-guide.md` keeps only the editor-facing **doer** commands — `enterModule()` / `enterSession()` / `enterActivity()`, `markActivityCompleted()`, and the three `populateMenuFor…()` commands (refines #18, which placed the whole cheat-sheet in the editor guide). The seven **query** commands (`getProgress`, `getModuleProgress`, `getProgressAdvice`, `isModuleCompleted`, `isSessionCompleted`, `hasModuleAdequateProgress`, `hasSessionAdequateProgress`) move to a new "Flow-logic commands" section in `docs/developer-guide.md`; each guide links to the other's half. While moving, the stale `isModuleCompleted` description ("all sessions *with activities*") was corrected to match #22 (all sessions, an intro counting once entered).
+
+**Why:** content editors create content, set flags, and display menus; conditional flow branching — the only consumer of the query commands' booleans/numbers/advice strings — is hidden from them and wired by developers. Query commands in the editor cheat-sheet were noise for that audience and doubled the surface an editor "would otherwise have to understand" (the same argument as #24). **Rejected:** one shared cheat-sheet with an "audience" column — both audiences still scan past the other's half, and the developer guide already hosts the flow-branching context (the "No conditional logic in flows beyond variables" constraint) the query commands belong next to.
+
+**Watch for:** the split encodes a team-role assumption — editors never wire branching. If a future flow design has editors placing conditions themselves, the query commands need an editor-facing home again. New commands must now be filed to the correct guide: doer → editor guide, query → developer guide.
