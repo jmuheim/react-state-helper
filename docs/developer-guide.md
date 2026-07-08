@@ -49,7 +49,7 @@ Every module needs at least one session, and every session needs at least one ac
 
 ### Navigation model
 
-Before calling most methods the caller must `enterModule → enterSession → enterActivity` in order. These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `countCompletedSessions`, etc.) implicitly use the `currentModuleId` stored in state.
+Before calling most methods the caller must `enterModule → enterSession → enterActivity` in order. These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `countCompletedSessionsInModule`, etc.) implicitly use the `currentModuleId` stored in state.
 
 ### Serialization
 

@@ -248,14 +248,14 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('countCompletedSessions', () => {
+  describe('countCompletedSessionsInModule', () => {
     it('throws if no module has been entered', () => {
-      expect(() => helper.countCompletedSessions()).toThrow('No module entered yet');
+      expect(() => helper.countCompletedSessionsInModule()).toThrow('No module entered yet');
     });
 
     it('returns 0 for the current module in the default state', () => {
       helper.enterModule('m_mod1');
-      expect(helper.countCompletedSessions()).toBe(0);
+      expect(helper.countCompletedSessionsInModule()).toBe(0);
     });
 
     it('counts only completed sessions within the current module', () => {
@@ -263,15 +263,15 @@ describe('ReactStateHelper', () => {
       helper.enterSession('s_ses1a');
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.countCompletedSessions()).toBe(1);
+      expect(helper.countCompletedSessionsInModule()).toBe(1);
       helper.enterModule('m_mod2');
-      expect(helper.countCompletedSessions()).toBe(0);
+      expect(helper.countCompletedSessionsInModule()).toBe(0);
     });
   });
 
-  describe('countCompletedOverall', () => {
+  describe('countCompletedSessionsOverall', () => {
     it('returns 0 in the default state', () => {
-      expect(helper.countCompletedOverall()).toBe(0);
+      expect(helper.countCompletedSessionsOverall()).toBe(0);
     });
 
     it('increases as sessions across modules are completed', () => {
@@ -279,11 +279,11 @@ describe('ReactStateHelper', () => {
       helper.enterSession('s_ses1a');
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.countCompletedOverall()).toBe(1);
+      expect(helper.countCompletedSessionsOverall()).toBe(1);
       helper.enterModule('m_mod2');
       helper.enterSession('s_ses2a');
       helper.enterActivity('a_act2a1'); helper.markActivityCompleted();
-      expect(helper.countCompletedOverall()).toBe(2);
+      expect(helper.countCompletedSessionsOverall()).toBe(2);
     });
   });
 
@@ -340,27 +340,27 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('isGoodEnough', () => {
+  describe('hasModuleAdequateProgress', () => {
     beforeEach(() => {
       helper.enterModule('m_mod1');
     });
 
     it('returns false with no completed sessions', () => {
-      expect(helper.isGoodEnough('m_mod1')).toBe(false);
+      expect(helper.hasModuleAdequateProgress('m_mod1')).toBe(false);
     });
 
     it('returns true once the module threshold is met (m_mod1 threshold=1)', () => {
       helper.enterSession('s_ses1a');
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.isGoodEnough('m_mod1')).toBe(true);
+      expect(helper.hasModuleAdequateProgress('m_mod1')).toBe(true);
     });
 
     it('does not count sessions from other modules', () => {
       helper.enterModule('m_mod2');
       helper.enterSession('s_ses2a');
       helper.enterActivity('a_act2a1'); helper.markActivityCompleted();
-      expect(helper.isGoodEnough('m_mod1')).toBe(false);
+      expect(helper.hasModuleAdequateProgress('m_mod1')).toBe(false);
     });
   });
 

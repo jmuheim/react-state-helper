@@ -400,12 +400,12 @@ class ReactStateHelper {
     return this.#findModule(this.#state.currentModuleId).findSession(sessionId).hasAdequateProgress();
   }
 
-  countCompletedSessions() {
+  countCompletedSessionsInModule() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     return this.#findModule(this.#state.currentModuleId).countCompletedSessions();
   }
 
-  countCompletedOverall() {
+  countCompletedSessionsOverall() {
     return this.#state.modules.reduce((sum, m) => sum + m.countCompletedSessions(), 0);
   }
 
@@ -421,7 +421,7 @@ class ReactStateHelper {
     return this.#findModule(moduleId).getProgress();
   }
 
-  isGoodEnough(moduleId) {
+  hasModuleAdequateProgress(moduleId) {
     return this.#findModule(moduleId).hasAdequateProgress();
   }
 
@@ -637,8 +637,8 @@ if (typeof process === 'undefined') {
   // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
   // - $jsStateHelperCmd = "isSessionCompleted('s_gesGre')"
   // - $jsStateHelperCmd = "markActivityCompleted()"
-  // - $jsStateHelperCmd = "countCompletedSessions()"
-  // - $jsStateHelperCmd = "isGoodEnough('m_bouMgt')"
+  // - $jsStateHelperCmd = "countCompletedSessionsInModule()"
+  // - $jsStateHelperCmd = "hasModuleAdequateProgress('m_bouMgt')"
   // - $jsStateHelperCmd = "getModuleProgress('m_bouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
   let result, status;

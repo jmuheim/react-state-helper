@@ -87,6 +87,7 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 ## 12. "Adequate progress" is a softer bar than completion
 
 > Refined by #21: the threshold fields are renamed `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress`. The softer-bar concept itself stands.
+> Refined by #23: `isGoodEnough()` is renamed `hasModuleAdequateProgress()`.
 
 **Decision:** `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` thresholds; `hasAdequateProgress()` / `isGoodEnough()` report once that many children are completed, even if not all are.
 
@@ -162,6 +163,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 21. The threshold concept is uniformly called "adequate progress", including in field names
 
+> Refined by #23: the module-level command `isGoodEnough()` — not renamed here — is renamed `hasModuleAdequateProgress()`, completing the unification.
+
 *(2026-07-08)*
 
 **Decision:** The JSON threshold fields `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` are renamed to `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress` (refines #12). "Adequate progress" is now the single term for the softer-than-completion bar everywhere: field names, `hasAdequateProgress()`, the `hasSessionAdequateProgress` command, and docs prose.
@@ -179,3 +182,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** intro sessions previously "never counted either way", so there was no way to tell whether a participant had actually seen a module's introduction, and a module could read as fully completed while its intro was never opened. Completing an intro on entry gives that a truthful signal — an intro is "done" precisely when it has been read — and keeping it out of the progress fraction means it still adds no busywork to the percentage. Restricting intros to the first slot matches how they are used (a stepping stone *into* the module) and keeps "was the intro seen" unambiguous. **Rejected:** leaving intros uncounted (loses the "intro seen" signal); marking intros complete unconditionally at load (would report completion before the participant ever entered the module).
 
 **Watch for:** nothing new to declare in MobileCoach — the change is pure library logic over existing `entered_first_at` timestamps. Flows that key off `isModuleCompleted` will now also require the intro to have been entered.
+
+## 23. The module-level command is renamed `hasModuleAdequateProgress`, completing the "adequate progress" unification
+
+*(2026-07-08)*
+
+**Decision:** The public command `isGoodEnough(moduleId)` is renamed `hasModuleAdequateProgress(moduleId)` (refines #21, which unified the terminology in field names and docs but left this command untouched).
+
+**Why:** `isGoodEnough` was the last holdout still using the informal "good enough" wording for the softer-than-completion bar that everything else — field names, `hasAdequateProgress()`, the `hasSessionAdequateProgress` command, docs prose — calls "adequate progress" since #21. The new name also parallels the session-level command exactly. Nothing is deployed to MobileCoach yet, so renaming the public command surface is free. **Rejected:** keeping `isGoodEnough` as an alias — dead surface with no deployed callers.
+
+**Watch for:** nothing — no `$`-wrapper variables are affected. Once flows are live in MobileCoach, command renames need a coordinated flow update instead.

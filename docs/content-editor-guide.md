@@ -44,9 +44,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    | `$jsStateHelperMenuId1` – `$jsStateHelperMenuId9` | The id belonging to the label in the same slot (e.g. `m_emoReg`); concatenate the two yourself in the menu definition: `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — populated by `getParticipantLocation()` (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
-## ⚠️ The silent-failure gotcha
-
-**If any variable is missing or has the wrong access setting, the script fails silently and halts the flow mid-conversation — with no error output whatsoever.** This is extremely painful to debug. Before testing anything, double-check that *every* variable in the table above is declared with default value `0` and access "manageable by service".
+**⚠️ The silent-failure gotcha:** If any variable is missing or has the wrong access setting, the script fails silently and halts the flow mid-conversation — with **no error output** whatsoever. This is extremely painful to debug. Before testing anything, double-check that *every* variable in the table above is declared with default value `0` and access "manageable by service".
 
 ## Running a command
 
@@ -64,24 +62,24 @@ Many commands require that the participant's current location was set first, in 
 
 | Command (value of `$jsStateHelperCmd`) | Preconditions | Effect / returns |
 |---|---|---|
+| `countCompletedSessionsInModule()` | module entered | Number of completed sessions in the current module |
+| `countCompletedSessionsOverall()` | — | Number of completed sessions across all modules |
+| `enterActivity('a_rolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `enterModule('m_bouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
 | `enterSession('s_gesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
-| `enterActivity('a_rolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
-| `markActivityCompleted()` | module + session + activity entered | Marks the current activity as completed |
+| `getModuleProgress('m_bouMgt')` | — | That module's progress as a number between 0 and 1 |
+| `getParticipantLocation()` | — | The current location as `m_x: s_y: a_z` (or `null` before any module was entered); also written to `$participantGroup` after every run |
+| `getProgress()` | — | Overall progress as a number between 0 and 1 |
+| `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue |
+| `hasModuleAdequateProgress('m_bouMgt')` | — | `true` once the module has adequate progress (threshold, not full completion) |
+| `hasSessionAdequateProgress('s_gesGre')` | module entered | `true` once the session has adequate progress |
 | `isModuleCompleted('m_bouMgt')` | — | `true` if all of the module's sessions (with activities) are completed |
 | `isSessionCompleted('s_gesGre')` | module entered | `true` if all activities of that session (in the current module) are completed |
-| `isGoodEnough('m_bouMgt')` | — | `true` once the module has adequate progress (threshold, not full completion) |
-| `hasSessionAdequateProgress('s_gesGre')` | module entered | `true` once the session has adequate progress |
-| `countCompletedSessions()` | module entered | Number of completed sessions in the current module |
-| `countCompletedOverall()` | — | Number of completed sessions across all modules |
-| `getProgress()` | — | Overall progress as a number between 0 and 1 |
-| `getModuleProgress('m_bouMgt')` | — | That module's progress as a number between 0 and 1 |
-| `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue |
+| `markActivityCompleted()` | module + session + activity entered | Marks the current activity as completed |
+| `markSuggestionSeen()` / `isSuggestionSeen()` | — | Sets / reads a one-time "suggestion seen" flag |
+| `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
 | `populateMenuForModule()` | — | Fills `$jsStateHelperMenuLabel1–9` and `$jsStateHelperMenuId1–9` with one entry per module |
 | `populateMenuForSession()` | module entered | Fills the labels and ids with the current module's sessions |
-| `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
-| `getParticipantLocation()` | — | The current location as `m_x: s_y: a_z` (or `null` before any module was entered); also written to `$participantGroup` after every run |
-| `markSuggestionSeen()` / `isSuggestionSeen()` | — | Sets / reads a one-time "suggestion seen" flag |
 | `toString()` | — | The full state as a JSON string (the same value written to `$jsStateHelperJson`) |
 
 ## Menus
