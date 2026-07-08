@@ -25,6 +25,8 @@ Run a single test by name:
 npx vitest run -t "returns true when all activities are completed"
 ```
 
+Small changes (typo/doc fixes) can skip the PR flow via the `/push-to-master` command: it runs the tests locally, temporarily adds an admin bypass to the `protect-master` ruleset, pushes, and restores protection.
+
 ## Decision log & open questions
 
 Design decisions and their rationale (including rejected alternatives) live in `docs/decisions.md` — append-only and numbered. Check it before re-opening a settled question; add entries via the `/log-decision` command, which also propagates the decision to affected docs. Unresolved items live in `docs/open-questions.md`; when one is settled, graduate it into the decision log and delete it there.
