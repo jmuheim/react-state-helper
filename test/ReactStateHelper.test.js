@@ -117,7 +117,6 @@ const testState = {
       ],
     },
   ],
-  suggestionSeen: false,
   currentModuleId: null,
   currentSessionId: null,
   currentActivityId: null,
@@ -245,45 +244,6 @@ describe('ReactStateHelper', () => {
         }
       }
       expect(helper.isModuleCompleted('m_mod1')).toBe(false);
-    });
-  });
-
-  describe('countCompletedSessionsInModule', () => {
-    it('throws if no module has been entered', () => {
-      expect(() => helper.countCompletedSessionsInModule()).toThrow('No module entered yet');
-    });
-
-    it('returns 0 for the current module in the default state', () => {
-      helper.enterModule('m_mod1');
-      expect(helper.countCompletedSessionsInModule()).toBe(0);
-    });
-
-    it('counts only completed sessions within the current module', () => {
-      helper.enterModule('m_mod1');
-      helper.enterSession('s_ses1a');
-      helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
-      helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.countCompletedSessionsInModule()).toBe(1);
-      helper.enterModule('m_mod2');
-      expect(helper.countCompletedSessionsInModule()).toBe(0);
-    });
-  });
-
-  describe('countCompletedSessionsOverall', () => {
-    it('returns 0 in the default state', () => {
-      expect(helper.countCompletedSessionsOverall()).toBe(0);
-    });
-
-    it('increases as sessions across modules are completed', () => {
-      helper.enterModule('m_mod1');
-      helper.enterSession('s_ses1a');
-      helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
-      helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.countCompletedSessionsOverall()).toBe(1);
-      helper.enterModule('m_mod2');
-      helper.enterSession('s_ses2a');
-      helper.enterActivity('a_act2a1'); helper.markActivityCompleted();
-      expect(helper.countCompletedSessionsOverall()).toBe(2);
     });
   });
 
@@ -860,29 +820,6 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('markSuggestionSeen / isSuggestionSeen', () => {
-    it('is false in the default state', () => {
-      expect(helper.isSuggestionSeen()).toBe(false);
-    });
-
-    it('becomes true after markSuggestionSeen', () => {
-      helper.markSuggestionSeen();
-      expect(helper.isSuggestionSeen()).toBe(true);
-    });
-
-    it('persists through serialization', () => {
-      helper.markSuggestionSeen();
-      const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.isSuggestionSeen()).toBe(true);
-    });
-
-    it('is idempotent — calling again leaves it true', () => {
-      helper.markSuggestionSeen();
-      helper.markSuggestionSeen();
-      expect(helper.isSuggestionSeen()).toBe(true);
-    });
-  });
-
   describe('production data (ReactStateHelper.initialState()) structural invariants', () => {
     let state;
     beforeEach(() => {
@@ -922,7 +859,6 @@ describe('ReactStateHelper', () => {
           ],
         },
       ],
-      suggestionSeen: false,
       currentModuleId: null,
       currentSessionId: null,
       currentActivityId: null,

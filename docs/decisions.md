@@ -192,3 +192,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** `isGoodEnough` was the last holdout still using the informal "good enough" wording for the softer-than-completion bar that everything else — field names, `hasAdequateProgress()`, the `hasSessionAdequateProgress` command, docs prose — calls "adequate progress" since #21. The new name also parallels the session-level command exactly. Nothing is deployed to MobileCoach yet, so renaming the public command surface is free. **Rejected:** keeping `isGoodEnough` as an alias — dead surface with no deployed callers.
 
 **Watch for:** nothing — no `$`-wrapper variables are affected. Once flows are live in MobileCoach, command renames need a coordinated flow update instead.
+
+## 24. Legacy command surface is removed: suggestion-seen flag and both session-count commands deleted; `toString`/`getParticipantLocation` dropped from the cheat-sheet
+
+*(2026-07-08)*
+
+**Decision:** `markSuggestionSeen()` / `isSuggestionSeen()` (with the persisted `suggestionSeen` state field), `countCompletedSessionsInModule()`, and `countCompletedSessionsOverall()` are deleted. `toString()` and `getParticipantLocation()` stay as methods — the wrapper calls them on every run to write `$jsStateHelperJson` and `$participantGroup` — but their rows leave the content-editor command cheat-sheet, since issuing them as `$jsStateHelperCmd` is never needed. `Module.countCompletedSessions()` stays: `hasAdequateProgress()` and `getProgressAdvice()` use it internally.
+
+**Why:** the suggestion-seen pair and both count commands date from the very first implementation commit, have no internal callers, and no documented use case in any doc or decision entry — leftover brainstorming surface that content editors would otherwise have to understand. The two cheat-sheet-only removals cut commands whose outputs are written automatically after every run anyway. Nothing is deployed to MobileCoach yet, so deleting public commands (and the `suggestionSeen` field from the persisted `$jsStateHelperJson` shape) is free. **Rejected:** keeping `countCompletedSessionsOverall()` "just in case" a future flow wants a "≥ N sessions completed in total" rule — note that the `$jsStateHelperSessionsCompleted` CSV is *not* a substitute (MobileCoach branching cannot count CSV entries), so if such a rule is ever designed, re-add the command then.
+
+**Watch for:** no MobileCoach variables need declaring or removing — `$jsStateHelperSessionsCompleted` and `$participantGroup` are still written every run. If a "suggestion" feature returns, design it with a documented flow use case first.
