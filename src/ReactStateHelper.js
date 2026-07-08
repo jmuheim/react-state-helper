@@ -623,7 +623,8 @@ if (typeof process === 'undefined') {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. jsStateHelperJson becomes $jsStateHelperJson.
     jsStateHelperJson:              helper ? helper.toString() : jsStateHelperJson,
-    jsStateHelperResult:            result,
+    // '' when the command returned nothing (enter…, mark…, populate…), so the variable never holds a stale value from an earlier run.
+    jsStateHelperResult:            result === undefined ? '' : result,
     jsStateHelperStatus:            status,
     jsStateHelperError:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
     jsStateHelperSessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',

@@ -36,7 +36,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    |---|---|
    | `$jsStateHelperCmd` | Command to execute, e.g. `markActivityCompleted()` (set this before each script run) |
    | `$jsStateHelperJson` | Full serialized state, persisted between runs |
-   | `$jsStateHelperResult` | Return value of the last command (the `populateMenuLabelsFor…()` commands return nothing — their output goes to the menu label variables instead) |
+   | `$jsStateHelperResult` | Return value of the last command; `""` when the command returns nothing (`enterModule(…)`, `markActivityCompleted()`, the `populateMenuLabelsFor…()` commands, …) |
    | `$jsStateHelperStatus` | `success` or `error` |
    | `$jsStateHelperError` | Error message if status is `error`, otherwise `none` |
    | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session ids across all modules |
@@ -53,7 +53,7 @@ MobileCoach cannot call JavaScript functions directly. Instead, each script run 
 
 1. Set `$jsStateHelperCmd` to the command you want, e.g. `markActivityCompleted()` — exactly as written in the cheat-sheet below. **Be extra careful: typos or syntax errors break the run.**
 2. Execute the script (the pasted `ReactStateHelper.js`).
-3. Read the results: the command's return value is in `$jsStateHelperResult`, `$jsStateHelperStatus` is `success` or `error`, and `$jsStateHelperError` holds the error message (or `none`).
+3. Read the results: the command's return value is in `$jsStateHelperResult` (`""` for commands that return nothing), `$jsStateHelperStatus` is `success` or `error`, and `$jsStateHelperError` holds the error message (or `none`).
 
 On the very first run, `$jsStateHelperJson` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$jsStateHelperJson` (the persisted state), `$jsStateHelperSessionsCompleted`, `$participantGroup`, and all nine `$jsStateHelperMenuLabel` variables (empty unless the run's command was a `populateMenuLabelsFor…()` one) — you never have to write these yourself.
 

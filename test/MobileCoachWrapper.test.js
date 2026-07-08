@@ -33,6 +33,12 @@ describe('MobileCoach deployment wrapper', () => {
     for (let i = 1; i <= 9; i++) expect(o).toHaveProperty(`jsStateHelperMenuLabel${i}`);
   });
 
+  it('writes "" to jsStateHelperResult when the command returns nothing (no stale result)', () => {
+    const o = runWrapper({ cmd: "enterModule('m_bouMgt')" });
+    expect(o.jsStateHelperStatus).toBe('success');
+    expect(o.jsStateHelperResult).toBe('');
+  });
+
   it('writes all 9 menu label slots as "" on runs that do not populate a menu (no stale labels)', () => {
     const o = runWrapper({ cmd: "getModuleProgress('m_bouMgt')" });
     expect(o.jsStateHelperStatus).toBe('success');
