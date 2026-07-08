@@ -30,6 +30,7 @@ describe('MobileCoach platform constraints', () => {
         'jsStateHelperError',
         'jsStateHelperSessionsCompleted',
         'jsStateHelperMenuLabel',
+        'jsStateHelperMenuId',
         'participantGroup',
       ]) {
         expect(names).toContain(expected);
