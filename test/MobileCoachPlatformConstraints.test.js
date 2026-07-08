@@ -1,0 +1,43 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { extractWrapperVariables, findUndocumentedVariables } from '../.claude/hooks/check-wrapper-variables.mjs';
+
+// The MobileCoach platform constraints from CLAUDE.md, enforced against the source *text* —
+// violating them never breaks a unit test, only the deployed script (usually silently).
+const src = readFileSync(fileURLToPath(new URL('../src/ReactStateHelper.js', import.meta.url)), 'utf8');
+const readme = readFileSync(fileURLToPath(new URL('../README.md', import.meta.url)), 'utf8');
+
+describe('MobileCoach platform constraints', () => {
+  describe('self-containedness (the script is copy-pasted verbatim into MobileCoach)', () => {
+    it('contains no ES module syntax', () => {
+      expect(src).not.toMatch(/^\s*(import|export)\b/m);
+    });
+
+    it('contains no CommonJS require', () => {
+      expect(src).not.toMatch(/\brequire\s*\(/);
+    });
+  });
+
+  describe('wrapper variables stay in sync with the README variable table', () => {
+    it('extraction finds the known wrapper variables (guards the check itself against silently going blind)', () => {
+      const names = [...extractWrapperVariables(src)];
+      for (const expected of [
+        'jsStateHelperJson',
+        'jsStateHelperCmd',
+        'jsStateHelperResult',
+        'jsStateHelperStatus',
+        'jsStateHelperError',
+        'jsStateHelperSessionsCompleted',
+        'jsStateHelperMenuLabel',
+        'participantGroup',
+      ]) {
+        expect(names).toContain(expected);
+      }
+    });
+
+    it('documents every wrapper variable in README (an undeclared variable fails silently in MobileCoach)', () => {
+      expect(findUndocumentedVariables(src, readme)).toEqual([]);
+    });
+  });
+});
