@@ -54,6 +54,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 8. Intro sessions opt out via `isIntro`, and every module needs at least one non-intro session
 
+> Refined by #22: an intro session now completes on first entry and *does* count toward module completion (only the progress fraction still ignores it), and it must be the module's first session. The `isIntro` opt-out and the "at least one non-intro session" rule still stand.
+
 **Decision:** A session with no activities must set `isIntro: true`. Completion and progress math filter to sessions that have activities. `Module.fromJSON` additionally requires at least one session with activities (`030b62b`).
 
 **Why:** `isIntro` exists solely so `Session.fromJSON` can tell an intentionally-empty stepping-stone session apart from one that is missing activities by mistake. Without the module-level rule, a module made up entirely of intro sessions would be vacuously "complete" before the participant has done anything.
@@ -83,6 +85,9 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Watch for:** titles containing `:` — see `docs/open-questions.md`.
 
 ## 12. "Adequate progress" is a softer bar than completion
+
+> Refined by #21: the threshold fields are renamed `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress`. The softer-bar concept itself stands.
+> Refined by #23: `isGoodEnough()` is renamed `hasModuleAdequateProgress()`.
 
 **Decision:** `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` thresholds; `hasAdequateProgress()` / `isGoodEnough()` report once that many children are completed, even if not all are.
 
@@ -155,3 +160,45 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** it puts the concatenation under MobileCoach-side control, and together with the load-time rejection of colons in titles (commit c304cee) it guarantees the concatenated entry contains **exactly one** colon — so where MobileCoach splits (first vs. last colon) no longer matters, settling the former open question "Colons inside titles vs. the `:`-split of menu labels". The title validation stays, because the displayed string is still `label:id` after concatenation and a colon in a title would still corrupt the split. **Rejected:** dropping the title-colon validation as "no longer JS's concern" — the library is still the only place that can catch the corruption before it silently breaks routing.
 
 **Watch for:** nine new MobileCoach variables `$jsStateHelperMenuId1`–`$jsStateHelperMenuId9` must be declared (default `0`, access "manageable by service") **before** deploying the updated script — a missing one fails silently mid-flow.
+
+## 21. The threshold concept is uniformly called "adequate progress", including in field names
+
+> Refined by #23: the module-level command `isGoodEnough()` — not renamed here — is renamed `hasModuleAdequateProgress()`, completing the unification.
+
+*(2026-07-08)*
+
+**Decision:** The JSON threshold fields `sessions_needed_for_adequate_use` / `activities_needed_for_adequate_use` are renamed to `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress` (refines #12). "Adequate progress" is now the single term for the softer-than-completion bar everywhere: field names, `hasAdequateProgress()`, the `hasSessionAdequateProgress` command, and docs prose.
+
+**Why:** the codebase used two names for one concept — "adequate progress" in every method name, command, docs heading, and even #12's own title, versus "adequate use" only in the two field names — forcing readers to learn that both mean the same thing. Renaming the two fields is the minimal unification; **rejected:** renaming the methods/command to "adequate use" instead, which would have touched far more surface (public API, content-editor cheat-sheet, prose) to standardize on the less descriptive term. Nothing is deployed to MobileCoach yet, so breaking the persisted `$jsStateHelperJson` shape is free; no `$`-wrapper variables are affected.
+
+**Watch for:** nothing — once state is live in MobileCoach, any future field rename needs a migration path instead (see the no-backward-compat window closing with the first deployment).
+
+## 22. An intro session completes on first entry and counts toward module completion
+
+*(2026-07-08)*
+
+**Decision:** `Session.isCompleted()` returns `true` for an intro session (`isIntro: true`) as soon as it has been entered once (`entered_first_at !== null`), and `Module.isCompleted()` now requires **all** sessions to be completed — intros included — rather than filtering to sessions that have activities (refines #8). The progress *fraction* (`getProgress`/`getModuleProgress`) and session counts still filter to sessions with activities, so an intro adds nothing to the denominator. An intro must also be its module's first session, checked in `Module.fromJSON`.
+
+**Why:** intro sessions previously "never counted either way", so there was no way to tell whether a participant had actually seen a module's introduction, and a module could read as fully completed while its intro was never opened. Completing an intro on entry gives that a truthful signal — an intro is "done" precisely when it has been read — and keeping it out of the progress fraction means it still adds no busywork to the percentage. Restricting intros to the first slot matches how they are used (a stepping stone *into* the module) and keeps "was the intro seen" unambiguous. **Rejected:** leaving intros uncounted (loses the "intro seen" signal); marking intros complete unconditionally at load (would report completion before the participant ever entered the module).
+
+**Watch for:** nothing new to declare in MobileCoach — the change is pure library logic over existing `entered_first_at` timestamps. Flows that key off `isModuleCompleted` will now also require the intro to have been entered.
+
+## 23. The module-level command is renamed `hasModuleAdequateProgress`, completing the "adequate progress" unification
+
+*(2026-07-08)*
+
+**Decision:** The public command `isGoodEnough(moduleId)` is renamed `hasModuleAdequateProgress(moduleId)` (refines #21, which unified the terminology in field names and docs but left this command untouched).
+
+**Why:** `isGoodEnough` was the last holdout still using the informal "good enough" wording for the softer-than-completion bar that everything else — field names, `hasAdequateProgress()`, the `hasSessionAdequateProgress` command, docs prose — calls "adequate progress" since #21. The new name also parallels the session-level command exactly. Nothing is deployed to MobileCoach yet, so renaming the public command surface is free. **Rejected:** keeping `isGoodEnough` as an alias — dead surface with no deployed callers.
+
+**Watch for:** nothing — no `$`-wrapper variables are affected. Once flows are live in MobileCoach, command renames need a coordinated flow update instead.
+
+## 24. Legacy command surface is removed: suggestion-seen flag and both session-count commands deleted; `toString`/`getParticipantLocation` dropped from the cheat-sheet
+
+*(2026-07-08)*
+
+**Decision:** `markSuggestionSeen()` / `isSuggestionSeen()` (with the persisted `suggestionSeen` state field), `countCompletedSessionsInModule()`, and `countCompletedSessionsOverall()` are deleted. `toString()` and `getParticipantLocation()` stay as methods — the wrapper calls them on every run to write `$jsStateHelperJson` and `$participantGroup` — but their rows leave the content-editor command cheat-sheet, since issuing them as `$jsStateHelperCmd` is never needed. `Module.countCompletedSessions()` stays: `hasAdequateProgress()` and `getProgressAdvice()` use it internally.
+
+**Why:** the suggestion-seen pair and both count commands date from the very first implementation commit, have no internal callers, and no documented use case in any doc or decision entry — leftover brainstorming surface that content editors would otherwise have to understand. The two cheat-sheet-only removals cut commands whose outputs are written automatically after every run anyway. Nothing is deployed to MobileCoach yet, so deleting public commands (and the `suggestionSeen` field from the persisted `$jsStateHelperJson` shape) is free. **Rejected:** keeping `countCompletedSessionsOverall()` "just in case" a future flow wants a "≥ N sessions completed in total" rule — note that the `$jsStateHelperSessionsCompleted` CSV is *not* a substitute (MobileCoach branching cannot count CSV entries), so if such a rule is ever designed, re-add the command then.
+
+**Watch for:** no MobileCoach variables need declaring or removing — `$jsStateHelperSessionsCompleted` and `$participantGroup` are still written every run. If a "suggestion" feature returns, design it with a documented flow use case first.

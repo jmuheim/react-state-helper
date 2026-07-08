@@ -5,13 +5,13 @@ const testState = {
     {
       id: 'm_mod1',
       title: 'Modul Eins',
-      sessions_needed_for_adequate_use: 1,
+      sessions_needed_for_adequate_progress: 1,
       entered_first_at: null, entered_last_at: null, times_entered: 0,
       sessions: [
         {
           id: 's_ses1intro',
           title: 'Intro Eins',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
           isIntro: true,
@@ -19,7 +19,7 @@ const testState = {
         {
           id: 's_ses1a',
           title: 'Session Eins A',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act1a1', title: 'Aktivität 1a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -29,7 +29,7 @@ const testState = {
         {
           id: 's_ses1b',
           title: 'Session Eins B',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act1b1', title: 'Aktivität 1b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -40,13 +40,13 @@ const testState = {
     {
       id: 'm_mod2',
       title: 'Modul Zwei',
-      sessions_needed_for_adequate_use: 1,
+      sessions_needed_for_adequate_progress: 1,
       entered_first_at: null, entered_last_at: null, times_entered: 0,
       sessions: [
         {
           id: 's_ses2intro',
           title: 'Intro Zwei',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
           isIntro: true,
@@ -54,7 +54,7 @@ const testState = {
         {
           id: 's_ses2a',
           title: 'Session Zwei A',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act2a1', title: 'Aktivität 2a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -63,7 +63,7 @@ const testState = {
         {
           id: 's_ses2b',
           title: 'Session Zwei B',
-          activities_needed_for_adequate_use: 2,
+          activities_needed_for_adequate_progress: 2,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act2b1', title: 'Aktivität 2b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -76,13 +76,13 @@ const testState = {
     {
       id: 'm_mod3',
       title: 'Modul Drei',
-      sessions_needed_for_adequate_use: 2,
+      sessions_needed_for_adequate_progress: 2,
       entered_first_at: null, entered_last_at: null, times_entered: 0,
       sessions: [
         {
           id: 's_ses3intro',
           title: 'Intro Drei',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [],
           isIntro: true,
@@ -90,7 +90,7 @@ const testState = {
         {
           id: 's_ses3a',
           title: 'Session Drei A',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act3a1', title: 'Aktivität 3a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -99,7 +99,7 @@ const testState = {
         {
           id: 's_ses3b',
           title: 'Session Drei B',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act3b1', title: 'Aktivität 3b-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -108,7 +108,7 @@ const testState = {
         {
           id: 's_ses3c',
           title: 'Session Drei C',
-          activities_needed_for_adequate_use: 1,
+          activities_needed_for_adequate_progress: 1,
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act3c1', title: 'Aktivität 3c-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
@@ -117,7 +117,6 @@ const testState = {
       ],
     },
   ],
-  suggestionSeen: false,
   currentModuleId: null,
   currentSessionId: null,
   currentActivityId: null,
@@ -223,7 +222,7 @@ describe('ReactStateHelper', () => {
       expect(helper.isModuleCompleted('m_mod1')).toBe(false);
     });
 
-    it('returns true when all sessions with activities are completed', () => {
+    it('returns true when all sessions are completed (including the intro)', () => {
       helper.enterModule('m_mod1');
       const mod1Data = testState.modules.find(m => m.id === 'm_mod1');
       for (const ses of mod1Data.sessions) {
@@ -245,45 +244,6 @@ describe('ReactStateHelper', () => {
         }
       }
       expect(helper.isModuleCompleted('m_mod1')).toBe(false);
-    });
-  });
-
-  describe('countCompletedSessions', () => {
-    it('throws if no module has been entered', () => {
-      expect(() => helper.countCompletedSessions()).toThrow('No module entered yet');
-    });
-
-    it('returns 0 for the current module in the default state', () => {
-      helper.enterModule('m_mod1');
-      expect(helper.countCompletedSessions()).toBe(0);
-    });
-
-    it('counts only completed sessions within the current module', () => {
-      helper.enterModule('m_mod1');
-      helper.enterSession('s_ses1a');
-      helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
-      helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.countCompletedSessions()).toBe(1);
-      helper.enterModule('m_mod2');
-      expect(helper.countCompletedSessions()).toBe(0);
-    });
-  });
-
-  describe('countCompletedOverall', () => {
-    it('returns 0 in the default state', () => {
-      expect(helper.countCompletedOverall()).toBe(0);
-    });
-
-    it('increases as sessions across modules are completed', () => {
-      helper.enterModule('m_mod1');
-      helper.enterSession('s_ses1a');
-      helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
-      helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.countCompletedOverall()).toBe(1);
-      helper.enterModule('m_mod2');
-      helper.enterSession('s_ses2a');
-      helper.enterActivity('a_act2a1'); helper.markActivityCompleted();
-      expect(helper.countCompletedOverall()).toBe(2);
     });
   });
 
@@ -340,27 +300,27 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('isGoodEnough', () => {
+  describe('hasModuleAdequateProgress', () => {
     beforeEach(() => {
       helper.enterModule('m_mod1');
     });
 
     it('returns false with no completed sessions', () => {
-      expect(helper.isGoodEnough('m_mod1')).toBe(false);
+      expect(helper.hasModuleAdequateProgress('m_mod1')).toBe(false);
     });
 
     it('returns true once the module threshold is met (m_mod1 threshold=1)', () => {
       helper.enterSession('s_ses1a');
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
-      expect(helper.isGoodEnough('m_mod1')).toBe(true);
+      expect(helper.hasModuleAdequateProgress('m_mod1')).toBe(true);
     });
 
     it('does not count sessions from other modules', () => {
       helper.enterModule('m_mod2');
       helper.enterSession('s_ses2a');
       helper.enterActivity('a_act2a1'); helper.markActivityCompleted();
-      expect(helper.isGoodEnough('m_mod1')).toBe(false);
+      expect(helper.hasModuleAdequateProgress('m_mod1')).toBe(false);
     });
   });
 
@@ -696,7 +656,7 @@ describe('ReactStateHelper', () => {
       expect(helper.getMenuLabel(3)).toBe('Session Eins B');
     });
 
-    it('marks content sessions as ✅ when all are done (intro session without activities stays as 👉)', () => {
+    it('marks all sessions as ✅ when all are completed (intro becomes ✅ as soon as it is entered)', () => {
       const mod1Data = testState.modules.find(m => m.id === 'm_mod1');
       for (const ses of mod1Data.sessions) {
         helper.enterSession(ses.id);
@@ -705,7 +665,7 @@ describe('ReactStateHelper', () => {
         }
       }
       helper.populateMenuForSession();
-      expect(helper.getMenuLabel(1)).toBe('👉 Intro Eins');
+      expect(helper.getMenuLabel(1)).toBe('✅ Intro Eins');
       expect(helper.getMenuLabel(2)).toBe('✅ Session Eins A');
       expect(helper.getMenuLabel(3)).toBe('✅ Session Eins B');
     });
@@ -776,7 +736,7 @@ describe('ReactStateHelper', () => {
     });
 
     describe('module-level advice', () => {
-      describe('other modules not yet adequately used (m_mod1: threshold 1, 2 completable sessions)', () => {
+      describe('other modules without adequate progress yet (m_mod1: threshold 1, 2 completable sessions)', () => {
         beforeEach(() => {
           helper.enterModule('m_mod1');
         });
@@ -807,7 +767,7 @@ describe('ReactStateHelper', () => {
         });
       });
 
-      describe('all other modules adequately used (m_mod3: threshold 2, 3 completable sessions)', () => {
+      describe('all other modules with adequate progress (m_mod3: threshold 2, 3 completable sessions)', () => {
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enterModule('m_mod3');
           helper.enterSession('s_ses3a'); helper.enterActivity('a_act3a1'); helper.markActivityCompleted();
@@ -860,29 +820,6 @@ describe('ReactStateHelper', () => {
     });
   });
 
-  describe('markSuggestionSeen / isSuggestionSeen', () => {
-    it('is false in the default state', () => {
-      expect(helper.isSuggestionSeen()).toBe(false);
-    });
-
-    it('becomes true after markSuggestionSeen', () => {
-      helper.markSuggestionSeen();
-      expect(helper.isSuggestionSeen()).toBe(true);
-    });
-
-    it('persists through serialization', () => {
-      helper.markSuggestionSeen();
-      const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.isSuggestionSeen()).toBe(true);
-    });
-
-    it('is idempotent — calling again leaves it true', () => {
-      helper.markSuggestionSeen();
-      helper.markSuggestionSeen();
-      expect(helper.isSuggestionSeen()).toBe(true);
-    });
-  });
-
   describe('production data (ReactStateHelper.initialState()) structural invariants', () => {
     let state;
     beforeEach(() => {
@@ -911,18 +848,17 @@ describe('ReactStateHelper', () => {
         {
           id: 'm_m1',
           title: 'M1',
-          sessions_needed_for_adequate_use: 1,
+          sessions_needed_for_adequate_progress: 1,
           sessions: [
             {
               id: 's_s1',
               title: 'S1',
-              activities_needed_for_adequate_use: 1,
+              activities_needed_for_adequate_progress: 1,
               activities: [{ id: 'a_a1', title: 'A1' }],
             },
           ],
         },
       ],
-      suggestionSeen: false,
       currentModuleId: null,
       currentSessionId: null,
       currentActivityId: null,
@@ -942,8 +878,8 @@ describe('ReactStateHelper', () => {
       state.modules.push({
         id: 'm_m2',
         title: 'M2',
-        sessions_needed_for_adequate_use: 1,
-        sessions: [{ id: 's_s1', title: 'S1 dup', activities_needed_for_adequate_use: 1, activities: [{ id: 'a_a2', title: 'A2' }] }],
+        sessions_needed_for_adequate_progress: 1,
+        sessions: [{ id: 's_s1', title: 'S1 dup', activities_needed_for_adequate_progress: 1, activities: [{ id: 'a_a2', title: 'A2' }] }],
       });
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Duplicate id found in state: s_s1');
     });
@@ -968,23 +904,23 @@ describe('ReactStateHelper', () => {
 
     it('throws when a module threshold exceeds its own session count', () => {
       const state = minimalValidState();
-      state.modules[0].sessions_needed_for_adequate_use = 2;
-      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 has an unachievable sessions_needed_for_adequate_use (2) for its 1 session(s)');
+      state.modules[0].sessions_needed_for_adequate_progress = 2;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 has an unachievable sessions_needed_for_adequate_progress (2) for its 1 session(s)');
     });
 
     it('throws when a session threshold exceeds its own activity count', () => {
       const state = minimalValidState();
-      state.modules[0].sessions[0].activities_needed_for_adequate_use = 2;
-      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s_s1 has an unachievable activities_needed_for_adequate_use (2) for its 1 activity/activities');
+      state.modules[0].sessions[0].activities_needed_for_adequate_progress = 2;
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s_s1 has an unachievable activities_needed_for_adequate_progress (2) for its 1 activity/activities');
     });
 
     it('does not enforce a threshold for intro sessions without activities', () => {
       const state = minimalValidState();
       state.modules[0].sessions[0].activities = [];
-      state.modules[0].sessions[0].activities_needed_for_adequate_use = 5;
+      state.modules[0].sessions[0].activities_needed_for_adequate_progress = 5;
       state.modules[0].sessions[0].isIntro = true;
       // The module needs at least one session with activities besides the intro session under test.
-      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_use: 1, activities: [{ id: 'a_a2', title: 'A2' }] });
+      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_progress: 1, activities: [{ id: 'a_a2', title: 'A2' }] });
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
     });
 
@@ -1012,7 +948,19 @@ describe('ReactStateHelper', () => {
       state.modules[0].sessions[0].activities = [];
       state.modules[0].sessions[0].isIntro = true;
       // The module needs at least one session with activities besides the intro session under test.
-      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_use: 1, activities: [{ id: 'a_a2', title: 'A2' }] });
+      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_progress: 1, activities: [{ id: 'a_a2', title: 'A2' }] });
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
+    });
+
+    it('throws when an intro session is not the first session in its module', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions.push({ id: 's_s2', title: 'S2', activities_needed_for_adequate_progress: 1, activities: [], isIntro: true });
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s_s2 in module m_m1 is marked isIntro but is not the first session — only the first session may be an intro');
+    });
+
+    it('does not throw when the first session is isIntro and subsequent sessions are not', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions.unshift({ id: 's_intro', title: 'Intro', activities_needed_for_adequate_progress: 1, activities: [], isIntro: true });
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).not.toThrow();
     });
 
@@ -1022,8 +970,8 @@ describe('ReactStateHelper', () => {
       state.modules = Array.from({ length: 10 }, (_, i) => ({
         id: `m_m${i}`,
         title: `M${i}`,
-        sessions_needed_for_adequate_use: 1,
-        sessions: [{ id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [{ id: `a_a${i}`, title: `A${i}` }] }],
+        sessions_needed_for_adequate_progress: 1,
+        sessions: [{ id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_progress: 1, activities: [{ id: `a_a${i}`, title: `A${i}` }] }],
       }));
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('State has 10 modules, but at most 9 are supported');
     });
@@ -1032,8 +980,8 @@ describe('ReactStateHelper', () => {
       const state = minimalValidState();
       state.modules[0].sessions = Array.from({ length: 10 }, (_, i) =>
         i === 0
-          ? { id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [{ id: `a_a${i}`, title: `A${i}` }] }
-          : { id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_use: 1, activities: [], isIntro: true }
+          ? { id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_progress: 1, activities: [{ id: `a_a${i}`, title: `A${i}` }] }
+          : { id: `s_s${i}`, title: `S${i}`, activities_needed_for_adequate_progress: 1, activities: [], isIntro: true }
       );
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 has 10 sessions, but at most 9 are supported');
     });
