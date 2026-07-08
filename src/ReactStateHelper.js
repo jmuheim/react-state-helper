@@ -171,6 +171,10 @@ class Activity {
 class ReactStateHelper {
   #state;
 
+  // Menu labels populated by the populateMenuLabelsFor…() methods, read back per slot via
+  // getMenuLabel(). Not part of #state: labels are rebuilt right before showing a menu, never persisted.
+  #menuLabels = [];
+
   static initDefaultState() {
     return this.loadExistingState(JSON.stringify(this.initialState()));
   }
@@ -504,38 +508,44 @@ class ReactStateHelper {
   }
 
   populateMenuLabelsForModule() {
-    return this.#buildMenuVars(this.#state.modules);
+    this.#menuLabels = this.#buildMenuLabels(this.#state.modules);
   }
 
   populateMenuLabelsForSession() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    return this.#buildMenuVars(this.#findModule(this.#state.currentModuleId).sessions);
+    this.#menuLabels = this.#buildMenuLabels(this.#findModule(this.#state.currentModuleId).sessions);
   }
 
   populateMenuLabelsForActivity() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    return this.#buildMenuVars(this.#findSession(this.#state.currentSessionId).activities);
+    this.#menuLabels = this.#buildMenuLabels(this.#findSession(this.#state.currentSessionId).activities);
   }
 
-  #buildMenuVars(items) {
+  // Slot numbers run 1–9, matching the MobileCoach menu label variables. Empty until one of the
+  // populateMenuLabelsFor…() methods was called ('' hides the slot in MobileCoach).
+  getMenuLabel(slot) {
+    return this.#menuLabels[slot - 1] ?? '';
+  }
+
+  #buildMenuLabels(items) {
     const { completed: completedEmoji, next: nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
-    const vars = {};
+    const labels = [];
     let nextAssigned = false;
     for (let i = 0; i < MAX_MENU_SLOTS; i++) {
       const item = items[i];
       if (!item) {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = '';
+        labels.push('');
       } else if (item.isCompleted()) {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = `${completedEmoji ? completedEmoji + ' ' : ''}${item.title}:${item.id}`;
+        labels.push(`${completedEmoji ? completedEmoji + ' ' : ''}${item.title}:${item.id}`);
       } else if (!nextAssigned) {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = `${nextEmoji ? nextEmoji + ' ' : ''}${item.title}:${item.id}`;
+        labels.push(`${nextEmoji ? nextEmoji + ' ' : ''}${item.title}:${item.id}`);
         nextAssigned = true;
       } else {
-        vars[`jsStateHelperMenuLabel${i + 1}`] = `${item.title}:${item.id}`;
+        labels.push(`${item.title}:${item.id}`);
       }
     }
-    return vars;
+    return labels;
   }
 
   #findModule(moduleId) {
@@ -619,5 +629,13 @@ if (typeof process === 'undefined') {
     jsStateHelperSessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
     participantGroup:               helper ? helper.getParticipantLocation() : null
   };
+
+  // All 9 menu labels are written back to MobileCoach as individual variables, on every run.
+  // A populateMenuLabelsFor…() command fills them; after any other command every slot is ''
+  // (hidden), so (re)populate the menu right before displaying it.
+  for (let i = 1; i <= MAX_MENU_SLOTS; i++) {
+    o[`jsStateHelperMenuLabel${i}`] = helper ? helper.getMenuLabel(i) : '';
+  }
+
   o
 }
