@@ -23,7 +23,7 @@ const testState = {
           entered_first_at: null, entered_last_at: null, times_entered: 0,
           activities: [
             { id: 'a_act1a1', title: 'Aktivität 1a-1', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
-            { id: 'a_act1a2', title: 'Aktivität 1a-2: Untertitel', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
+            { id: 'a_act1a2', title: 'Aktivität 1a-2 – Untertitel', entered_first_at: null, entered_last_at: null, times_entered: 0, completed: false },
           ],
         },
         {
@@ -706,7 +706,7 @@ describe('ReactStateHelper', () => {
     it('marks the first incomplete activity as 👉 and leaves the rest plain', () => {
       helper.populateMenuLabelsForActivity();
       expect(helper.getMenuLabel(1)).toBe('👉 Aktivität 1a-1:a_act1a1');
-      expect(helper.getMenuLabel(2)).toBe('Aktivität 1a-2: Untertitel:a_act1a2');
+      expect(helper.getMenuLabel(2)).toBe('Aktivität 1a-2 – Untertitel:a_act1a2');
     });
 
     it('fills unused slots with empty string', () => {
@@ -718,7 +718,7 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('a_act1a1'); helper.markActivityCompleted();
       helper.populateMenuLabelsForActivity();
       expect(helper.getMenuLabel(1)).toBe('✅ Aktivität 1a-1:a_act1a1');
-      expect(helper.getMenuLabel(2)).toBe('👉 Aktivität 1a-2: Untertitel:a_act1a2');
+      expect(helper.getMenuLabel(2)).toBe('👉 Aktivität 1a-2 – Untertitel:a_act1a2');
     });
 
     it('throws if no module has been entered', () => {
@@ -731,7 +731,7 @@ describe('ReactStateHelper', () => {
       helper.enterActivity('a_act1a2'); helper.markActivityCompleted();
       helper.populateMenuLabelsForActivity();
       expect(helper.getMenuLabel(1)).toBe('✅ Aktivität 1a-1:a_act1a1');
-      expect(helper.getMenuLabel(2)).toBe('✅ Aktivität 1a-2: Untertitel:a_act1a2');
+      expect(helper.getMenuLabel(2)).toBe('✅ Aktivität 1a-2 – Untertitel:a_act1a2');
     });
 
     it('throws if no session has been entered', () => {
@@ -1014,6 +1014,24 @@ describe('ReactStateHelper', () => {
       const state = minimalValidState();
       state.modules[0].sessions[0].activities = Array.from({ length: 10 }, (_, i) => ({ id: `a_a${i}`, title: `A${i}` }));
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s_s1 has 10 activities, but at most 9 are supported');
+    });
+
+    it('throws when a module title contains a colon', () => {
+      const state = minimalValidState();
+      state.modules[0].title = 'Modul: Einführung';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module m_m1 title "Modul: Einführung" must not contain a colon');
+    });
+
+    it('throws when a session title contains a colon', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].title = 'Session: Überblick';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session s_s1 title "Session: Überblick" must not contain a colon');
+    });
+
+    it('throws when an activity title contains a colon', () => {
+      const state = minimalValidState();
+      state.modules[0].sessions[0].activities[0].title = 'Aktivität: Detail';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Activity a_a1 title "Aktivität: Detail" must not contain a colon');
     });
   });
 });

@@ -15,6 +15,12 @@ function registerId(idRegistry, id, levelPrefix) {
   idRegistry.add(id);
 }
 
+// MobileCoach menu labels use the format "<emoji> <title>:<id>", splitting on ":"  to extract the id.
+// A colon inside a title would break that split and corrupt navigation.
+function validateTitle(title, entityDescription) {
+  if (title.includes(':')) throw new Error(`${entityDescription} title "${title}" must not contain a colon`);
+}
+
 class Module {
   constructor({ id, title, sessions_needed_for_adequate_use = 1, sessions = [], entered_first_at = null, entered_last_at = null, times_entered = 0 }) {
     this.id = id;
@@ -70,6 +76,7 @@ class Module {
 
   static fromJSON({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions }, idRegistry) {
     registerId(idRegistry, id, 'm');
+    validateTitle(title, `Module ${id}`);
     const module = new Module({ id, title, sessions_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s, idRegistry)) });
     if (module.sessions.length === 0) throw new Error(`Module ${id} has no sessions`);
     // Without at least one session that has activities, isCompleted()/getProgress() (which filter to such
@@ -122,6 +129,7 @@ class Session {
 
   static fromJSON({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities, isIntro }, idRegistry) {
     registerId(idRegistry, id, 's');
+    validateTitle(title, `Session ${id}`);
     const session = new Session({ id, title, activities_needed_for_adequate_use, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), isIntro });
     if (session.activities.length > MAX_MENU_SLOTS) throw new Error(`Session ${id} has ${session.activities.length} activities, but at most ${MAX_MENU_SLOTS} are supported`);
     // Only intro sessions (isIntro: true) may have no activities; every other session needs at least one.
@@ -164,6 +172,7 @@ class Activity {
 
   static fromJSON(obj, idRegistry) {
     registerId(idRegistry, obj.id, 'a');
+    validateTitle(obj.title, `Activity ${obj.id}`);
     return new Activity(obj);
   }
 }
@@ -228,7 +237,7 @@ class ReactStateHelper {
                 },
                 {
                   id: "a_abgKon",
-                  title: "Abgrenzen mit Klarheit: Das Konsequenzengitter",
+                  title: "Abgrenzen mit Klarheit – Das Konsequenzengitter",
                   entered_first_at: null,
                   entered_last_at: null,
                   times_entered: 0,
