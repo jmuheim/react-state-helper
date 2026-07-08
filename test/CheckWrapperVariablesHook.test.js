@@ -25,7 +25,7 @@ function fakeSrc({ outputKeys = ['jsStateHelperJson', 'participantGroup'] } = {}
   ].join('\n');
 }
 
-function fakeReadme(names) {
+function fakeDocTable(names) {
   return names.map(n => `| \`$${n}\` | some purpose |`).join('\n');
 }
 
@@ -45,21 +45,21 @@ describe('check-wrapper-variables hook', () => {
   });
 
   describe('findUndocumentedVariables', () => {
-    it('returns an empty list when README documents every variable', () => {
-      const readme = fakeReadme(['jsStateHelperJson', 'jsStateHelperCmd', 'participantGroup', 'jsStateHelperMenuLabel1']);
-      expect(findUndocumentedVariables(fakeSrc(), readme)).toEqual([]);
+    it('returns an empty list when the doc table documents every variable', () => {
+      const doc = fakeDocTable(['jsStateHelperJson', 'jsStateHelperCmd', 'participantGroup', 'jsStateHelperMenuLabel1']);
+      expect(findUndocumentedVariables(fakeSrc(), doc)).toEqual([]);
     });
 
-    it('matches a numbered series against its README range row via the base name', () => {
-      // README only lists $jsStateHelperMenuLabel1 (– $jsStateHelperMenuLabel9), not the base name itself
-      const readme = fakeReadme(['jsStateHelperJson', 'jsStateHelperCmd', 'participantGroup', 'jsStateHelperMenuLabel1']);
-      expect(findUndocumentedVariables(fakeSrc(), readme)).not.toContain('jsStateHelperMenuLabel');
+    it('matches a numbered series against its doc-table range row via the base name', () => {
+      // The table only lists $jsStateHelperMenuLabel1 (– $jsStateHelperMenuLabel9), not the base name itself
+      const doc = fakeDocTable(['jsStateHelperJson', 'jsStateHelperCmd', 'participantGroup', 'jsStateHelperMenuLabel1']);
+      expect(findUndocumentedVariables(fakeSrc(), doc)).not.toContain('jsStateHelperMenuLabel');
     });
 
-    it('reports variables missing from README, sorted', () => {
+    it('reports variables missing from the doc table, sorted', () => {
       const src = fakeSrc({ outputKeys: ['jsStateHelperJson', 'jsStateHelperZebra', 'jsStateHelperAlpha'] });
-      const readme = fakeReadme(['jsStateHelperJson', 'jsStateHelperCmd', 'jsStateHelperMenuLabel1']);
-      expect(findUndocumentedVariables(src, readme)).toEqual(['jsStateHelperAlpha', 'jsStateHelperZebra']);
+      const doc = fakeDocTable(['jsStateHelperJson', 'jsStateHelperCmd', 'jsStateHelperMenuLabel1']);
+      expect(findUndocumentedVariables(src, doc)).toEqual(['jsStateHelperAlpha', 'jsStateHelperZebra']);
     });
   });
 
@@ -79,7 +79,7 @@ describe('check-wrapper-variables hook', () => {
       expect(result.status).toBe(0);
     });
 
-    it('passes on the real source and README (repo currently has no undocumented variable)', () => {
+    it('passes on the real source and content-editor guide (repo currently has no undocumented variable)', () => {
       const result = runHook(JSON.stringify({ tool_input: { file_path: realSrcPath } }));
       expect(result.stderr).toBe('');
       expect(result.status).toBe(0);

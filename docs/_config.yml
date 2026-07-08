@@ -1,0 +1,3 @@
+theme: jekyll-theme-primer
+title: ReactStateHelper
+description: Hierarchical app state (modules → sessions → activities) for MobileCoach
