@@ -119,3 +119,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** durable knowledge belongs in files and claims should be verified deterministically (per the two project-foundation playbooks this was adapted from) — scaled to this project's actual weight.
 
 **Considered and skipped, with revisit triggers:** Claude Code skills (CLAUDE.md is ~100 lines, far under the ~250-line split threshold, and the MobileCoach constraints are needed in nearly every session — revisit if CLAUDE.md outgrows that); a path-based skill-routing hook (no skills to route to); `docs/roadmap.md` (single-file library with a working feature-per-PR flow — revisit if a multi-PR feature queue forms); Dependabot (one devDependency, zero runtime dependencies, deployment is copy-paste); reviewer subagents (the suite runs in ~250 ms).
+
+## 18. Documentation is published via plain GitHub Pages from `docs/`, and the docs site is the source of truth
+
+*(2026-07-08)*
+
+**Decision:** `docs/` is served by GitHub Pages in "deploy from a branch" mode (`master`, `/docs` folder, GitHub's server-side Jekyll with the built-in `jekyll-theme-primer` — a 3-line `_config.yml`, no front matter, no local build tooling, no new dependencies). Two audience-specific pages were added: `docs/content-editor-guide.md` (for MobileCoach content editors; now holds the canonical wrapper **variable table**, the command cheat-sheet, and menu/routing setup) and `docs/developer-guide.md` (architecture + full platform constraints, promoted from CLAUDE.md). README and CLAUDE.md were slimmed to essentials plus links; the docs pages are the single source of truth. The edit-time hook (`.claude/hooks/check-wrapper-variables.mjs`) and `test/MobileCoachPlatformConstraints.test.js` now check the variable table in `docs/content-editor-guide.md` instead of README.
+
+**Why:** with a first live MobileCoach test upcoming, documentation must serve future developers *and* content editors — the latter benefit from a clean published URL with navigable pages rather than a repo tree. Plain Pages was chosen over VitePress and `remote_theme` just-the-docs to avoid non-standard tooling: multiple pages, converted relative links, and themes come for free from GitHub's default Jekyll plugins, and the same markdown renders on github.com. Making docs the source of truth avoids three copies (README / CLAUDE.md / docs) drifting apart.
+
+**Watch for:** the site only updates from `master` (enable once via Settings → Pages, deploy from branch `master` `/docs`); links from docs pages out of `docs/` must be absolute GitHub URLs. Revisit the tooling choice (sidebar/search via just-the-docs or VitePress) if the page count outgrows a hand-written index.

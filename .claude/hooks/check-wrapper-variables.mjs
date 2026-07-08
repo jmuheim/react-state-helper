@@ -1,7 +1,7 @@
 // Extracts every MobileCoach $variable the deployment wrapper in src/ReactStateHelper.js reads
-// or writes, and reports the ones missing from README.md's variable table. A variable that is
-// used by the script but not declared in MobileCoach makes the whole script fail silently (see
-// CLAUDE.md "Variables"), so a new one must never slip in undocumented.
+// or writes, and reports the ones missing from the variable table in docs/content-editor-guide.md.
+// A variable that is used by the script but not declared in MobileCoach makes the whole script fail
+// silently (see "Variables" in docs/developer-guide.md), so a new one must never slip in undocumented.
 //
 // Used from two places, sharing one extraction so they can't drift apart:
 // - test/MobileCoachPlatformConstraints.test.js fails `npm test` on any undocumented variable
@@ -30,16 +30,16 @@ export function extractWrapperVariables(srcText) {
   for (const [, name] of outputBlock.matchAll(/^\s*([a-zA-Z][a-zA-Z0-9]*):/gm)) names.add(name);
 
   // Numbered series written via template literals outside the wrapper, e.g.
-  // vars[`jsStateHelperMenuLabel${i + 1}`] — recorded under their base name, which the README
+  // vars[`jsStateHelperMenuLabel${i + 1}`] — recorded under their base name, which the table's
   // range row ("$jsStateHelperMenuLabel1 – $jsStateHelperMenuLabel9") matches as a substring.
   for (const [, name] of srcText.matchAll(/`(jsStateHelper[a-zA-Z0-9]*)\$\{/g)) names.add(name);
 
   return names;
 }
 
-export function findUndocumentedVariables(srcText, readmeText) {
+export function findUndocumentedVariables(srcText, docText) {
   return [...extractWrapperVariables(srcText)]
-    .filter(name => !readmeText.includes(`$${name}`))
+    .filter(name => !docText.includes(`$${name}`))
     .sort();
 }
 
@@ -57,13 +57,13 @@ function main() {
 
   const root = new URL('../../', import.meta.url);
   const src = readFileSync(fileURLToPath(new URL('src/ReactStateHelper.js', root)), 'utf8');
-  const readme = readFileSync(fileURLToPath(new URL('README.md', root)), 'utf8');
-  const missing = findUndocumentedVariables(src, readme);
+  const doc = readFileSync(fileURLToPath(new URL('docs/content-editor-guide.md', root)), 'utf8');
+  const missing = findUndocumentedVariables(src, doc);
   if (missing.length === 0) return 0;
 
   console.error(
-    `Wrapper variable(s) not documented in README's variable table: ${missing.map(n => `$${n}`).join(', ')}.\n` +
-    '1. Add them to the table in README.md ("MobileCoach deployment").\n' +
+    `Wrapper variable(s) not documented in the variable table in docs/content-editor-guide.md: ${missing.map(n => `$${n}`).join(', ')}.\n` +
+    '1. Add them to the table in docs/content-editor-guide.md ("One-time MobileCoach setup").\n' +
     '2. Declare them in the MobileCoach project (default value 0, access "manageable by service") ' +
     'before deploying — an undeclared variable makes the script fail silently.'
   );

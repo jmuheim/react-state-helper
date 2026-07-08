@@ -6,7 +6,7 @@ import { extractWrapperVariables, findUndocumentedVariables } from '../.claude/h
 // The MobileCoach platform constraints from CLAUDE.md, enforced against the source *text* —
 // violating them never breaks a unit test, only the deployed script (usually silently).
 const src = readFileSync(fileURLToPath(new URL('../src/ReactStateHelper.js', import.meta.url)), 'utf8');
-const readme = readFileSync(fileURLToPath(new URL('../README.md', import.meta.url)), 'utf8');
+const doc = readFileSync(fileURLToPath(new URL('../docs/content-editor-guide.md', import.meta.url)), 'utf8');
 
 describe('MobileCoach platform constraints', () => {
   describe('self-containedness (the script is copy-pasted verbatim into MobileCoach)', () => {
@@ -19,7 +19,7 @@ describe('MobileCoach platform constraints', () => {
     });
   });
 
-  describe('wrapper variables stay in sync with the README variable table', () => {
+  describe('wrapper variables stay in sync with the variable table in docs/content-editor-guide.md', () => {
     it('extraction finds the known wrapper variables (guards the check itself against silently going blind)', () => {
       const names = [...extractWrapperVariables(src)];
       for (const expected of [
@@ -36,8 +36,8 @@ describe('MobileCoach platform constraints', () => {
       }
     });
 
-    it('documents every wrapper variable in README (an undeclared variable fails silently in MobileCoach)', () => {
-      expect(findUndocumentedVariables(src, readme)).toEqual([]);
+    it('documents every wrapper variable in the content-editor guide (an undeclared variable fails silently in MobileCoach)', () => {
+      expect(findUndocumentedVariables(src, doc)).toEqual([]);
     });
   });
 });
