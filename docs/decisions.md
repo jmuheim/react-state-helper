@@ -66,11 +66,15 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 10. Three explicit `populateMenuLabelsFor*` methods instead of one auto-detecting method
 
+> Refined by #20: renamed to `populateMenuForModule()` / `ForSession()` / `ForActivity()` — the methods now populate ids as well as labels. The three-explicit-methods choice itself stands.
+
 **Decision:** `populateMenuLabelsForModule()` / `ForSession()` / `ForActivity()` rather than a single `populateMenuLabels()` that infers the level from navigation state.
 
 **Why:** (a) a higher-level menu must be displayable while the participant is navigated deeper — e.g. a "go back" screen; (b) explicit names make the `$jsStateHelperCmd` value self-documenting inside flows.
 
 ## 11. Menu labels encode routing as `<emoji> <title>:<id>`
+
+> Superseded by #20: labels and ids are now separate variables; the `:` concatenation happens in the MobileCoach menu definition, not in JS.
 
 **Decision:** Each populated slot is formatted `"✅ Emotionsregulation:m_emoReg"`; unused slots are set to `""` so MobileCoach can hide them; the first not-yet-completed item gets 👉 (see `#MENU_EMOJIS`).
 
@@ -132,6 +136,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 19. Menu labels are stored on the helper and written to all nine label variables on every wrapper run
 
+> Refined by #20: the wrapper now writes nine `jsStateHelperMenuId` variables alongside the nine labels, with the same every-run reset behavior.
+
 *(2026-07-08)*
 
 **Decision:** The `populateMenuLabelsFor…()` methods no longer return a label map; they store the labels on the helper instance (`#menuLabels`, not part of persisted state), read back per slot via `getMenuLabel(slot)`. The deployment wrapper writes all nine `jsStateHelperMenuLabel` keys into its output object on **every** run — `""` unless the run's command populated a menu. Consequence: a menu must be (re)populated immediately before displaying it, and stale labels from earlier runs cannot survive.
@@ -139,3 +145,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** MobileCoach writes each key of the object the script returns back into the variable of the same name — one key, one variable; an object nested inside another value is not unpacked. The original wrapper returned the label map nested inside `$jsStateHelperResult`, so the menu label variables were never written at all. Now every menu label is written back to MobileCoach as an individual variable. **Rejected:** conditionally spreading object-valued command results into the output object — works, but the conditional spread is hard to read and hides which variables the wrapper writes; explicit per-slot writes keep the wrapper's variable set visible and aligned with the pre-declared variable table. Covered by `test/MobileCoachWrapper.test.js`, which runs the wrapper MobileCoach-style (textual `$variable` interpolation, `vm` context without `process`).
 
 **Watch for:** that MobileCoach really writes each returned key back as a variable is our understanding, not yet observed live — the upcoming live test confirms it. If a flow ever needs labels to survive unrelated commands between populate and display, persist `#menuLabels` into `#state` instead of widening the wrapper.
+
+## 20. Menu labels and menu ids are separate variables, concatenated in the MobileCoach menu definition
+
+*(2026-07-08)*
+
+**Decision:** `getMenuLabel(slot)` returns only the display text `"<emoji> <title>"`; the new `getMenuId(slot)` returns the bare id. The wrapper writes `$jsStateHelperMenuId1`–`9` alongside `$jsStateHelperMenuLabel1`–`9` on every run (same `""`-reset behavior, see #19). The content editor concatenates the two per slot in the menu definition — `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1` — so the `:` that MobileCoach splits on at tap time is added in MobileCoach, not in JS. Supersedes #11's `"<emoji> <title>:<id>"` label format. Because the methods now populate ids as well as labels, they were renamed `populateMenuForModule()` / `ForSession()` / `ForActivity()` (refines #10; nothing is deployed yet, so renaming `$jsStateHelperCmd` command strings is free).
+
+**Why:** it puts the concatenation under MobileCoach-side control, and together with the load-time rejection of colons in titles (commit c304cee) it guarantees the concatenated entry contains **exactly one** colon — so where MobileCoach splits (first vs. last colon) no longer matters, settling the former open question "Colons inside titles vs. the `:`-split of menu labels". The title validation stays, because the displayed string is still `label:id` after concatenation and a colon in a title would still corrupt the split. **Rejected:** dropping the title-colon validation as "no longer JS's concern" — the library is still the only place that can catch the corruption before it silently breaks routing.
+
+**Watch for:** nine new MobileCoach variables `$jsStateHelperMenuId1`–`$jsStateHelperMenuId9` must be declared (default `0`, access "manageable by service") **before** deploying the updated script — a missing one fails silently mid-flow.

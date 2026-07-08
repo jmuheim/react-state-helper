@@ -36,11 +36,12 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    |---|---|
    | `$jsStateHelperCmd` | Command to execute, e.g. `markActivityCompleted()` (set this before each script run) |
    | `$jsStateHelperJson` | Full serialized state, persisted between runs |
-   | `$jsStateHelperResult` | Return value of the last command; `""` when the command returns nothing (`enterModule(…)`, `markActivityCompleted()`, the `populateMenuLabelsFor…()` commands, …) |
+   | `$jsStateHelperResult` | Return value of the last command; `""` when the command returns nothing (`enterModule(…)`, `markActivityCompleted()`, the `populateMenuFor…()` commands, …) |
    | `$jsStateHelperStatus` | `success` or `error` |
    | `$jsStateHelperError` | Error message if status is `error`, otherwise `none` |
    | `$jsStateHelperSessionsCompleted` | Comma-separated list of all completed session ids across all modules |
-   | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel9` | Dynamic menu entry labels populated by `populateMenuLabelsForModule()` / `populateMenuLabelsForSession()` / `populateMenuLabelsForActivity()`; written on **every** run — any other command resets all slots to `""` |
+   | `$jsStateHelperMenuLabel1` – `$jsStateHelperMenuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuForModule()` / `populateMenuForSession()` / `populateMenuForActivity()`; written on **every** run — any other command resets all slots to `""` |
+   | `$jsStateHelperMenuId1` – `$jsStateHelperMenuId9` | The id belonging to the label in the same slot (e.g. `m_emoReg`); concatenate the two yourself in the menu definition: `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — populated by `getParticipantLocation()` (we "mis-use" this variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
 ## ⚠️ The silent-failure gotcha
@@ -55,7 +56,7 @@ MobileCoach cannot call JavaScript functions directly. Instead, each script run 
 2. Execute the script (the pasted `ReactStateHelper.js`).
 3. Read the results: the command's return value is in `$jsStateHelperResult` (`""` for commands that return nothing), `$jsStateHelperStatus` is `success` or `error`, and `$jsStateHelperError` holds the error message (or `none`).
 
-On the very first run, `$jsStateHelperJson` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$jsStateHelperJson` (the persisted state), `$jsStateHelperSessionsCompleted`, `$participantGroup`, and all nine `$jsStateHelperMenuLabel` variables (empty unless the run's command was a `populateMenuLabelsFor…()` one) — you never have to write these yourself.
+On the very first run, `$jsStateHelperJson` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$jsStateHelperJson` (the persisted state), `$jsStateHelperSessionsCompleted`, `$participantGroup`, and all nine `$jsStateHelperMenuLabel` and nine `$jsStateHelperMenuId` variables (empty unless the run's command was a `populateMenuFor…()` one) — you never have to write these yourself.
 
 ## Command cheat-sheet
 
@@ -76,9 +77,9 @@ Many commands require that the participant's current location was set first, in 
 | `getProgress()` | — | Overall progress as a number between 0 and 1 |
 | `getModuleProgress('m_bouMgt')` | — | That module's progress as a number between 0 and 1 |
 | `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue |
-| `populateMenuLabelsForModule()` | — | Fills `$jsStateHelperMenuLabel1–9` with one entry per module |
-| `populateMenuLabelsForSession()` | module entered | Fills the labels with the current module's sessions |
-| `populateMenuLabelsForActivity()` | module + session entered | Fills the labels with the current session's activities |
+| `populateMenuForModule()` | — | Fills `$jsStateHelperMenuLabel1–9` and `$jsStateHelperMenuId1–9` with one entry per module |
+| `populateMenuForSession()` | module entered | Fills the labels and ids with the current module's sessions |
+| `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
 | `getParticipantLocation()` | — | The current location as `m_x: s_y: a_z` (or `null` before any module was entered); also written to `$participantGroup` after every run |
 | `markSuggestionSeen()` / `isSuggestionSeen()` | — | Sets / reads a one-time "suggestion seen" flag |
 | `toString()` | — | The full state as a JSON string (the same value written to `$jsStateHelperJson`) |
@@ -87,11 +88,11 @@ Many commands require that the participant's current location was set first, in 
 
 MobileCoach has no dynamic list constructs — menu entries are hard-coded in the flow. The workaround:
 
-1. Call one of the `populateMenuLabelsFor…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all label slots to `""`. It fills `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9`; unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
-2. Each label has the format `"<emoji> <title>:<id>"`, e.g. `"✅ Emotionsregulation:m_emoReg"`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a routing variable of your choice when the button is tapped.
+1. Call one of the `populateMenuFor…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$jsStateHelperMenuId1`–`$jsStateHelperMenuId9` (the matching id, e.g. `m_emoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
+2. In the menu definition, concatenate label and id per slot with a colon: `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a routing variable of your choice when the button is tapped.
 3. For each possible id, add one hard-coded routing rule: `if <routing variable> == "m_emoReg" → jump to element X`. Tedious to set up once, but fully dynamic thereafter.
 
-> **Caveat:** titles can themselves contain a colon (e.g. *"Abgrenzen mit Klarheit: Das Konsequenzengitter"*). Whether routing survives this depends on where MobileCoach splits — see [open questions](open-questions.md).
+> **Note:** titles must not contain a colon — state loading rejects them, because a colon inside the label would corrupt the `:`-split above. So the concatenated entry always contains exactly one colon.
 
 Labels (and `getProgressAdvice()` text) are prefixed with an emoji from the `#MENU_EMOJIS` map in the source:
 

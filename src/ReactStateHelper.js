@@ -1,6 +1,6 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
 
-const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $jsStateHelperMenuLabel slots exist
+const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $jsStateHelperMenuLabel/$jsStateHelperMenuId slots exist
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
@@ -15,8 +15,9 @@ function registerId(idRegistry, id, levelPrefix) {
   idRegistry.add(id);
 }
 
-// MobileCoach menu labels use the format "<emoji> <title>:<id>", splitting on ":"  to extract the id.
-// A colon inside a title would break that split and corrupt navigation.
+// In MobileCoach, menu entries are concatenated as "$jsStateHelperMenuLabelN:$jsStateHelperMenuIdN"
+// and split on ":" at tap time to extract the id. A colon inside a title would break that split
+// and corrupt navigation.
 function validateTitle(title, entityDescription) {
   if (title.includes(':')) throw new Error(`${entityDescription} title "${title}" must not contain a colon`);
 }
@@ -180,9 +181,11 @@ class Activity {
 class ReactStateHelper {
   #state;
 
-  // Menu labels populated by the populateMenuLabelsFor…() methods, read back per slot via
-  // getMenuLabel(). Not part of #state: labels are rebuilt right before showing a menu, never persisted.
+  // Menu labels and ids populated by the populateMenuFor…() methods, read back per slot via
+  // getMenuLabel() / getMenuId(). Not part of #state: they are rebuilt right before showing a menu,
+  // never persisted.
   #menuLabels = [];
+  #menuIds = [];
 
   static initDefaultState() {
     return this.loadExistingState(JSON.stringify(this.initialState()));
@@ -516,25 +519,36 @@ class ReactStateHelper {
     return `Mach weiter in ${emoji} ${label} "${title}" — zum Beispiel mit ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
   }
 
-  populateMenuLabelsForModule() {
+  populateMenuForModule() {
     this.#menuLabels = this.#buildMenuLabels(this.#state.modules);
+    this.#menuIds = this.#buildMenuIds(this.#state.modules);
   }
 
-  populateMenuLabelsForSession() {
+  populateMenuForSession() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    this.#menuLabels = this.#buildMenuLabels(this.#findModule(this.#state.currentModuleId).sessions);
+    const sessions = this.#findModule(this.#state.currentModuleId).sessions;
+    this.#menuLabels = this.#buildMenuLabels(sessions);
+    this.#menuIds = this.#buildMenuIds(sessions);
   }
 
-  populateMenuLabelsForActivity() {
+  populateMenuForActivity() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    this.#menuLabels = this.#buildMenuLabels(this.#findSession(this.#state.currentSessionId).activities);
+    const activities = this.#findSession(this.#state.currentSessionId).activities;
+    this.#menuLabels = this.#buildMenuLabels(activities);
+    this.#menuIds = this.#buildMenuIds(activities);
   }
 
   // Slot numbers run 1–9, matching the MobileCoach menu label variables. Empty until one of the
-  // populateMenuLabelsFor…() methods was called ('' hides the slot in MobileCoach).
+  // populateMenuFor…() methods was called ('' hides the slot in MobileCoach).
   getMenuLabel(slot) {
     return this.#menuLabels[slot - 1] ?? '';
+  }
+
+  // The id belonging to the label in the same slot ('' for empty slots). In MobileCoach the two are
+  // concatenated as "$jsStateHelperMenuLabelN:$jsStateHelperMenuIdN" to form the routable menu entry.
+  getMenuId(slot) {
+    return this.#menuIds[slot - 1] ?? '';
   }
 
   #buildMenuLabels(items) {
@@ -546,15 +560,24 @@ class ReactStateHelper {
       if (!item) {
         labels.push('');
       } else if (item.isCompleted()) {
-        labels.push(`${completedEmoji ? completedEmoji + ' ' : ''}${item.title}:${item.id}`);
+        labels.push(`${completedEmoji ? completedEmoji + ' ' : ''}${item.title}`);
       } else if (!nextAssigned) {
-        labels.push(`${nextEmoji ? nextEmoji + ' ' : ''}${item.title}:${item.id}`);
+        labels.push(`${nextEmoji ? nextEmoji + ' ' : ''}${item.title}`);
         nextAssigned = true;
       } else {
-        labels.push(`${item.title}:${item.id}`);
+        labels.push(item.title);
       }
     }
     return labels;
+  }
+
+  #buildMenuIds(items) {
+    const ids = [];
+    for (let i = 0; i < MAX_MENU_SLOTS; i++) {
+      const item = items[i];
+      ids.push(item ? item.id : '');
+    }
+    return ids;
   }
 
   #findModule(moduleId) {
@@ -640,11 +663,12 @@ if (typeof process === 'undefined') {
     participantGroup:               helper ? helper.getParticipantLocation() : null
   };
 
-  // All 9 menu labels are written back to MobileCoach as individual variables, on every run.
-  // A populateMenuLabelsFor…() command fills them; after any other command every slot is ''
-  // (hidden), so (re)populate the menu right before displaying it.
+  // All 9 menu labels and their 9 ids are written back to MobileCoach as individual variables,
+  // on every run. A populateMenuFor…() command fills them; after any other command every
+  // slot is '' (hidden), so (re)populate the menu right before displaying it.
   for (let i = 1; i <= MAX_MENU_SLOTS; i++) {
     o[`jsStateHelperMenuLabel${i}`] = helper ? helper.getMenuLabel(i) : '';
+    o[`jsStateHelperMenuId${i}`] = helper ? helper.getMenuId(i) : '';
   }
 
   o

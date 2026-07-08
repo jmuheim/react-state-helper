@@ -61,6 +61,6 @@ Full section in `docs/developer-guide.md` — these constraints drive most desig
 - Every `$variable` the script might write must be pre-declared in MobileCoach (default `0`, access "manageable by service") — a missing one makes the script **fail silently mid-flow**.
 - State persists only as a JSON string round-tripped through `$jsStateHelperJson`; `0` means first run → fresh default state.
 - Commands dispatch by `eval`-ing `$jsStateHelperCmd`; errors are surfaced via `$jsStateHelperStatus`/`$jsStateHelperError`.
-- Menus are static: at most 9 slots (`$jsStateHelperMenuLabel1`–`9`), label format `"<emoji> <title>:<id>"`, routed by hard-coded per-id rules splitting on `:`.
+- Menus are static: at most 9 slots. Labels (`$jsStateHelperMenuLabel1`–`9`, format `"<emoji> <title>"`) and ids (`$jsStateHelperMenuId1`–`9`) are separate variables, concatenated per slot in MobileCoach as `$jsStateHelperMenuLabelN:$jsStateHelperMenuIdN` and routed by hard-coded per-id rules splitting on `:`.
 - Ids are globally unique across the whole state and level-prefixed (`m_`/`s_`/`a_`).
 - Flow branching only reads `$variable` content — booleans and label strings are the library's primary outputs.
