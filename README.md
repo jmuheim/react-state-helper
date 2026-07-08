@@ -1,6 +1,6 @@
 # ReactStateHelper
 
-A plain JavaScript helper for managing hierarchical app state (modules → sessions → activities) as JSON. Designed to be copy-pasted verbatim into [MobileCoach](https://www.mobilecoach.com/), a mobile health platform that executes JavaScript snippets.
+A plain JavaScript helper for managing hierarchical app state (modules → sessions → activities) as JSON. Designed to be copy-pasted verbatim into [MobileCoach](https://mobile-coach.eu/), a mobile health platform that executes JavaScript snippets.
 
 ```
 ReactStateHelper

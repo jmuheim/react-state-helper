@@ -1,6 +1,6 @@
 # ReactStateHelper documentation
 
-A plain JavaScript helper for managing hierarchical app state (modules → sessions → activities) as JSON. Designed to be copy-pasted verbatim into [MobileCoach](https://www.mobilecoach.com/), a mobile health platform that executes JavaScript snippets. The source lives at [github.com/jmuheim/react-state-helper](https://github.com/jmuheim/react-state-helper).
+A plain JavaScript helper for managing hierarchical app state (modules → sessions → activities) as JSON. Designed to be copy-pasted verbatim into [MobileCoach](https://mobile-coach.eu/), a mobile health platform that executes JavaScript snippets. The source lives at [github.com/jmuheim/react-state-helper](https://github.com/jmuheim/react-state-helper).
 
 ## Guides
 
