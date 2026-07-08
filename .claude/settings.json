@@ -1,4 +1,13 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(git push:*)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {

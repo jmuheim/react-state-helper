@@ -61,6 +61,8 @@ Before calling most methods the caller must `enterModule → enterSession → en
 
 `test/MobileCoachPlatformConstraints.test.js` reads `src/ReactStateHelper.js` and `docs/content-editor-guide.md` as *text* and fails on platform-constraint violations (module syntax in the source; a wrapper variable missing from the content-editor guide's variable table). It shares its variable-extraction logic with the PostToolUse hook in `.claude/hooks/check-wrapper-variables.mjs`, which raises the same warning already at edit time.
 
+`test/MobileCoachWrapper.test.js` executes the deployment wrapper the way MobileCoach does: it interpolates `$jsStateHelperJson`/`$jsStateHelperCmd` textually into the script, runs it in a `vm` context without Node's `process` global, and asserts on the completion-value object — covering command dispatch, error surfacing, state round-tripping, and that all nine menu label slots are written as top-level keys on every run.
+
 ## MobileCoach / Pathmate platform constraints
 
 Understanding these constraints is essential — they drive most design decisions in this library.
@@ -71,7 +73,7 @@ MobileCoach runs JavaScript snippets in a restricted environment. There is no mo
 
 ### Variables
 
-MobileCoach uses `$variableName` variables that are declared upfront in the project with a fixed name and initial value. The script writes back to them by returning a plain object — MobileCoach maps each key to the corresponding `$variable`. Variables must be declared in advance; you cannot create new ones at runtime. This means any variable the script might ever write to must be pre-declared, including numbered series like `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9`. **Critical:** if a variable is missing or has the wrong access setting, the script silently fails and halts execution mid-flow with no error output — this is extremely painful to debug. Always make sure every variable is declared with default value `0` and access "manageable by service" before testing — the full table lives in the [content editor guide](content-editor-guide.md#one-time-mobilecoach-setup).
+MobileCoach uses `$variableName` variables that are declared upfront in the project with a fixed name and initial value. The script writes back to them by returning a plain object — MobileCoach writes each key back into the variable of the same name (one key, one variable; an object nested inside another value is not unpacked). This is why the deployment wrapper writes each of the nine menu labels as its own key on every run: the `populateMenuLabelsFor…()` methods store the labels on the helper instance, and the wrapper reads them back per slot via `getMenuLabel(slot)` (empty string on runs that didn't populate a menu). Variables must be declared in advance; you cannot create new ones at runtime. This means any variable the script might ever write to must be pre-declared, including numbered series like `$jsStateHelperMenuLabel1`–`$jsStateHelperMenuLabel9`. **Critical:** if a variable is missing or has the wrong access setting, the script silently fails and halts execution mid-flow with no error output — this is extremely painful to debug. Always make sure every variable is declared with default value `0` and access "manageable by service" before testing — the full table lives in the [content editor guide](content-editor-guide.md#one-time-mobilecoach-setup).
 
 ### State persistence
 
@@ -79,7 +81,7 @@ There is no database or session store accessible from JS. State is round-tripped
 
 ### Command dispatch
 
-MobileCoach has no way to call specific JS functions directly. Instead, inside MobileCoach, the variable `$jsStateHelperCmd` needs to be set to a string like `"markActivityCompleted()"` before the JS script is executed. The script then `eval`s it against the helper instance. While `eval` is generally dangerous, it is safe here because we are in full control of what gets set in `$jsStateHelperCmd`. If, however, the eval throws an error, it is caught and written to `$jsStateHelperStatus` (`"error"`) and `$jsStateHelperError` (the message), so failures can be inspected inside MobileCoach.
+MobileCoach has no way to call specific JS functions directly. Instead, inside MobileCoach, the variable `$jsStateHelperCmd` needs to be set to a string like `"markActivityCompleted()"` before the JS script is executed. The script then `eval`s it against the helper instance. While `eval` is generally dangerous, it is safe here because we are in full control of what gets set in `$jsStateHelperCmd`. If, however, the eval throws an error, it is caught and written to `$jsStateHelperStatus` (`"error"`) and `$jsStateHelperError` (the message), so failures can be inspected inside MobileCoach. Commands that return nothing write `""` into `$jsStateHelperResult`, so it never holds a stale value from an earlier run.
 
 ### Menus are static by default
 
@@ -92,6 +94,7 @@ Each label is formatted as `"<emoji> <title>:<id>"` (e.g. `"✅ Emotionsregulati
 Good to know:
 
 - Unused slots are set to `""` so MobileCoach can hide them.
+- The wrapper writes all nine label variables on **every** run — a run whose command isn't one of the `populateMenuLabelsFor…()` methods resets them to `""`. Stale labels can't survive, but a menu must be (re)populated right before it is displayed.
 - The maximum of 9 slots is a hard constraint and should offer enough headroom.
 - There are three separate methods rather than one auto-detecting `populateMenuLabels()`.
     - This allows displaying a higher-level menu while the user is navigated deeper — for example, a "go back" screen.
