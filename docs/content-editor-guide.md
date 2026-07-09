@@ -1,15 +1,15 @@
 # Content editor guide
 
-This guide is for **content editors** — the people who define 🗂️ modules, 📑 sessions, and 🎯 activities inside [MobileCoach](https://mobile-coach.eu/). No JavaScript knowledge is required. If you are looking for architecture and code internals instead, see the [developer guide](developer-guide.md).
+This guide is for **content editors** — the people who define modules, sessions, and activities inside [MobileCoach](https://mobile-coach.eu/). No JavaScript knowledge is required. If you are looking for architecture and code internals instead, see the [developer guide](developer-guide.md).
 
 ## How content is structured
 
 The participant's progress is tracked in a three-level hierarchy:
 
 ```
-Module (e.g. "Boundary Management")
-└── Session (e.g. "Gesunde Grenzen setzen")
-    └── Activity (e.g. "Rollenwechsel bewusst gestalten")
+🗂️ Module (e.g. "Boundary Management")
+└── 📑 Session (e.g. "Gesunde Grenzen setzen")
+    └── 🎯 Activity (e.g. "Rollenwechsel bewusst gestalten")
 ```
 
 Every module, session, and activity has an **id** and a **title**:
