@@ -23,9 +23,9 @@ function registerId(idRegistry, id, levelLetter) {
 }
 
 // In MobileCoach, menu entries are concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1",
-// and split on ":" at tap time to extract the id. How MobileCoach splits an entry with multiple
-// colons (first vs. last) is unknown, so titles must not contain any colon — the entry then
-// always contains exactly one and the split cannot be corrupted.
+// and split on ":" at tap time to extract the id. The split happens on the raw definition text,
+// before variable interpolation, so a colon inside a title cannot corrupt it — whether this
+// validation can therefore be dropped is an open question (docs/open-questions.md).
 function validateTitle(title, entityDescription) {
   if (title.includes(':')) throw new Error(entityDescription + ' title "' + title + '" must not contain a colon');
 }

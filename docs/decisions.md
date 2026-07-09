@@ -163,6 +163,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 20. Menu labels and menu ids are separate variables, concatenated in the MobileCoach menu definition
 
+> Factual basis revised (2026-07-09): MobileCoach splits on the **raw definition text before variable interpolation**, so a colon in a title cannot corrupt the split after all — see the [field note](mobilecoach-field-notes.md#menu-entries-split-on-the-raw-definition-text-not-on-variable-content). The decision itself (concatenate MobileCoach-side) stands; whether the title-colon validation kept below can now be dropped is an [open question](open-questions.md#drop-the-title-colon-validation).
+
 *(2026-07-08)*
 
 **Decision:** `getMenuLabel(slot)` returns only the display text `"<emoji> <title>"`; the new `getMenuId(slot)` returns the bare id. The wrapper writes `$jsStateHelperMenuId1`–`9` alongside `$jsStateHelperMenuLabel1`–`9` on every run (same `""`-reset behavior, see #19). The content editor concatenates the two per slot in the menu definition — `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1` — so the `:` that MobileCoach splits on at tap time is added in MobileCoach, not in JS. Supersedes #11's `"<emoji> <title>:<id>"` label format. Because the methods now populate ids as well as labels, they were renamed `populateMenuForModule()` / `ForSession()` / `ForActivity()` (refines #10; nothing is deployed yet, so renaming `$jsStateHelperCmd` command strings is free).

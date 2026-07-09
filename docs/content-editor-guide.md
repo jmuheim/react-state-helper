@@ -80,7 +80,7 @@ MobileCoach has no dynamic list constructs — menu entries are hard-coded in th
 2. In the menu definition, concatenate label and id per slot with a colon: `$rsh_menuLabel1:$rsh_menuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a variable with a specific, reserved name when the button is tapped. <!-- TODO: document the exact variable name -->
 3. MobileCoach reads that variable and navigates directly to the dialog with that id. Just make sure each module/session/activity id has a dialog of exactly the same name.
 
-> **Note:** titles must not contain a colon — state loading rejects them, because a colon inside the label would corrupt the `:`-split above. It is not known yet how MobileCoach handles an entry with multiple colons (first-colon vs. last-colon split), so the library guarantees the concatenated entry always contains exactly one colon.
+> **Note:** titles must not contain a colon — state loading rejects them. MobileCoach performs the `:`-split on the raw menu definition text before variables are interpolated ([field note](mobilecoach-field-notes.md#menu-entries-split-on-the-raw-definition-text-not-on-variable-content)), so a colon inside a label would be displayed literally rather than corrupt the split; whether the validation can therefore be dropped is an [open question](open-questions.md#drop-the-title-colon-validation).
 
 Labels (and the advice text of the developer-facing [`getProgressAdvice()`](developer-guide.md#flow-logic-commands) command) are prefixed with an emoji from the `#EMOJIS` map in the source:
 
