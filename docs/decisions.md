@@ -214,3 +214,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** content editors create content, set flags, and display menus; conditional flow branching — the only consumer of the query commands' booleans/numbers/advice strings — is hidden from them and wired by developers. Query commands in the editor cheat-sheet were noise for that audience and doubled the surface an editor "would otherwise have to understand" (the same argument as #24). **Rejected:** one shared cheat-sheet with an "audience" column — both audiences still scan past the other's half, and the developer guide already hosts the flow-branching context (the "No conditional logic in flows beyond variables" constraint) the query commands belong next to.
 
 **Watch for:** the split encodes a team-role assumption — editors never wire branching. If a future flow design has editors placing conditions themselves, the query commands need an editor-facing home again. New commands must now be filed to the correct guide: doer → editor guide, query → developer guide.
+
+## 26. The MobileCoach variable prefix is `rsh_` instead of `jsStateHelper`
+
+*(2026-07-09)*
+
+**Decision:** All wrapper variables are renamed from `$jsStateHelper…` to `$rsh_…` with camelCase after the underscore: `$rsh_json`, `$rsh_cmd`, `$rsh_status`, `$rsh_error`, `$rsh_result`, `$rsh_menuLabel1`–`9`, `$rsh_menuId1`–`9`, `$rsh_sessionsCompleted`. Earlier entries in this log keep the old names (append-only); everywhere else — source, tests, hook, docs — uses the new ones.
+
+**Why:** `jsStateHelper` was long (14 characters) and didn't resemble the project name ReactStateHelper; `rsh` is its initials. The trailing underscore follows MobileCoach's own convention: its dialog-level user-definable variable prefixes are *required* to end with an underscore, so `rsh_` reads as a native prefix. The shortening pays off most where names are hand-typed in MobileCoach — a menu slot is now `$rsh_menuLabel1:$rsh_menuId1` instead of `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1`. **Rejected:** `$react…` (falsely suggests the React framework), `$helper…` (generic, loses the link to the library), `$stateHelper…` (barely shorter). Nothing is deployed (testing phase), so the rename costs only re-declaring the variables in MobileCoach.
+
+**Watch for:** the extraction regexes in `.claude/hooks/check-wrapper-variables.mjs` needed `_` added to their character classes (`[a-zA-Z0-9_]`) — any future name-matching pattern must include the underscore too. All wrapper variables must be re-declared in MobileCoach under the new names (default `0`, access "manageable by service") before the next test — the old `$jsStateHelper…` declarations become dead and should be deleted.

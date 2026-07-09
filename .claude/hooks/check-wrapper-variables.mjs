@@ -20,19 +20,19 @@ export function extractWrapperVariables(srcText) {
 
   const names = new Set();
 
-  // $-prefixed reads, e.g. '$jsStateHelperJson' or $jsStateHelperCmd inside the eval template
-  for (const [, name] of wrapper.matchAll(/\$([a-zA-Z][a-zA-Z0-9]*)/g)) names.add(name);
+  // $-prefixed reads, e.g. '$rsh_json' or $rsh_cmd inside the eval template
+  for (const [, name] of wrapper.matchAll(/\$([a-zA-Z][a-zA-Z0-9_]*)/g)) names.add(name);
 
   // Keys of the output object `let o = {...}` — written back without the $ prefix
   const outputStart = wrapper.indexOf('let o = {');
   if (outputStart === -1) throw new Error('MobileCoach wrapper output object (`let o = {`) not found');
   const outputBlock = wrapper.slice(outputStart, wrapper.indexOf('};', outputStart));
-  for (const [, name] of outputBlock.matchAll(/^\s*([a-zA-Z][a-zA-Z0-9]*):/gm)) names.add(name);
+  for (const [, name] of outputBlock.matchAll(/^\s*([a-zA-Z][a-zA-Z0-9_]*):/gm)) names.add(name);
 
   // Numbered series written via template literals outside the wrapper, e.g.
-  // vars[`jsStateHelperMenuLabel${i + 1}`] — recorded under their base name, which the table's
-  // range row ("$jsStateHelperMenuLabel1 – $jsStateHelperMenuLabel9") matches as a substring.
-  for (const [, name] of srcText.matchAll(/`(jsStateHelper[a-zA-Z0-9]*)\$\{/g)) names.add(name);
+  // vars[`rsh_menuLabel${i + 1}`] — recorded under their base name, which the table's
+  // range row ("$rsh_menuLabel1 – $rsh_menuLabel9") matches as a substring.
+  for (const [, name] of srcText.matchAll(/`(rsh_[a-zA-Z0-9_]*)\$\{/g)) names.add(name);
 
   return names;
 }

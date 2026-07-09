@@ -2,7 +2,7 @@
 
 Living document, unlike the append-only `docs/decisions.md`. Each item: what is unresolved, the current placeholder, and what resolves it. When one is settled, log the outcome in the decision log (via `/log-decision`) and delete the item here.
 
-## Richer diagnostics in `$jsStateHelperError`
+## Richer diagnostics in `$rsh_error`
 
 Currently only the error message is written back (TODO in `src/ReactStateHelper.js`: *"Möglichst viel weitere nützliche Infos rein-dumpen!"*).
 
@@ -15,5 +15,5 @@ Currently only the error message is written back (TODO in `src/ReactStateHelper.
 `getParticipantLocation()` writes the participant's location into `$participantGroup` because it is one of the few easily inspectable variables (decision #16 — README calls it a "mis-use").
 
 - **Placeholder:** keep the repurposing.
-- **Why open:** a dedicated `$jsStateHelperLocation` would be cleaner and free `$participantGroup` for real group assignment, but might lose the easy inspectability that motivated the choice.
+- **Why open:** a dedicated `$rsh_location` would be cleaner and free `$participantGroup` for real group assignment, but might lose the easy inspectability that motivated the choice.
 - **Resolved by:** checking whether a purpose-declared variable is equally inspectable in the MobileCoach UI.
