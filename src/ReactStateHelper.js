@@ -307,7 +307,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "aAkzepAct",
+                  id: "aAkzep",
                   title: "Akzeptanz",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -326,7 +326,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "aNeuBewAct",
+                  id: "aNeuBew",
                   title: "Neubewertung",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -364,7 +364,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "aUmgSupAct",
+                  id: "aUmgSup",
                   title: "Umgang mit Suppression",
                   entered_first_at: null,
                   entered_last_at: null,
