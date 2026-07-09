@@ -94,8 +94,8 @@ function main() {
     messages.push(
       "Invalid $ sign(s) in src/ReactStateHelper.js — MobileCoach's paste-time validator rejects the " +
       'whole script when any $ (comments included) does not start a declared variable name (decision #27). ' +
-      'Use string concatenation instead of `${…}`, and write variable series in comments without the $ ' +
-      '(rsh_menuLabelN):\n- ' + invalidDollars.join('\n- ')
+      'Use string concatenation instead of `${…}`, and refer to variable series in comments via real ' +
+      'declared names ($rsh_menuLabel1), never pseudo-names like $rsh_menuLabelN:\n- ' + invalidDollars.join('\n- ')
     );
   }
 

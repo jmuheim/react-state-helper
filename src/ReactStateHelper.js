@@ -1,6 +1,6 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
 
-const MAX_MENU_SLOTS = 9; // only 9 rsh_menuLabel/rsh_menuId slot variables are declared in MobileCoach
+const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_menuId1 to $rsh_menuId9 are declared in MobileCoach
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
@@ -15,7 +15,7 @@ function registerId(idRegistry, id, levelPrefix) {
   idRegistry.add(id);
 }
 
-// In MobileCoach, menu entries are concatenated as "rsh_menuLabelN:rsh_menuIdN" (both MobileCoach variables)
+// In MobileCoach, menu entries are concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1",
 // and split on ":" at tap time to extract the id. How MobileCoach splits an entry with multiple
 // colons (first vs. last) is unknown, so titles must not contain any colon — the entry then
 // always contains exactly one and the split cannot be corrupted.
@@ -529,7 +529,7 @@ class ReactStateHelper {
   }
 
   // The id belonging to the label in the same slot ('' for empty slots). In MobileCoach the two are
-  // concatenated as "rsh_menuLabelN:rsh_menuIdN" (both MobileCoach variables) to form the routable menu entry.
+  // concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1", to form the routable menu entry.
   getMenuId(slot) {
     return this.#menuIds[slot - 1] ?? '';
   }
