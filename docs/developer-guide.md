@@ -49,7 +49,7 @@ Every module needs at least one session, and every session needs at least one ac
 
 ### Navigation model
 
-Before calling most methods the caller must `enterModule → enterSession → enterActivity` in order. These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `hasSessionAdequateProgress`, etc.) implicitly use the `currentModuleId` stored in state.
+Navigation happens through a single `enter(id)` method: the id's level prefix (`m_`/`s_`/`a_`, guaranteed by `registerId`) determines whether a module, session, or activity is entered — one command therefore works after any menu tap, regardless of the menu's level. Before calling most methods the caller must enter module → session → activity in order (entering a session looks it up within the current module, an activity within the current session). These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `hasSessionAdequateProgress`, etc.) implicitly use the `currentModuleId` stored in state.
 
 ### Serialization
 
@@ -65,9 +65,9 @@ Before calling most methods the caller must `enterModule → enterSession → en
 
 ## Flow-logic commands
 
-Content editors only issue the "doer" commands (`enter…`, `markActivityCompleted()`, `populateMenuFor…()` — see the [content editor guide's cheat-sheet](content-editor-guide.md#command-cheat-sheet)). The query commands below are developer territory: they return booleans, numbers, and display strings that feed MobileCoach's variable-based conditional branching (see "No conditional logic in flows beyond variables" below), and wiring that branching is a developer task.
+Content editors only issue the "doer" commands (`enter(…)`, `markActivityCompleted()`, `populateMenuFor…()` — see the [content editor guide's cheat-sheet](content-editor-guide.md#command-cheat-sheet)). The query commands below are developer territory: they return booleans, numbers, and display strings that feed MobileCoach's variable-based conditional branching (see "No conditional logic in flows beyond variables" below), and wiring that branching is a developer task.
 
-They are issued the same way as every other command — set `$rsh_cmd`, run the script, read `$rsh_result` (the mechanics are described in the content editor guide under [Running a command](content-editor-guide.md#running-a-command)). The same location preconditions apply: `enterModule(…)` → `enterSession(…)` in order, and a command issued without its preconditions sets `$rsh_status` = `error`.
+They are issued the same way as every other command — set `$rsh_cmd`, run the script, read `$rsh_result` (the mechanics are described in the content editor guide under [Running a command](content-editor-guide.md#running-a-command)). The same location preconditions apply: `enter(…)` the module before its session, and a command issued without its preconditions sets `$rsh_status` = `error`.
 
 | Command (value of `$rsh_cmd`) | Preconditions | Returns |
 |---|---|---|
@@ -112,7 +112,7 @@ MobileCoach has no way to call specific JS functions directly. Instead, inside M
 
 MobileCoach has no dynamic list/loop constructs for building menus. Menu entries are hard-coded in the flow. The workaround is to pre-declare a fixed number of `$rsh_menuLabel1`–`$rsh_menuLabel9` and `$rsh_menuId1`–`$rsh_menuId9` variables and populate them from JS. This can be done for each hierarchy level: modules → sessions → activities (i.e. `populateMenuForModule()`).
 
-The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enterModule('m_bouMgt')` before calling `populateMenuForSession()`; and to `populateMenuForActivity()`, you also first need to `enterSession('s_gesGre')`.
+The right context needs to be set up before invoking these commands — otherwise the script will error. For example, call `enter('m_bouMgt')` before calling `populateMenuForSession()`; and to `populateMenuForActivity()`, you also first need to `enter('s_gesGre')`.
 
 Each label is formatted as `"<emoji> <title>"` (e.g. `"✅ Emotionsregulation"`); the matching id (e.g. `m_emoReg`) is written separately to `$rsh_menuIdN`. The menu definition in MobileCoach concatenates the two per slot — `$rsh_menuLabel1:$rsh_menuId1` — and MobileCoach splits on `:` when the button is tapped: the left side is displayed to the user, the right side (the id) is stored to a variable with a specific, reserved name. (TODO: document the exact variable name) Because of this split, titles are rejected at state load if they contain a colon, so the concatenated entry always contains exactly one — we don't know yet how MobileCoach behaves when the entry contains multiple colons (e.g. whether it splits on the first or the last one), so guaranteeing exactly one sidesteps the question entirely. MobileCoach then reads that variable and navigates directly to the dialog with that id. This direct id-to-dialog navigation is also why module, session, and activity ids must be unique across the entire state. See the [content editor guide](content-editor-guide.md#menus) for the `#MENU_EMOJIS` legend and the editor-facing setup steps.
 

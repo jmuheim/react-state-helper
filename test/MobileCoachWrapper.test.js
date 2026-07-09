@@ -38,7 +38,7 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes "" to rsh_result when the command returns nothing (no stale result)', () => {
-    const o = runWrapper({ cmd: "enterModule('m_bouMgt')" });
+    const o = runWrapper({ cmd: "enter('m_bouMgt')" });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_result).toBe('');
   });
@@ -53,7 +53,7 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('round-trips state through rsh_json between runs', () => {
-    const first = runWrapper({ cmd: "enterModule('m_bouMgt')" });
+    const first = runWrapper({ cmd: "enter('m_bouMgt')" });
     expect(first.rsh_status).toBe('success');
     const second = runWrapper({ cmd: 'populateMenuForSession()', json: first.rsh_json });
     expect(second.rsh_status).toBe('success');

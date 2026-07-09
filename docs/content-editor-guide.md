@@ -36,7 +36,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    |---|---|
    | `$rsh_cmd` | Command to execute, e.g. `markActivityCompleted()` (set this before each script run) |
    | `$rsh_json` | Full serialized state, persisted between runs |
-   | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enterModule(…)`, `markActivityCompleted()`, the `populateMenuFor…()` commands, …) |
+   | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `markActivityCompleted()`, the `populateMenuFor…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
    | `$rsh_sessionsCompleted` | Comma-separated list of all completed session ids across all modules |
@@ -58,13 +58,13 @@ On the very first run, `$rsh_json` still has its default value `0`; the script d
 
 ## Command cheat-sheet
 
-As a content editor you only ever issue three kinds of commands: **entering** a module/session/activity, **marking an activity completed**, and **populating a menu**. Most commands require that the participant's current location was set first, in strict order: `enterModule(…)` → `enterSession(…)` → `enterActivity(…)`. Calling a command without its preconditions results in `$rsh_status` = `error`.
+As a content editor you only ever issue three kinds of commands: **entering** a module/session/activity, **marking an activity completed**, and **populating a menu**. Entering is a single command, `enter(…)` — the id's prefix (`m_`/`s_`/`a_`) tells the library which level to enter, so the same command works after any menu tap. Most commands require that the participant's current location was set first, in strict order: module → session → activity. Calling a command without its preconditions results in `$rsh_status` = `error`.
 
 | Command (value of `$rsh_cmd`) | Preconditions | Effect |
 |---|---|---|
-| `enterActivity('a_rolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
-| `enterModule('m_bouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
-| `enterSession('s_gesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
+| `enter('m_bouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
+| `enter('s_gesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
+| `enter('a_rolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `markActivityCompleted()` | module + session + activity entered | Marks the current activity as completed |
 | `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
 | `populateMenuForModule()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
@@ -97,5 +97,5 @@ Menu items that are neither completed nor the next one get no emoji prefix.
 ## Troubleshooting
 
 - **The flow just stops, no error anywhere** → almost always an undeclared or misconfigured variable. Re-check every row of the [variable table](#one-time-mobilecoach-setup): default `0`, access "manageable by service".
-- **Something misbehaves but the flow continues** → inspect `$rsh_error` first (and `$rsh_status`). Load errors name the offending id; command errors usually mean a typo in `$rsh_cmd` or a missing `enterModule`/`enterSession`/`enterActivity` precondition.
+- **Something misbehaves but the flow continues** → inspect `$rsh_error` first (and `$rsh_status`). Load errors name the offending id; command errors usually mean a typo in `$rsh_cmd` or a missing `enter(…)` precondition (module before session, session before activity).
 - **Where is the participant right now?** → `$participantGroup` shows the current location (module, session, activity) and is easy to inspect from within MobileCoach.

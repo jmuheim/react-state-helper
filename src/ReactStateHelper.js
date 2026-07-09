@@ -415,26 +415,28 @@ class ReactStateHelper {
     return this.#findModule(moduleId).hasAdequateProgress();
   }
 
-  enterModule(moduleId) {
-    const module = this.#findModule(moduleId);
-    if (!module) throw new Error('Module ' + moduleId + ' not found');
-    this.#state.currentModuleId = moduleId;
-    this.#state.currentSessionId = null;
-    this.#state.currentActivityId = null;
-    module.enter();
-  }
-
-  enterSession(sessionId) {
-    const session = this.#findSession(sessionId);
-    this.#state.currentSessionId = session.id;
-    this.#state.currentActivityId = null;
-    session.enter();
-  }
-
-  enterActivity(activityId) {
-    const activity = this.#findActivity(activityId);
-    this.#state.currentActivityId = activity.id;
-    activity.enter();
+  // The level to enter is read off the id's prefix (m_/s_/a_, enforced by registerId), so a single
+  // command works after any menu tap regardless of whether the menu listed modules, sessions or activities.
+  enter(id) {
+    if (id.startsWith('m_')) {
+      const module = this.#findModule(id);
+      if (!module) throw new Error('Module ' + id + ' not found');
+      this.#state.currentModuleId = id;
+      this.#state.currentSessionId = null;
+      this.#state.currentActivityId = null;
+      module.enter();
+    } else if (id.startsWith('s_')) {
+      const session = this.#findSession(id);
+      this.#state.currentSessionId = session.id;
+      this.#state.currentActivityId = null;
+      session.enter();
+    } else if (id.startsWith('a_')) {
+      const activity = this.#findActivity(id);
+      this.#state.currentActivityId = activity.id;
+      activity.enter();
+    } else {
+      throw new Error('Cannot enter id ' + id + ': it must start with "m_", "s_" or "a_"');
+    }
   }
 
   getParticipantLocation() {
