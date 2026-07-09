@@ -34,9 +34,9 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
 
    | Variable | Purpose |
    |---|---|
-   | `$rsh_cmd` | Command to execute, e.g. `markActivityCompleted()` (set this before each script run) |
+   | `$rsh_cmd` | Command to execute, e.g. `completeActivity()` (set this before each script run) |
    | `$rsh_json` | Full serialized state, persisted between runs |
-   | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `markActivityCompleted()`, the `populateMenuFor…()` commands, …) |
+   | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuFor…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
    | `$rsh_sessionsCompleted` | Comma-separated list of all completed session ids across all modules |
@@ -50,7 +50,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
 
 MobileCoach cannot call JavaScript functions directly. Instead, each script run works like this:
 
-1. Set `$rsh_cmd` to the command you want, e.g. `markActivityCompleted()` — exactly as written in the cheat-sheet below. **Be extra careful: typos or syntax errors break the run.**
+1. Set `$rsh_cmd` to the command you want, e.g. `completeActivity()` — exactly as written in the cheat-sheet below. **Be extra careful: typos or syntax errors break the run.**
 2. Execute the script (the pasted `ReactStateHelper.js`).
 3. Read the results: the command's return value is in `$rsh_result` (`""` for commands that return nothing), `$rsh_status` is `success` or `error`, and `$rsh_error` holds the error message (or `none`).
 
@@ -65,7 +65,7 @@ As a content editor you only ever issue three kinds of commands: **entering** a 
 | `enter('mBouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
 | `enter('sGesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
 | `enter('aRolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
-| `markActivityCompleted()` | module + session + activity entered | Marks the current activity as completed |
+| `completeActivity()` | module + session + activity entered | Marks the current activity as completed |
 | `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
 | `populateMenuForModule()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
 | `populateMenuForSession()` | module entered | Fills the labels and ids with the current module's sessions |
