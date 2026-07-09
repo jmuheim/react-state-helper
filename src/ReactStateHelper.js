@@ -15,7 +15,7 @@ function registerId(idRegistry, id, levelPrefix) {
   idRegistry.add(id);
 }
 
-// In MobileCoach, menu entries are concatenated as "rsh_menuLabelN:rsh_menuIdN" (variables, $-prefixed there)
+// In MobileCoach, menu entries are concatenated as "rsh_menuLabelN:rsh_menuIdN" (both MobileCoach variables)
 // and split on ":" at tap time to extract the id. How MobileCoach splits an entry with multiple
 // colons (first vs. last) is unknown, so titles must not contain any colon — the entry then
 // always contains exactly one and the split cannot be corrupted.
@@ -529,7 +529,7 @@ class ReactStateHelper {
   }
 
   // The id belonging to the label in the same slot ('' for empty slots). In MobileCoach the two are
-  // concatenated as "rsh_menuLabelN:rsh_menuIdN" (variables, $-prefixed there) to form the routable menu entry.
+  // concatenated as "rsh_menuLabelN:rsh_menuIdN" (both MobileCoach variables) to form the routable menu entry.
   getMenuId(slot) {
     return this.#menuIds[slot - 1] ?? '';
   }
