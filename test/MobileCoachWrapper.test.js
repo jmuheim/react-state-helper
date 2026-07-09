@@ -26,7 +26,7 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes populated menu labels and ids as top-level keys (only those reach the MobileCoach variables)', () => {
-    const o = runWrapper({ cmd: 'populateMenuForModule()' });
+    const o = runWrapper({ cmd: 'populateMenuWithModules()' });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_menuLabel1).toBe('👉 Boundary Management');
     expect(o.rsh_menuId1).toBe('mBouMgt');
@@ -55,13 +55,13 @@ describe('MobileCoach deployment wrapper', () => {
   it('round-trips state through rsh_json between runs', () => {
     const first = runWrapper({ cmd: "enter('mBouMgt')" });
     expect(first.rsh_status).toBe('success');
-    const second = runWrapper({ cmd: 'populateMenuForSession()', json: first.rsh_json });
+    const second = runWrapper({ cmd: 'populateMenuWithSessions()', json: first.rsh_json });
     expect(second.rsh_status).toBe('success');
     expect(second.rsh_menuId1).toBe('sBouIntro');
   });
 
   it('reports command errors via rsh_status/-Error instead of crashing', () => {
-    const o = runWrapper({ cmd: 'populateMenuForSession()' }); // no module entered yet
+    const o = runWrapper({ cmd: 'populateMenuWithSessions()' }); // no module entered yet
     expect(o.rsh_status).toBe('error');
     expect(o.rsh_error).toMatch(/No module entered/);
   });
