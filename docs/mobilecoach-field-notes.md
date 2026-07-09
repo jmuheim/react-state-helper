@@ -22,6 +22,8 @@ A rule consists of:
 - an operator dropdown, e.g. "text value matches regular expression" / "text value not matches regular expression"
 - **Comparison term [y] (with placeholders)** — the value or pattern to compare against
 
+![The "Edit micro dialog message rule" dialog: rule "$coachName", operator "text value matches regular expression", comparison term "DEBUGGER.*"](images/micro-dialog-message-rule-debugger.jpg)
+
 ### Regex matching
 
 To match all debug coaches (see above), the comparison term is the regex `DEBUGGER.*` — confirmed working against `DEBUGGER_J` (2026-07-09).
