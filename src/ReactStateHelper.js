@@ -656,6 +656,17 @@ if (typeof process === 'undefined') {
     }
   }
 
+  // getProgressAdvice() throws before any module was entered (e.g. on the very first run), so it
+  // is guarded here: a failing advice must never crash the whole output object.
+  let progressAdvice = '';
+  if (helper) {
+    try {
+      progressAdvice = helper.getProgressAdvice();
+    } catch {
+      progressAdvice = '';
+    }
+  }
+
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
@@ -665,6 +676,7 @@ if (typeof process === 'undefined') {
     rsh_status:             status,
     rsh_error:              error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
     rsh_completionOverview: helper ? helper.getCompletionOverview() : '',
+    rsh_progressAdvice:     progressAdvice,
     participantGroup:       helper ? helper.getParticipantLocation() : null
   };
 

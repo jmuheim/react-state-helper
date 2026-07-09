@@ -60,6 +60,18 @@ describe('MobileCoach deployment wrapper', () => {
     expect(second.rsh_menuId1).toBe('sBouIntro');
   });
 
+  it('writes the progress advice to rsh_progressAdvice once a module is entered', () => {
+    const o = runWrapper({ cmd: "enter('mBouMgt')" });
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_progressAdvice).toContain('Boundary Management');
+  });
+
+  it('writes "" to rsh_progressAdvice while no module is entered (advice would throw)', () => {
+    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_progressAdvice).toBe('');
+  });
+
   it('reports command errors via rsh_status/-Error instead of crashing', () => {
     const o = runWrapper({ cmd: 'populateMenuWithSessions()' }); // no module entered yet
     expect(o.rsh_status).toBe('error');

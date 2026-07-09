@@ -72,7 +72,7 @@ They are issued the same way as every other command — set `$rsh_cmd`, run the 
 | Command (value of `$rsh_cmd`) | Preconditions | Returns |
 |---|---|---|
 | `getModuleProgress('mBouMgt')` | — | That module's progress as a number between 0 and 1 |
-| `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue |
+| `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue. Also written automatically to `$rsh_progressAdvice` on **every** run (`""` while no module is entered), so flows can display it without issuing the command |
 | `hasModuleAdequateProgress('mBouMgt')` | — | `true` once the module has adequate progress (threshold, not full completion) |
 | `hasSessionAdequateProgress('sGesGre')` | module entered | `true` once the session has adequate progress |
 | `isModuleCompleted('mBouMgt')` | — | `true` if all of the module's sessions are completed — an intro session counts once it has been entered |
