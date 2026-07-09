@@ -647,7 +647,7 @@ if (typeof process === 'undefined') {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
     rsh_json:              helper ? helper.toString() : rsh_json,
-    // '' when the command returned nothing (enter…, mark…, populate…), so the variable never holds a stale value from an earlier run.
+    // '' when the command returned nothing (enter…, complete…, populate…), so the variable never holds a stale value from an earlier run.
     rsh_result:            result === undefined ? '' : result,
     rsh_status:            status,
     rsh_error:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
