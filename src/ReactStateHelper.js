@@ -1,6 +1,6 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
 
-const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $rsh_menuLabel/$rsh_menuId slots exist
+const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_menuId1 to $rsh_menuId9 are declared in MobileCoach
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
@@ -9,18 +9,18 @@ const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $rsh_menuLabel/
 // (see "ID conventions" in CLAUDE.md) — checked here, at the same point ids are registered, rather than
 // trusting callers to follow the convention.
 function registerId(idRegistry, id, levelPrefix) {
-  const prefix = `${levelPrefix}_`;
-  if (!id.startsWith(prefix)) throw new Error(`Id ${id} must start with "${prefix}"`);
-  if (idRegistry.has(id)) throw new Error(`Duplicate id found in state: ${id}`);
+  const prefix = levelPrefix + '_';
+  if (!id.startsWith(prefix)) throw new Error('Id ' + id + ' must start with "' + prefix + '"');
+  if (idRegistry.has(id)) throw new Error('Duplicate id found in state: ' + id);
   idRegistry.add(id);
 }
 
-// In MobileCoach, menu entries are concatenated as "$rsh_menuLabelN:$rsh_menuIdN"
+// In MobileCoach, menu entries are concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1",
 // and split on ":" at tap time to extract the id. How MobileCoach splits an entry with multiple
 // colons (first vs. last) is unknown, so titles must not contain any colon — the entry then
 // always contains exactly one and the split cannot be corrupted.
 function validateTitle(title, entityDescription) {
-  if (title.includes(':')) throw new Error(`${entityDescription} title "${title}" must not contain a colon`);
+  if (title.includes(':')) throw new Error(entityDescription + ' title "' + title + '" must not contain a colon');
 }
 
 class Module {
@@ -77,16 +77,16 @@ class Module {
 
   static fromJSON({ id, title, sessions_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, sessions }, idRegistry) {
     registerId(idRegistry, id, 'm');
-    validateTitle(title, `Module ${id}`);
+    validateTitle(title, 'Module ' + id);
     const module = new Module({ id, title, sessions_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, sessions: sessions.map(s => Session.fromJSON(s, idRegistry)) });
-    if (module.sessions.length === 0) throw new Error(`Module ${id} has no sessions`);
+    if (module.sessions.length === 0) throw new Error('Module ' + id + ' has no sessions');
     // An intro session completes on first entry alone; without at least one session that has activities,
     // a module could be "completed" without any real work — so at least one non-intro session is required.
-    if (module.sessions.every(s => s.activities.length === 0)) throw new Error(`Module ${id} has no sessions with activities (every module needs at least one non-intro session)`);
-    if (module.sessions.length > MAX_MENU_SLOTS) throw new Error(`Module ${id} has ${module.sessions.length} sessions, but at most ${MAX_MENU_SLOTS} are supported`);
-    if (module.sessions_needed_for_adequate_progress < 1 || module.sessions_needed_for_adequate_progress > module.sessions.length) throw new Error(`Module ${id} has an unachievable sessions_needed_for_adequate_progress (${module.sessions_needed_for_adequate_progress}) for its ${module.sessions.length} session(s)`);
+    if (module.sessions.every(s => s.activities.length === 0)) throw new Error('Module ' + id + ' has no sessions with activities (every module needs at least one non-intro session)');
+    if (module.sessions.length > MAX_MENU_SLOTS) throw new Error('Module ' + id + ' has ' + module.sessions.length + ' sessions, but at most ' + MAX_MENU_SLOTS + ' are supported');
+    if (module.sessions_needed_for_adequate_progress < 1 || module.sessions_needed_for_adequate_progress > module.sessions.length) throw new Error('Module ' + id + ' has an unachievable sessions_needed_for_adequate_progress (' + module.sessions_needed_for_adequate_progress + ') for its ' + module.sessions.length + ' session(s)');
     const nonFirstIntroSession = module.sessions.find((s, i) => s.isIntro && i !== 0);
-    if (nonFirstIntroSession) throw new Error(`Session ${nonFirstIntroSession.id} in module ${id} is marked isIntro but is not the first session — only the first session may be an intro`);
+    if (nonFirstIntroSession) throw new Error('Session ' + nonFirstIntroSession.id + ' in module ' + id + ' is marked isIntro but is not the first session — only the first session may be an intro');
     return module;
   }
 }
@@ -133,14 +133,14 @@ class Session {
 
   static fromJSON({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities, isIntro }, idRegistry) {
     registerId(idRegistry, id, 's');
-    validateTitle(title, `Session ${id}`);
+    validateTitle(title, 'Session ' + id);
     const session = new Session({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), isIntro });
-    if (session.activities.length > MAX_MENU_SLOTS) throw new Error(`Session ${id} has ${session.activities.length} activities, but at most ${MAX_MENU_SLOTS} are supported`);
+    if (session.activities.length > MAX_MENU_SLOTS) throw new Error('Session ' + id + ' has ' + session.activities.length + ' activities, but at most ' + MAX_MENU_SLOTS + ' are supported');
     // Only intro sessions (isIntro: true) may have no activities; every other session needs at least one.
-    if (!session.isIntro && session.activities.length === 0) throw new Error(`Session ${id} has no activities (set isIntro: true if this is intentional)`);
+    if (!session.isIntro && session.activities.length === 0) throw new Error('Session ' + id + ' has no activities (set isIntro: true if this is intentional)');
     // Sessions without activities (i.e. intros) have no achievable threshold to check.
     if (session.activities.length > 0 && (session.activities_needed_for_adequate_progress < 1 || session.activities_needed_for_adequate_progress > session.activities.length))
-      throw new Error(`Session ${id} has an unachievable activities_needed_for_adequate_progress (${session.activities_needed_for_adequate_progress}) for its ${session.activities.length} activity/activities`);
+      throw new Error('Session ' + id + ' has an unachievable activities_needed_for_adequate_progress (' + session.activities_needed_for_adequate_progress + ') for its ' + session.activities.length + ' activity/activities');
     return session;
   }
 }
@@ -176,7 +176,7 @@ class Activity {
 
   static fromJSON(obj, idRegistry) {
     registerId(idRegistry, obj.id, 'a');
-    validateTitle(obj.title, `Activity ${obj.id}`);
+    validateTitle(obj.title, 'Activity ' + obj.id);
     return new Activity(obj);
   }
 }
@@ -199,7 +199,7 @@ class ReactStateHelper {
     const data = JSON.parse(json);
     const idRegistry = new Set();
     const modules = data.modules.map(m => Module.fromJSON(m, idRegistry));
-    if (modules.length > MAX_MENU_SLOTS) throw new Error(`State has ${modules.length} modules, but at most ${MAX_MENU_SLOTS} are supported`);
+    if (modules.length > MAX_MENU_SLOTS) throw new Error('State has ' + modules.length + ' modules, but at most ' + MAX_MENU_SLOTS + ' are supported');
     helper.#state = { ...data, modules };
     return helper;
   }
@@ -493,13 +493,13 @@ class ReactStateHelper {
   }
 
   #buildProgressAdviceString({ label, labelPlural, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
-    const skipPart = next ? `, oder zu ${next.emoji} ${next.label} "${next.title}" ${nextVerb}` : '';
-    const allCoveredPart = next ? '' : ` — und das gilt auch für alle anderen ${labelPlural}`;
-    if (completed >= total) return `Du hast ${emoji} ${label} "${title}" erfolgreich abgeschlossen${allCoveredPart}. Die enthaltenen ${subLabel} kannst du jederzeit erneut besuchen${skipPart}.`;
-    if (completed >= threshold) return `Du hast in ${emoji} ${label} "${title}" ausreichend Fortschritt gemacht${allCoveredPart}. Du kannst bleiben und weitere ${subEmoji} ${subLabel} abschliessen${skipPart}.`;
-    if (notStartedYet) return `Beginne mit einer der verfügbaren ${subEmoji} ${subLabel} in ${emoji} ${label} "${title}".`;
-    if (!nextItem) throw new Error(`No uncompleted ${subLabelSingular} found in ${label} "${title}" despite being below threshold`);
-    return `Mach weiter in ${emoji} ${label} "${title}" — zum Beispiel mit ${subEmoji} ${subLabelSingular} "${nextItem.title}".`;
+    const skipPart = next ? ', oder zu ' + next.emoji + ' ' + next.label + ' "' + next.title + '" ' + nextVerb : '';
+    const allCoveredPart = next ? '' : ' — und das gilt auch für alle anderen ' + labelPlural;
+    if (completed >= total) return 'Du hast ' + emoji + ' ' + label + ' "' + title + '" erfolgreich abgeschlossen' + allCoveredPart + '. Die enthaltenen ' + subLabel + ' kannst du jederzeit erneut besuchen' + skipPart + '.';
+    if (completed >= threshold) return 'Du hast in ' + emoji + ' ' + label + ' "' + title + '" ausreichend Fortschritt gemacht' + allCoveredPart + '. Du kannst bleiben und weitere ' + subEmoji + ' ' + subLabel + ' abschliessen' + skipPart + '.';
+    if (notStartedYet) return 'Beginne mit einer der verfügbaren ' + subEmoji + ' ' + subLabel + ' in ' + emoji + ' ' + label + ' "' + title + '".';
+    if (!nextItem) throw new Error('No uncompleted ' + subLabelSingular + ' found in ' + label + ' "' + title + '" despite being below threshold');
+    return 'Mach weiter in ' + emoji + ' ' + label + ' "' + title + '" — zum Beispiel mit ' + subEmoji + ' ' + subLabelSingular + ' "' + nextItem.title + '".';
   }
 
   populateMenuForModule() {
@@ -529,7 +529,7 @@ class ReactStateHelper {
   }
 
   // The id belonging to the label in the same slot ('' for empty slots). In MobileCoach the two are
-  // concatenated as "$rsh_menuLabelN:$rsh_menuIdN" to form the routable menu entry.
+  // concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1", to form the routable menu entry.
   getMenuId(slot) {
     return this.#menuIds[slot - 1] ?? '';
   }
@@ -543,9 +543,9 @@ class ReactStateHelper {
       if (!item) {
         labels.push('');
       } else if (item.isCompleted()) {
-        labels.push(`${completedEmoji ? completedEmoji + ' ' : ''}${item.title}`);
+        labels.push((completedEmoji ? completedEmoji + ' ' : '') + item.title);
       } else if (!nextAssigned) {
-        labels.push(`${nextEmoji ? nextEmoji + ' ' : ''}${item.title}`);
+        labels.push((nextEmoji ? nextEmoji + ' ' : '') + item.title);
         nextAssigned = true;
       } else {
         labels.push(item.title);
@@ -649,8 +649,8 @@ if (typeof process === 'undefined') {
   // on every run. A populateMenuFor…() command fills them; after any other command every
   // slot is '' (hidden), so (re)populate the menu right before displaying it.
   for (let i = 1; i <= MAX_MENU_SLOTS; i++) {
-    o[`rsh_menuLabel${i}`] = helper ? helper.getMenuLabel(i) : '';
-    o[`rsh_menuId${i}`] = helper ? helper.getMenuId(i) : '';
+    o['rsh_menuLabel' + i] = helper ? helper.getMenuLabel(i) : '';
+    o['rsh_menuId' + i] = helper ? helper.getMenuId(i) : '';
   }
 
   o

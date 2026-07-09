@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { extractWrapperVariables, findUndocumentedVariables } from '../.claude/hooks/check-wrapper-variables.mjs';
+import { extractWrapperVariables, findUndocumentedVariables, findInvalidDollarSigns } from '../.claude/hooks/check-wrapper-variables.mjs';
 
 // The MobileCoach platform constraints from CLAUDE.md, enforced against the source *text* —
 // violating them never breaks a unit test, only the deployed script (usually silently).
@@ -16,6 +16,12 @@ describe('MobileCoach platform constraints', () => {
 
     it('contains no CommonJS require', () => {
       expect(src).not.toMatch(/\brequire\s*\(/);
+    });
+  });
+
+  describe("script-editor validation on save (MobileCoach scans the raw text for $ signs — code, comments, everything — and rejects the save unless each one starts a declared variable; verified 2026-07-09: even '$-prefixed' in a comment was rejected)", () => {
+    it('every $ in the source starts a variable name documented in the content-editor guide', () => {
+      expect(findInvalidDollarSigns(src, doc)).toEqual([]);
     });
   });
 
