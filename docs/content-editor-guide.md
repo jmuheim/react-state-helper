@@ -14,16 +14,16 @@ The participant's progress is tracked in a three-level hierarchy:
 
 Every module, session, and activity has an **id** and a **title**:
 
-- Ids are short and mnemonic, prefixed by their level: `m_` for modules, `s_` for sessions, `a_` for activities — e.g. `m_bouMgt`, `s_gesGre`, `a_rolGes`.
+- Ids are short and mnemonic, starting with their level letter — `m` for modules, `s` for sessions, `a` for activities — followed by the mnemonic part in camelCase, e.g. `mBouMgt`, `sGesGre`, `aRolGes`. Only letters and numbers are allowed (no underscores): the id with an underscore appended is used verbatim as the dialog's variable prefix in MobileCoach, and prefixes only allow letters and numbers before the trailing underscore.
 - Ids must be **unique across the whole state**, not just within their parent. MobileCoach maps each id to a separate dialog, and menu routing (see [Menus](#menus)) navigates directly to the dialog named after the tapped id — so the exact same id string must be used consistently in the state definition **and** in MobileCoach (dialog names, variable prefixes).
-- A wrongly prefixed or duplicated id makes state loading fail immediately, with the offending id named in `$rsh_error`.
+- A malformed or duplicated id makes state loading fail immediately, with the offending id named in `$rsh_error`.
 
 Two progress notions exist per module/session:
 
 - **Completed** — all activities of a session are done; all sessions (that have activities) of a module are done.
 - **Adequate progress** — a softer bar: the item counts as "good enough" once `sessions_needed_for_adequate_progress` / `activities_needed_for_adequate_progress` of its children are completed, even if not all of them are. Used to nudge participants onward instead of insisting they finish everything.
 
-An **intro session** is a session with no activities of its own (just a stepping stone into the module, e.g. `s_bouIntro`). It must be marked `isIntro: true` in the state definition and be the module's **first** session. Because it has no activities, it counts as completed as soon as the participant enters it once — so it *does* count toward the module being completed, but it never affects the finer-grained progress percentage.
+An **intro session** is a session with no activities of its own (just a stepping stone into the module, e.g. `sBouIntro`). It must be marked `isIntro: true` in the state definition and be the module's **first** session. Because it has no activities, it counts as completed as soon as the participant enters it once — so it *does* count toward the module being completed, but it never affects the finer-grained progress percentage.
 
 Structural limits, checked when state loads: at most **9** modules, **9** sessions per module, and **9** activities per session (that's how many menu slots exist); every module needs at least one session with activities; every non-intro session needs at least one activity; an intro session may only be a module's first session.
 
@@ -41,7 +41,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
    | `$rsh_sessionsCompleted` | Comma-separated list of all completed session ids across all modules |
    | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuForModule()` / `populateMenuForSession()` / `populateMenuForActivity()`; written on **every** run — any other command resets all slots to `""` |
-   | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `m_emoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
+   | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — updated automatically after every run (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
 **⚠️ The silent-failure gotcha:** If any variable is missing or has the wrong access setting, the script fails silently and halts the flow mid-conversation — with **no error output** whatsoever. This is extremely painful to debug. Before testing anything, double-check that *every* variable in the table above is declared with default value `0` and access "manageable by service".
@@ -58,13 +58,13 @@ On the very first run, `$rsh_json` still has its default value `0`; the script d
 
 ## Command cheat-sheet
 
-As a content editor you only ever issue three kinds of commands: **entering** a module/session/activity, **marking an activity completed**, and **populating a menu**. Entering is a single command, `enter(…)` — the id's prefix (`m_`/`s_`/`a_`) tells the library which level to enter, so the same command works after any menu tap. Most commands require that the participant's current location was set first, in strict order: module → session → activity. Calling a command without its preconditions results in `$rsh_status` = `error`.
+As a content editor you only ever issue three kinds of commands: **entering** a module/session/activity, **marking an activity completed**, and **populating a menu**. Entering is a single command, `enter(…)` — the id's level letter (`m`/`s`/`a`) tells the library which level to enter, so the same command works after any menu tap. Most commands require that the participant's current location was set first, in strict order: module → session → activity. Calling a command without its preconditions results in `$rsh_status` = `error`.
 
 | Command (value of `$rsh_cmd`) | Preconditions | Effect |
 |---|---|---|
-| `enter('m_bouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
-| `enter('s_gesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
-| `enter('a_rolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
+| `enter('mBouMgt')` | — | Sets the current module (and clears session/activity); records visit timestamps and count |
+| `enter('sGesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
+| `enter('aRolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `markActivityCompleted()` | module + session + activity entered | Marks the current activity as completed |
 | `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
 | `populateMenuForModule()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
@@ -76,7 +76,7 @@ The library also offers **flow-logic commands** (completion booleans, progress n
 
 MobileCoach has no dynamic list constructs — menu entries are hard-coded in the flow. The workaround:
 
-1. Call one of the `populateMenuFor…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$rsh_menuLabel1`–`$rsh_menuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$rsh_menuId1`–`$rsh_menuId9` (the matching id, e.g. `m_emoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
+1. Call one of the `populateMenuFor…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$rsh_menuLabel1`–`$rsh_menuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$rsh_menuId1`–`$rsh_menuId9` (the matching id, e.g. `mEmoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
 2. In the menu definition, concatenate label and id per slot with a colon: `$rsh_menuLabel1:$rsh_menuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a variable with a specific, reserved name when the button is tapped. <!-- TODO: document the exact variable name -->
 3. MobileCoach reads that variable and navigates directly to the dialog with that id. Just make sure each module/session/activity id has a dialog of exactly the same name.
 
