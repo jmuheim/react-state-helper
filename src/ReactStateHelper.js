@@ -92,14 +92,14 @@ class Module {
     if (module.sessions.every(s => s.activities.length === 0)) throw new Error('Module ' + id + ' has no sessions with activities (every module needs at least one non-intro session)');
     if (module.sessions.length > MAX_MENU_SLOTS) throw new Error('Module ' + id + ' has ' + module.sessions.length + ' sessions, but at most ' + MAX_MENU_SLOTS + ' are supported');
     if (module.sessions_needed_for_adequate_progress < 1 || module.sessions_needed_for_adequate_progress > module.sessions.length) throw new Error('Module ' + id + ' has an unachievable sessions_needed_for_adequate_progress (' + module.sessions_needed_for_adequate_progress + ') for its ' + module.sessions.length + ' session(s)');
-    const nonFirstIntroSession = module.sessions.find((s, i) => s.isIntro && i !== 0);
-    if (nonFirstIntroSession) throw new Error('Session ' + nonFirstIntroSession.id + ' in module ' + id + ' is marked isIntro but is not the first session — only the first session may be an intro');
+    const nonFirstIntroSession = module.sessions.find((s, i) => s.is_intro && i !== 0);
+    if (nonFirstIntroSession) throw new Error('Session ' + nonFirstIntroSession.id + ' in module ' + id + ' is marked is_intro but is not the first session — only the first session may be an intro');
     return module;
   }
 }
 
 class Session {
-  constructor({ id, title, activities_needed_for_adequate_progress = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [], isIntro = false }) {
+  constructor({ id, title, activities_needed_for_adequate_progress = 1, entered_first_at = null, entered_last_at = null, times_entered = 0, activities = [], is_intro = false }) {
     this.id = id;
     this.title = title;
     this.activities_needed_for_adequate_progress = activities_needed_for_adequate_progress;
@@ -107,7 +107,7 @@ class Session {
     this.entered_last_at = entered_last_at;
     this.times_entered = times_entered;
     this.activities = activities;
-    this.isIntro = isIntro;
+    this.is_intro = is_intro;
   }
 
   enter() {
@@ -118,7 +118,7 @@ class Session {
   }
 
   isCompleted() {
-    if (this.isIntro) return this.entered_first_at !== null;
+    if (this.is_intro) return this.entered_first_at !== null;
     return this.activities.length > 0 && this.activities.every(a => a.isCompleted());
   }
 
@@ -135,16 +135,16 @@ class Session {
   }
 
   toJSON() {
-    return { id: this.id, title: this.title, activities_needed_for_adequate_progress: this.activities_needed_for_adequate_progress, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities, isIntro: this.isIntro };
+    return { id: this.id, title: this.title, activities_needed_for_adequate_progress: this.activities_needed_for_adequate_progress, entered_first_at: this.entered_first_at, entered_last_at: this.entered_last_at, times_entered: this.times_entered, activities: this.activities, is_intro: this.is_intro };
   }
 
-  static fromJSON({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities, isIntro }, idRegistry) {
+  static fromJSON({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities, is_intro }, idRegistry) {
     registerId(idRegistry, id, 's');
     validateTitle(title, 'Session ' + id);
-    const session = new Session({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), isIntro });
+    const session = new Session({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), is_intro });
     if (session.activities.length > MAX_MENU_SLOTS) throw new Error('Session ' + id + ' has ' + session.activities.length + ' activities, but at most ' + MAX_MENU_SLOTS + ' are supported');
-    // Only intro sessions (isIntro: true) may have no activities; every other session needs at least one.
-    if (!session.isIntro && session.activities.length === 0) throw new Error('Session ' + id + ' has no activities (set isIntro: true if this is intentional)');
+    // Only intro sessions (is_intro: true) may have no activities; every other session needs at least one.
+    if (!session.is_intro && session.activities.length === 0) throw new Error('Session ' + id + ' has no activities (set is_intro: true if this is intentional)');
     // Sessions without activities (i.e. intros) have no achievable threshold to check.
     if (session.activities.length > 0 && (session.activities_needed_for_adequate_progress < 1 || session.activities_needed_for_adequate_progress > session.activities.length))
       throw new Error('Session ' + id + ' has an unachievable activities_needed_for_adequate_progress (' + session.activities_needed_for_adequate_progress + ') for its ' + session.activities.length + ' activity/activities');
@@ -198,7 +198,7 @@ class ReactStateHelper {
   #menuIds = [];
 
   static initDefaultState() {
-    return this.loadExistingState(JSON.stringify(this.initialState()));
+    return this.loadExistingState(JSON.stringify(this.defaultStateTemplate()));
   }
 
   static loadExistingState(json) {
@@ -211,7 +211,7 @@ class ReactStateHelper {
     return helper;
   }
 
-  static initialState() {
+  static defaultStateTemplate() {
     return {
       modules: [
         {
@@ -230,7 +230,7 @@ class ReactStateHelper {
               entered_last_at: null,
               times_entered: 0,
               activities: [],
-              isIntro: true,
+              is_intro: true,
             },
             {
               id: "sGesGre",
@@ -257,7 +257,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
-              isIntro: false,
+              is_intro: false,
             },
             {
               id: "sPaus",
@@ -276,7 +276,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
-              isIntro: false,
+              is_intro: false,
             },
           ],
         },
@@ -296,7 +296,7 @@ class ReactStateHelper {
               entered_last_at: null,
               times_entered: 0,
               activities: [],
-              isIntro: true,
+              is_intro: true,
             },
             {
               id: "sAkzep",
@@ -315,7 +315,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
-              isIntro: false,
+              is_intro: false,
             },
             {
               id: "sNeuBew",
@@ -334,7 +334,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
-              isIntro: false,
+              is_intro: false,
             },
             {
               id: "sUmgEmo",
@@ -353,7 +353,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
-              isIntro: false,
+              is_intro: false,
             },
             {
               id: "sUmgSup",
@@ -372,7 +372,7 @@ class ReactStateHelper {
                   completed: false,
                 },
               ],
-              isIntro: false,
+              is_intro: false,
             },
           ],
         },
@@ -404,13 +404,6 @@ class ReactStateHelper {
   hasSessionAdequateProgress(sessionId) {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     return this.#findModule(this.#state.currentModuleId).findSession(sessionId).hasAdequateProgress();
-  }
-
-  // Returns a value between 0 and 1
-  getProgress() {
-    const all = this.#state.modules.flatMap(m => m.sessions.filter(s => s.activities.length > 0));
-    if (all.length === 0) return 0;
-    return all.filter(s => s.isCompleted()).length / all.length;
   }
 
   // Returns a value between 0 and 1 for the given module
@@ -453,15 +446,33 @@ class ReactStateHelper {
     return [currentModuleId, currentSessionId, currentActivityId].filter(Boolean).join(': ');
   }
 
-  allCompletedSessionsAsCsv() {
-    return this.#state.modules
-      .flatMap(m => m.sessions)
-      .filter(s => s.isCompleted())
-      .map(s => s.id)
-      .join(',');
+  // One-line snapshot of the whole completion state, meant for quick inspection inside MobileCoach:
+  // each module wraps its sessions in [ ], each non-intro session wraps its activities in ( ), and
+  // every completed item carries the completed emoji right after its id — so the rollup from
+  // completed activities to their session and module is visible at a glance, e.g.
+  // "mMod1[sSes1intro✅ sSes1a✅(aAct1a1✅ aAct1a2✅) sSes1b(aAct1b1)] mMod2[…]".
+  getCompletionOverview() {
+    const completedEmoji = ReactStateHelper.#EMOJIS.completed;
+    const moduleParts = [];
+    for (const module of this.#state.modules) {
+      const sessionParts = [];
+      for (const session of module.sessions) {
+        let sessionPart = session.id + (session.isCompleted() ? completedEmoji : '');
+        if (session.activities.length > 0) {
+          const activityParts = [];
+          for (const activity of session.activities) {
+            activityParts.push(activity.id + (activity.isCompleted() ? completedEmoji : ''));
+          }
+          sessionPart += '(' + activityParts.join(' ') + ')';
+        }
+        sessionParts.push(sessionPart);
+      }
+      moduleParts.push(module.id + (module.isCompleted() ? completedEmoji : '') + '[' + sessionParts.join(' ') + ']');
+    }
+    return moduleParts.join(' ');
   }
 
-  static #MENU_EMOJIS = {
+  static #EMOJIS = {
     completed: '✅',
     next: '👉',
     module: '🗂️',
@@ -470,15 +481,15 @@ class ReactStateHelper {
   };
 
   getProgressAdvice() {
-    const { module: m, session: s, activity: a } = ReactStateHelper.#MENU_EMOJIS;
+    const { module: m, session: s, activity: a } = ReactStateHelper.#EMOJIS;
     if (this.#state.currentSessionId) {
       const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       return this.#buildProgressAdviceString({
-        label: 'Session', labelPlural: 'Sessions', emoji: s, title: session.title,
-        subLabel: 'Aktivitäten', subLabelSingular: 'Aktivität', subEmoji: a,
+        labelSingular: 'Session', labelPlural: 'Sessions', emoji: s, title: session.title,
+        subLabelSingular: 'Aktivität', subLabelPlural: 'Aktivitäten', subEmoji: a,
         completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_progress,
         notStartedYet: !activity, nextItem: nextActivity,
         next: { label: 'Modul', emoji: m, title: module.title }, nextVerb: 'zurückgehen',
@@ -492,8 +503,8 @@ class ReactStateHelper {
       const nextModule = this.#state.modules[idx + 1];
       const completedSessions = module.countCompletedSessions();
       return this.#buildProgressAdviceString({
-        label: 'Modul', labelPlural: 'Module', emoji: m, title: module.title,
-        subLabel: 'Sessions', subLabelSingular: 'Session', subEmoji: s,
+        labelSingular: 'Modul', labelPlural: 'Module', emoji: m, title: module.title,
+        subLabelSingular: 'Session', subLabelPlural: 'Sessions', subEmoji: s,
         completed: completedSessions, total: completableSessions.length, threshold: module.sessions_needed_for_adequate_progress,
         notStartedYet: completedSessions === 0, nextItem: nextUncompletedSession,
         next: nextModule ? { label: 'Modul', emoji: m, title: nextModule.title } : null, nextVerb: 'weitergehen',
@@ -502,14 +513,14 @@ class ReactStateHelper {
     throw new Error('No module entered yet');
   }
 
-  #buildProgressAdviceString({ label, labelPlural, emoji, title, subLabel, subLabelSingular, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
+  #buildProgressAdviceString({ labelSingular, labelPlural, emoji, title, subLabelSingular, subLabelPlural, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
     const skipPart = next ? ', oder zu ' + next.emoji + ' ' + next.label + ' "' + next.title + '" ' + nextVerb : '';
     const allCoveredPart = next ? '' : ' — und das gilt auch für alle anderen ' + labelPlural;
-    if (completed >= total) return 'Du hast ' + emoji + ' ' + label + ' "' + title + '" erfolgreich abgeschlossen' + allCoveredPart + '. Die enthaltenen ' + subLabel + ' kannst du jederzeit erneut besuchen' + skipPart + '.';
-    if (completed >= threshold) return 'Du hast in ' + emoji + ' ' + label + ' "' + title + '" ausreichend Fortschritt gemacht' + allCoveredPart + '. Du kannst bleiben und weitere ' + subEmoji + ' ' + subLabel + ' abschliessen' + skipPart + '.';
-    if (notStartedYet) return 'Beginne mit einer der verfügbaren ' + subEmoji + ' ' + subLabel + ' in ' + emoji + ' ' + label + ' "' + title + '".';
-    if (!nextItem) throw new Error('No uncompleted ' + subLabelSingular + ' found in ' + label + ' "' + title + '" despite being below threshold');
-    return 'Mach weiter in ' + emoji + ' ' + label + ' "' + title + '" — zum Beispiel mit ' + subEmoji + ' ' + subLabelSingular + ' "' + nextItem.title + '".';
+    if (completed >= total) return 'Du hast ' + emoji + ' ' + labelSingular + ' "' + title + '" erfolgreich abgeschlossen' + allCoveredPart + '. Die enthaltenen ' + subLabelPlural + ' kannst du jederzeit erneut besuchen' + skipPart + '.';
+    if (completed >= threshold) return 'Du hast in ' + emoji + ' ' + labelSingular + ' "' + title + '" ausreichend Fortschritt gemacht' + allCoveredPart + '. Du kannst bleiben und weitere ' + subEmoji + ' ' + subLabelPlural + ' abschliessen' + skipPart + '.';
+    if (notStartedYet) return 'Beginne mit einer der verfügbaren ' + subEmoji + ' ' + subLabelPlural + ' in ' + emoji + ' ' + labelSingular + ' "' + title + '".';
+    if (!nextItem) throw new Error('No uncompleted ' + subLabelSingular + ' found in ' + labelSingular + ' "' + title + '" despite being below threshold');
+    return 'Mach weiter in ' + emoji + ' ' + labelSingular + ' "' + title + '" — zum Beispiel mit ' + subEmoji + ' ' + subLabelSingular + ' "' + nextItem.title + '".';
   }
 
   populateMenuForModule() {
@@ -545,7 +556,7 @@ class ReactStateHelper {
   }
 
   #buildMenuLabels(items) {
-    const { completed: completedEmoji, next: nextEmoji } = ReactStateHelper.#MENU_EMOJIS;
+    const { completed: completedEmoji, next: nextEmoji } = ReactStateHelper.#EMOJIS;
     const labels = [];
     let nextAssigned = false;
     for (let i = 0; i < MAX_MENU_SLOTS; i++) {
@@ -646,13 +657,13 @@ if (typeof process === 'undefined') {
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
-    rsh_json:              helper ? helper.toString() : rsh_json,
+    rsh_json:               helper ? helper.toString() : rsh_json,
     // '' when the command returned nothing (enter…, complete…, populate…), so the variable never holds a stale value from an earlier run.
-    rsh_result:            result === undefined ? '' : result,
-    rsh_status:            status,
-    rsh_error:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    rsh_sessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
-    participantGroup:               helper ? helper.getParticipantLocation() : null
+    rsh_result:             result === undefined ? '' : result,
+    rsh_status:             status,
+    rsh_error:              error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    rsh_completionOverview: helper ? helper.getCompletionOverview() : '',
+    participantGroup:       helper ? helper.getParticipantLocation() : null
   };
 
   // All 9 menu labels and their 9 ids are written back to MobileCoach as individual variables,

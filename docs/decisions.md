@@ -56,6 +56,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 8. Intro sessions opt out via `isIntro`, and every module needs at least one non-intro session
 
+> Refined by #31: the field is renamed `is_intro`, matching the snake_case of the other persisted fields. The opt-out mechanism itself stands.
+
 > Refined by #22: an intro session now completes on first entry and *does* count toward module completion (only the progress fraction still ignores it), and it must be the module's first session. The `isIntro` opt-out and the "at least one non-intro session" rule still stand.
 
 **Decision:** A session with no activities must set `isIntro: true`. Completion and progress math filter to sessions that have activities. `Module.fromJSON` additionally requires at least one session with activities (`030b62b`).
@@ -103,6 +105,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 14. Behavioral tests run on synthetic fixtures, decoupled from production content
 
+> Refined by #33: `initialState()` is renamed `defaultStateTemplate()`.
+
 **Decision:** Tests build their own minimal states (`851f191`, `07eefe9`). Production `initialState()` is covered by a behavioral test that every activity can be completed without throwing — not invariant-by-invariant.
 
 **Why:** content edits (new modules, renamed sessions) must not break behavioral tests; and `initDefaultState` cannot return an invariant-violating state anyway, since it delegates to `loadExistingState` (#7).
@@ -114,6 +118,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** Swiss deployment context; "Session" is the established participant-facing term for that hierarchy level.
 
 ## 16. `$participantGroup` is deliberately repurposed to expose the participant's location
+
+> Refined by #35: the repurposing is permanent — `$participantGroup` is a MobileCoach built-in that will never carry real group assignment in this project.
 
 **Decision:** `getParticipantLocation()` writes `moduleId[: sessionId[: activityId]]` into `$participantGroup` (`e656913`).
 
@@ -209,6 +215,7 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 25. The command cheat-sheet is split by audience: doer commands stay with content editors, flow-logic commands move to the developer guide
 
+> Refined by #32: the overall `getProgress()` command is deleted (unused); the other six flow-logic commands stand.
 > Refined by #28: the three `enter…()` doer commands are now a single `enter(id)`. The audience split itself stands.
 
 *(2026-07-08)*
@@ -264,3 +271,39 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** next to the id-taking queries (`isSessionCompleted(sessionId)`, `hasSessionAdequateProgress(sessionId)`), `markActivityCompleted()` read like it should take an `activityId`, while it silently operates on the current activity. Verb-first `completeActivity` is a plainer imperative and shorter to hand-type into `$rsh_cmd` (the same brevity argument as #26). "Current" stays implicit, matching the API convention that a command’s scope is implied rather than spelled out — `getProgressAdvice()` and `populateMenuForSession()` also operate on the current context without carrying “Current” in their names. Nothing is deployed (testing phase), so the break is free. **Rejected:** `completeCurrentActivity()` — explicit about the target, but it would be the only name carrying "Current", breaking that convention; keeping the old name as an alias — dead surface with no deployed callers.
 
 **Watch for:** nothing new to declare in MobileCoach — `$rsh_cmd` is the only carrier. Historical entries (#2, #25) keep the old name, per the append-only rule.
+
+## 31. The intro-session field is `is_intro`, matching the snake_case of all other persisted fields
+
+**Decision:** The persisted field and object property `isIntro` is renamed `is_intro` (refines #8).
+
+**Why:** it was the only camelCase key in an otherwise snake_case state shape (`times_entered`, `entered_first_at`, `sessions_needed_for_adequate_progress`, `completed`) — two conventions in one JSON object for no reason. snake_case wins because every other field already uses it, so this is the minimal diff. Nothing is deployed (testing phase), so breaking the persisted `$rsh_json` shape is free — the same argument as #21. **Rejected:** converting all fields to camelCase instead (touches every field, fixture, and docs mention to standardize on the minority convention).
+
+**Watch for:** nothing — no `$`-wrapper variables are affected. Once state is live in MobileCoach, field renames need a migration path instead.
+
+## 32. The overall `getProgress()` command is removed
+
+**Decision:** The helper-level `getProgress()` (overall progress across all modules) is deleted from the public command surface, its tests and docs row with it. `Module.getProgress()` stays — it backs the `getModuleProgress(moduleId)` command.
+
+**Why:** it was referenced only by its own tests and its docs table row; no flow uses an overall-progress number (confirmed 2026-07-09). Its name was also misleading: everywhere else a no-arg command scopes to the current location, but this one was global. Dead surface with a misleading name is better deleted than renamed. **Rejected:** renaming it `getOverallProgress()` — keeps unused surface, just prettier.
+
+**Watch for:** if a flow ever needs overall progress, reintroduce it as `getOverallProgress()` so the global scope is explicit in the name.
+
+## 33. The default-state blueprint is `defaultStateTemplate()`, not `initialState()`
+
+**Decision:** The static `initialState()` is renamed `defaultStateTemplate()` (refines #14's wording; behavior unchanged).
+
+**Why:** `initDefaultState()` and `initialState()` were near-twin names — four letters apart — for different things: the former returns a ready helper *instance*, the latter the plain state *object* the default is built from. "Template" states that role and no longer collides visually with `initDefaultState()`. **Rejected:** renaming `initDefaultState()` instead — it is the wrapper-facing entry point and its name (init me a default-state helper) reads fine; renaming both — churn without extra clarity.
+
+## 34. `getCompletionOverview()` and `$rsh_completionOverview` replace `allCompletedSessionsAsCsv()` and `$rsh_sessionsCompleted`
+
+**Decision:** The CSV of completed session ids is replaced by a one-line overview of the entire completion state, written to `$rsh_completionOverview` on every run (same cadence as before): each module wraps its sessions in `[ ]`, each non-intro session wraps its activities in `( )`, and every completed item — activity, session, or module — carries the completed emoji (see #EMOJIS in the source) directly after its id, e.g. `mBouMgt[sBouIntro sGesGre(aRolGes aAbgKon)]` with the marker appended to whatever is done.
+
+**Why:** the CSV predates activities — it named completed sessions and said nothing about activities or how completion rolls up into sessions and modules. The overview shows the full hierarchy and its rollup at a glance while staying a single, inspectable string. Ids instead of titles keep it compact and unambiguous (titles are long and may repeat); the completed marker reuses the same emoji editors already know from menu labels. **Rejected:** exposing raw JSON (that is `$rsh_json`, unreadable at a glance); per-level counts like `1/2` (derivable from the marks, adds noise); keeping the CSV alongside the overview (a second variable carrying strictly less information).
+
+**Watch for:** declare `$rsh_completionOverview` in MobileCoach (default `0`, "manageable by service") and remove the `$rsh_sessionsCompleted` declaration before the next copy-over. Variable length limits in MobileCoach are unknown — with many modules the overview is the likeliest value to hit one (same unknown as the `$rsh_error` open question).
+
+## 35. `$participantGroup` keeps carrying the participant location — permanently
+
+**Decision:** The repurposing of `$participantGroup` for the participant's location (#16) is permanent; no dedicated `$rsh_location` variable will replace it. The corresponding open question is resolved and removed.
+
+**Why:** `$participantGroup` is a MobileCoach built-in, written into the platform itself — it always exists, needs no declaration, and stays one of the few variables easily inspectable in the MobileCoach UI. The project will never use it for actual group assignment (confirmed 2026-07-09), so the collision the open question worried about cannot happen. **Rejected:** a dedicated `$rsh_location` — one more variable to declare, without the built-in inspectability that motivated #16 in the first place.
