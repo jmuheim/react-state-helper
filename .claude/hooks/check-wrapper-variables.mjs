@@ -29,10 +29,11 @@ export function extractWrapperVariables(srcText) {
   const outputBlock = wrapper.slice(outputStart, wrapper.indexOf('};', outputStart));
   for (const [, name] of outputBlock.matchAll(/^\s*([a-zA-Z][a-zA-Z0-9_]*):/gm)) names.add(name);
 
-  // Numbered series written via template literals outside the wrapper, e.g.
-  // vars[`rsh_menuLabel${i + 1}`] — recorded under their base name, which the table's
-  // range row ("$rsh_menuLabel1 – $rsh_menuLabel9") matches as a substring.
-  for (const [, name] of srcText.matchAll(/`(rsh_[a-zA-Z0-9_]*)\$\{/g)) names.add(name);
+  // Numbered series written via string concatenation, e.g. o['rsh_menuLabel' + i] — recorded
+  // under their base name, which the table's range row ("$rsh_menuLabel1 – $rsh_menuLabel9")
+  // matches as a substring. (Template literals are banned in the source: MobileCoach's paste-time
+  // validator scans the raw text for $ signs, and `${` would trip it.)
+  for (const [, name] of srcText.matchAll(/'(rsh_[a-zA-Z0-9_]*)'\s*\+/g)) names.add(name);
 
   return names;
 }

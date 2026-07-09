@@ -9,7 +9,7 @@ const realSrcPath = fileURLToPath(new URL('../src/ReactStateHelper.js', import.m
 // Minimal stand-in for src/ReactStateHelper.js: a class part writing a numbered variable series,
 // the wrapper guard, $-reads, and the output object.
 function fakeSrc({ outputKeys = ['rsh_json', 'participantGroup'] } = {}) {
-  const menuLine = 'vars[`rsh_menuLabel${i + 1}`] = item.title;';
+  const menuLine = "vars['rsh_menuLabel' + (i + 1)] = item.title;";
   return [
     'class Foo {',
     `  bar() { ${menuLine} }`,
@@ -31,7 +31,7 @@ function fakeDocTable(names) {
 
 describe('check-wrapper-variables hook', () => {
   describe('extractWrapperVariables', () => {
-    it('collects $-reads, output object keys, and template-literal series', () => {
+    it('collects $-reads, output object keys, and concatenated numbered series', () => {
       const names = [...extractWrapperVariables(fakeSrc())];
       expect(names).toContain('rsh_json'); // $-read and output key
       expect(names).toContain('rsh_cmd'); // read inside the eval template
