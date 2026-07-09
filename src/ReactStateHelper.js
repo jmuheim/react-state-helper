@@ -550,7 +550,9 @@ class ReactStateHelper {
   }
 
   // The id belonging to the label in the same slot ('' for empty slots). In MobileCoach the two are
-  // concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1", to form the routable menu entry.
+  // concatenated per slot, e.g. "$rsh_menuLabel1:$rsh_menuId1", to form the routable menu entry: on
+  // tap, MobileCoach stores the id in its reserved variable $participantNextMicroDialogIdentifier
+  // and navigates to the dialog with that id.
   getMenuId(slot) {
     return this.#menuIds[slot - 1] ?? '';
   }
