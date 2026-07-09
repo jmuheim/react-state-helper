@@ -191,7 +191,7 @@ class Activity {
 class ReactStateHelper {
   #state;
 
-  // Menu labels and ids populated by the populateMenuFor…() methods, read back per slot via
+  // Menu labels and ids populated by the populateMenuWith…() methods, read back per slot via
   // getMenuLabel() / getMenuId(). Not part of #state: they are rebuilt right before showing a menu,
   // never persisted.
   #menuLabels = [];
@@ -523,19 +523,19 @@ class ReactStateHelper {
     return 'Mach weiter in ' + emoji + ' ' + labelSingular + ' "' + title + '" — zum Beispiel mit ' + subEmoji + ' ' + subLabelSingular + ' "' + nextItem.title + '".';
   }
 
-  populateMenuForModule() {
+  populateMenuWithModules() {
     this.#menuLabels = this.#buildMenuLabels(this.#state.modules);
     this.#menuIds = this.#buildMenuIds(this.#state.modules);
   }
 
-  populateMenuForSession() {
+  populateMenuWithSessions() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     const sessions = this.#findModule(this.#state.currentModuleId).sessions;
     this.#menuLabels = this.#buildMenuLabels(sessions);
     this.#menuIds = this.#buildMenuIds(sessions);
   }
 
-  populateMenuForActivity() {
+  populateMenuWithActivities() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
     const activities = this.#findSession(this.#state.currentSessionId).activities;
@@ -544,7 +544,7 @@ class ReactStateHelper {
   }
 
   // Slot numbers run 1–9, matching the MobileCoach menu label variables. Empty until one of the
-  // populateMenuFor…() methods was called ('' hides the slot in MobileCoach).
+  // populateMenuWith…() methods was called ('' hides the slot in MobileCoach).
   getMenuLabel(slot) {
     return this.#menuLabels[slot - 1] ?? '';
   }
@@ -667,7 +667,7 @@ if (typeof process === 'undefined') {
   };
 
   // All 9 menu labels and their 9 ids are written back to MobileCoach as individual variables,
-  // on every run. A populateMenuFor…() command fills them; after any other command every
+  // on every run. A populateMenuWith…() command fills them; after any other command every
   // slot is '' (hidden), so (re)populate the menu right before displaying it.
   for (let i = 1; i <= MAX_MENU_SLOTS; i++) {
     o['rsh_menuLabel' + i] = helper ? helper.getMenuLabel(i) : '';

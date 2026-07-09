@@ -36,11 +36,11 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    |---|---|
    | `$rsh_cmd` | Command to execute, e.g. `completeActivity()` (set this before each script run) |
    | `$rsh_json` | Full serialized state, persisted between runs |
-   | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuFor…()` commands, …) |
+   | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuWith…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
    | `$rsh_completionOverview` | One-line snapshot of the whole completion state, for quick inspection: each module wraps its sessions in `[ ]`, each session its activities in `( )`, and every completed item carries ✅ right after its id — e.g. `mBouMgt[sBouIntro✅ sGesGre✅(aRolGes✅ aAbgKon✅) sPaus(aMikPau)]` |
-   | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuForModule()` / `populateMenuForSession()` / `populateMenuForActivity()`; written on **every** run — any other command resets all slots to `""` |
+   | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuWithModules()` / `populateMenuWithSessions()` / `populateMenuWithActivities()`; written on **every** run — any other command resets all slots to `""` |
    | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — updated automatically after every run (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
@@ -54,7 +54,7 @@ MobileCoach cannot call JavaScript functions directly. Instead, each script run 
 2. Execute the script (the pasted `ReactStateHelper.js`).
 3. Read the results: the command's return value is in `$rsh_result` (`""` for commands that return nothing), `$rsh_status` is `success` or `error`, and `$rsh_error` holds the error message (or `none`).
 
-On the very first run, `$rsh_json` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$rsh_json` (the persisted state), `$rsh_completionOverview`, `$participantGroup`, and all nine `$rsh_menuLabel` and nine `$rsh_menuId` variables (empty unless the run's command was a `populateMenuFor…()` one) — you never have to write these yourself.
+On the very first run, `$rsh_json` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$rsh_json` (the persisted state), `$rsh_completionOverview`, `$participantGroup`, and all nine `$rsh_menuLabel` and nine `$rsh_menuId` variables (empty unless the run's command was a `populateMenuWith…()` one) — you never have to write these yourself.
 
 ## Command cheat-sheet
 
@@ -66,9 +66,9 @@ As a content editor you only ever issue three kinds of commands: **entering** a 
 | `enter('sGesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
 | `enter('aRolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `completeActivity()` | module + session + activity entered | Marks the current activity as completed |
-| `populateMenuForActivity()` | module + session entered | Fills the labels and ids with the current session's activities |
-| `populateMenuForModule()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
-| `populateMenuForSession()` | module entered | Fills the labels and ids with the current module's sessions |
+| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities |
+| `populateMenuWithModules()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
+| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions |
 
 The library also offers **flow-logic commands** (completion booleans, progress numbers, advice text) that feed MobileCoach's conditional branching. Those are wired into the flows by developers and documented in the [developer guide](developer-guide.md#flow-logic-commands) — as a content editor you never need to issue them.
 
@@ -76,7 +76,7 @@ The library also offers **flow-logic commands** (completion booleans, progress n
 
 MobileCoach has no dynamic list constructs — menu entries are hard-coded in the flow. The workaround:
 
-1. Call one of the `populateMenuFor…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$rsh_menuLabel1`–`$rsh_menuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$rsh_menuId1`–`$rsh_menuId9` (the matching id, e.g. `mEmoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
+1. Call one of the `populateMenuWith…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$rsh_menuLabel1`–`$rsh_menuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$rsh_menuId1`–`$rsh_menuId9` (the matching id, e.g. `mEmoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
 2. In the menu definition, concatenate label and id per slot with a colon: `$rsh_menuLabel1:$rsh_menuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to a variable with a specific, reserved name when the button is tapped. <!-- TODO: document the exact variable name -->
 3. MobileCoach reads that variable and navigates directly to the dialog with that id. Just make sure each module/session/activity id has a dialog of exactly the same name.
 
