@@ -294,13 +294,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 **Why:** `initDefaultState()` and `initialState()` were near-twin names — four letters apart — for different things: the former returns a ready helper *instance*, the latter the plain state *object* the default is built from. "Template" states that role and no longer collides visually with `initDefaultState()`. **Rejected:** renaming `initDefaultState()` instead — it is the wrapper-facing entry point and its name (init me a default-state helper) reads fine; renaming both — churn without extra clarity.
 
-## 34. `getCompletionOverview()` and `$rsh_overview` replace `allCompletedSessionsAsCsv()` and `$rsh_sessionsCompleted`
+## 34. `getCompletionOverview()` and `$rsh_completionOverview` replace `allCompletedSessionsAsCsv()` and `$rsh_sessionsCompleted`
 
-**Decision:** The CSV of completed session ids is replaced by a one-line overview of the entire completion state, written to `$rsh_overview` on every run (same cadence as before): each module wraps its sessions in `[ ]`, each non-intro session wraps its activities in `( )`, and every completed item — activity, session, or module — carries the completed emoji (see #EMOJIS in the source) directly after its id, e.g. `mBouMgt[sBouIntro sGesGre(aRolGes aAbgKon)]` with the marker appended to whatever is done.
+**Decision:** The CSV of completed session ids is replaced by a one-line overview of the entire completion state, written to `$rsh_completionOverview` on every run (same cadence as before): each module wraps its sessions in `[ ]`, each non-intro session wraps its activities in `( )`, and every completed item — activity, session, or module — carries the completed emoji (see #EMOJIS in the source) directly after its id, e.g. `mBouMgt[sBouIntro sGesGre(aRolGes aAbgKon)]` with the marker appended to whatever is done.
 
 **Why:** the CSV predates activities — it named completed sessions and said nothing about activities or how completion rolls up into sessions and modules. The overview shows the full hierarchy and its rollup at a glance while staying a single, inspectable string. Ids instead of titles keep it compact and unambiguous (titles are long and may repeat); the completed marker reuses the same emoji editors already know from menu labels. **Rejected:** exposing raw JSON (that is `$rsh_json`, unreadable at a glance); per-level counts like `1/2` (derivable from the marks, adds noise); keeping the CSV alongside the overview (a second variable carrying strictly less information).
 
-**Watch for:** declare `$rsh_overview` in MobileCoach (default `0`, "manageable by service") and remove the `$rsh_sessionsCompleted` declaration before the next copy-over. Variable length limits in MobileCoach are unknown — with many modules the overview is the likeliest value to hit one (same unknown as the `$rsh_error` open question).
+**Watch for:** declare `$rsh_completionOverview` in MobileCoach (default `0`, "manageable by service") and remove the `$rsh_sessionsCompleted` declaration before the next copy-over. Variable length limits in MobileCoach are unknown — with many modules the overview is the likeliest value to hit one (same unknown as the `$rsh_error` open question).
 
 ## 35. `$participantGroup` keeps carrying the participant location — permanently
 

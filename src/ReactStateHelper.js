@@ -657,13 +657,13 @@ if (typeof process === 'undefined') {
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
-    rsh_json:              helper ? helper.toString() : rsh_json,
+    rsh_json:               helper ? helper.toString() : rsh_json,
     // '' when the command returned nothing (enter…, complete…, populate…), so the variable never holds a stale value from an earlier run.
-    rsh_result:            result === undefined ? '' : result,
-    rsh_status:            status,
-    rsh_error:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    rsh_overview:          helper ? helper.getCompletionOverview() : '',
-    participantGroup:               helper ? helper.getParticipantLocation() : null
+    rsh_result:             result === undefined ? '' : result,
+    rsh_status:             status,
+    rsh_error:              error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    rsh_completionOverview: helper ? helper.getCompletionOverview() : '',
+    participantGroup:       helper ? helper.getParticipantLocation() : null
   };
 
   // All 9 menu labels and their 9 ids are written back to MobileCoach as individual variables,

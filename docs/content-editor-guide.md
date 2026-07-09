@@ -39,7 +39,7 @@ Structural limits, checked when state loads: at most **9** modules, **9** sessio
    | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuFor…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
-   | `$rsh_overview` | One-line snapshot of the whole completion state, for quick inspection: each module wraps its sessions in `[ ]`, each session its activities in `( )`, and every completed item carries ✅ right after its id — e.g. `mBouMgt[sBouIntro✅ sGesGre✅(aRolGes✅ aAbgKon✅) sPaus(aMikPau)]` |
+   | `$rsh_completionOverview` | One-line snapshot of the whole completion state, for quick inspection: each module wraps its sessions in `[ ]`, each session its activities in `( )`, and every completed item carries ✅ right after its id — e.g. `mBouMgt[sBouIntro✅ sGesGre✅(aRolGes✅ aAbgKon✅) sPaus(aMikPau)]` |
    | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuForModule()` / `populateMenuForSession()` / `populateMenuForActivity()`; written on **every** run — any other command resets all slots to `""` |
    | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — updated automatically after every run (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
@@ -54,7 +54,7 @@ MobileCoach cannot call JavaScript functions directly. Instead, each script run 
 2. Execute the script (the pasted `ReactStateHelper.js`).
 3. Read the results: the command's return value is in `$rsh_result` (`""` for commands that return nothing), `$rsh_status` is `success` or `error`, and `$rsh_error` holds the error message (or `none`).
 
-On the very first run, `$rsh_json` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$rsh_json` (the persisted state), `$rsh_overview`, `$participantGroup`, and all nine `$rsh_menuLabel` and nine `$rsh_menuId` variables (empty unless the run's command was a `populateMenuFor…()` one) — you never have to write these yourself.
+On the very first run, `$rsh_json` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$rsh_json` (the persisted state), `$rsh_completionOverview`, `$participantGroup`, and all nine `$rsh_menuLabel` and nine `$rsh_menuId` variables (empty unless the run's command was a `populateMenuFor…()` one) — you never have to write these yourself.
 
 ## Command cheat-sheet
 
