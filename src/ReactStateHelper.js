@@ -11,7 +11,7 @@ const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_me
 // the level letter keeps the level marker recognizable without a separator; the letters-and-numbers
 // restriction exists because each id, with an underscore appended, doubles as a MobileCoach dialog
 // variable prefix — and prefixes reject underscores anywhere but the end (see
-// "Dialog variable prefixes" in docs/mobilecoach-field-notes.md).
+// "Dialog ids and variable prefixes" in docs/mobilecoach-field-notes.md).
 function registerId(idRegistry, id, levelLetter) {
   // No end-of-string anchor here — its character cannot appear anywhere in this script (decision #27) —
   // so the whole-id coverage is checked by rejecting any character outside letters and numbers instead.
