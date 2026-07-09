@@ -25,7 +25,7 @@ Two progress notions exist per module/session:
 
 An **intro session** is a session with no activities of its own (just a stepping stone into the module, e.g. `sBouIntro`). It must be marked `is_intro: true` in the state definition and be the module's **first** session. Because it has no activities, it counts as completed as soon as the participant enters it once — so it *does* count toward the module being completed, but it never affects the finer-grained progress percentage.
 
-Structural limits, checked when state loads: at most **9** modules, **9** sessions per module, and **9** activities per session (that's how many menu slots exist); every module needs at least one session with activities; every non-intro session needs at least one activity; an intro session may only be a module's first session.
+Structural limits, checked when state loads: at most **9** modules (that's how many menu slots exist), and **8** sessions per module and **8** activities per session (the sessions and activities menus reserve their last slot for a back entry, see [Menus](#menus)); every module needs at least one session with activities; every non-intro session needs at least one activity; an intro session may only be a module's first session.
 
 ## One-time MobileCoach setup
 
@@ -67,9 +67,9 @@ As a content editor you only ever issue three kinds of commands: **entering** a 
 | `enter('sGesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
 | `enter('aRolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `completeActivity()` | module + session + activity entered | Marks the current activity as completed |
-| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities |
+| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus a back entry (`Zurück zu 🗂️ <module title>` → the parent module's dialog) |
 | `populateMenuWithModules()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
-| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions |
+| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Zurück zur 🗂️ Modulauswahl` → the `menuModules` dialog) |
 
 The library also offers **flow-logic commands** (completion booleans, progress numbers, advice text) that feed MobileCoach's conditional branching. Those are wired into the flows by developers and documented in the [developer guide](developer-guide.md#flow-logic-commands) — as a content editor you never need to issue them.
 
@@ -94,6 +94,15 @@ Labels (and the advice text of the developer-facing [`getProgressAdvice()`](deve
 | `activity` | 🎯 | activity references in `getProgressAdvice()` |
 
 Menu items that are neither completed nor the next one get no emoji prefix.
+
+### Back entries
+
+The sessions and activities menus automatically append a back entry in the slot after their last item (which is why sessions and activities are capped at 8 per parent — see [structural limits](#how-content-is-structured) above):
+
+- Sessions menu: `Zurück zur 🗂️ Modulauswahl`, routing to the dialog id `menuModules` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `menuModules`**, or the back entry leads nowhere.
+- Activities menu: `Zurück zu 🗂️ <module title>`, routing to the parent module's own dialog.
+
+The generic follow-up rule `enter($participantNextMicroDialogIdentifier)` keeps working after a back tap: `enter('menuModules')` resets the participant's location entirely (no current module/session/activity), and entering the parent module clears the current session/activity as usual. The back entry never gets the ✅/👉 prefix. The modules menu has no back entry — it is already the top level.
 
 ## Troubleshooting
 

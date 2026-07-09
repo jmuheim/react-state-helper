@@ -490,6 +490,23 @@ describe('ReactStateHelper', () => {
       expect(state.currentActivityId).toBeNull();
     });
 
+    it('entering the module overview (back entry of the sessions menu) resets the whole navigation', () => {
+      helper.enter('mMod1');
+      helper.enter('sSes1a');
+      helper.enter('aAct1a1');
+      helper.enter('menuModules');
+      const state = JSON.parse(helper.toString());
+      expect(state.currentModuleId).toBeNull();
+      expect(state.currentSessionId).toBeNull();
+      expect(state.currentActivityId).toBeNull();
+      expect(helper.getParticipantLocation()).toBeNull();
+    });
+
+    it('entering the module overview works before any module was entered', () => {
+      expect(() => helper.enter('menuModules')).not.toThrow();
+      expect(helper.getParticipantLocation()).toBeNull();
+    });
+
     it('entering a session resets currentActivityId', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
@@ -628,9 +645,15 @@ describe('ReactStateHelper', () => {
       expect(helper.getMenuId(3)).toBe('sSes1b');
     });
 
+    it('appends a back-to-module-overview entry in the slot after the last session', () => {
+      helper.populateMenuWithSessions();
+      expect(helper.getMenuLabel(4)).toBe('Zurück zur 🗂️ Modulauswahl');
+      expect(helper.getMenuId(4)).toBe('menuModules');
+    });
+
     it('fills unused slots with empty string', () => {
       helper.populateMenuWithSessions();
-      for (let i = 4; i <= 9; i++) {
+      for (let i = 5; i <= 9; i++) {
         expect(helper.getMenuLabel(i)).toBe('');
         expect(helper.getMenuId(i)).toBe('');
       }
@@ -660,6 +683,18 @@ describe('ReactStateHelper', () => {
       expect(helper.getMenuLabel(3)).toBe('✅ Session Eins B');
     });
 
+    it('never marks the back entry with 👉 or ✅', () => {
+      const mod1Data = testState.modules.find(m => m.id === 'mMod1');
+      for (const ses of mod1Data.sessions) {
+        helper.enter(ses.id);
+        for (const act of ses.activities) {
+          helper.enter(act.id); helper.completeActivity();
+        }
+      }
+      helper.populateMenuWithSessions();
+      expect(helper.getMenuLabel(4)).toBe('Zurück zur 🗂️ Modulauswahl');
+    });
+
     it('throws if no module has been entered', () => {
       helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
       expect(() => helper.populateMenuWithSessions()).toThrow('No module entered yet');
@@ -684,9 +719,15 @@ describe('ReactStateHelper', () => {
       expect(helper.getMenuId(2)).toBe('aAct1a2');
     });
 
+    it('appends a back-to-parent-module entry in the slot after the last activity', () => {
+      helper.populateMenuWithActivities();
+      expect(helper.getMenuLabel(3)).toBe('Zurück zu 🗂️ Modul Eins');
+      expect(helper.getMenuId(3)).toBe('mMod1');
+    });
+
     it('fills unused slots with empty string', () => {
       helper.populateMenuWithActivities();
-      for (let i = 3; i <= 9; i++) {
+      for (let i = 4; i <= 9; i++) {
         expect(helper.getMenuLabel(i)).toBe('');
         expect(helper.getMenuId(i)).toBe('');
       }
@@ -976,20 +1017,20 @@ describe('ReactStateHelper', () => {
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('State has 10 modules, but at most 9 are supported');
     });
 
-    it('throws when a module has more than 9 sessions', () => {
+    it('throws when a module has more than 8 sessions (one menu slot is reserved for the back entry)', () => {
       const state = minimalValidState();
-      state.modules[0].sessions = Array.from({ length: 10 }, (_, i) =>
+      state.modules[0].sessions = Array.from({ length: 9 }, (_, i) =>
         i === 0
           ? { id: `sS${i}`, title: `S${i}`, activities_needed_for_adequate_progress: 1, activities: [{ id: `aA${i}`, title: `A${i}` }] }
           : { id: `sS${i}`, title: `S${i}`, activities_needed_for_adequate_progress: 1, activities: [], is_intro: true }
       );
-      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module mM1 has 10 sessions, but at most 9 are supported');
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module mM1 has 9 sessions, but at most 8 are supported (one menu slot is reserved for the back entry)');
     });
 
-    it('throws when a session has more than 9 activities', () => {
+    it('throws when a session has more than 8 activities (one menu slot is reserved for the back entry)', () => {
       const state = minimalValidState();
-      state.modules[0].sessions[0].activities = Array.from({ length: 10 }, (_, i) => ({ id: `aA${i}`, title: `A${i}` }));
-      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session sS1 has 10 activities, but at most 9 are supported');
+      state.modules[0].sessions[0].activities = Array.from({ length: 9 }, (_, i) => ({ id: `aA${i}`, title: `A${i}` }));
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session sS1 has 9 activities, but at most 8 are supported (one menu slot is reserved for the back entry)');
     });
 
     it('throws when a module title contains a colon', () => {
