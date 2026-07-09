@@ -19,7 +19,7 @@ function runWrapper({ cmd, json = '0' }) {
 
 describe('MobileCoach deployment wrapper', () => {
   it('writes scalar command results to rsh_result', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('m_bouMgt')" });
+    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_result).toBe(0);
     expect(o.rsh_error).toBe('none');
@@ -29,8 +29,8 @@ describe('MobileCoach deployment wrapper', () => {
     const o = runWrapper({ cmd: 'populateMenuForModule()' });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_menuLabel1).toBe('👉 Boundary Management');
-    expect(o.rsh_menuId1).toBe('m_bouMgt');
-    expect(o.rsh_menuId2).toBe('m_emoReg');
+    expect(o.rsh_menuId1).toBe('mBouMgt');
+    expect(o.rsh_menuId2).toBe('mEmoReg');
     for (let i = 1; i <= 9; i++) {
       expect(o).toHaveProperty(`rsh_menuLabel${i}`);
       expect(o).toHaveProperty(`rsh_menuId${i}`);
@@ -38,13 +38,13 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes "" to rsh_result when the command returns nothing (no stale result)', () => {
-    const o = runWrapper({ cmd: "enter('m_bouMgt')" });
+    const o = runWrapper({ cmd: "enter('mBouMgt')" });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_result).toBe('');
   });
 
   it('writes all 9 menu label and id slots as "" on runs that do not populate a menu (no stale entries)', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('m_bouMgt')" });
+    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
     expect(o.rsh_status).toBe('success');
     for (let i = 1; i <= 9; i++) {
       expect(o[`rsh_menuLabel${i}`]).toBe('');
@@ -53,11 +53,11 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('round-trips state through rsh_json between runs', () => {
-    const first = runWrapper({ cmd: "enter('m_bouMgt')" });
+    const first = runWrapper({ cmd: "enter('mBouMgt')" });
     expect(first.rsh_status).toBe('success');
     const second = runWrapper({ cmd: 'populateMenuForSession()', json: first.rsh_json });
     expect(second.rsh_status).toBe('success');
-    expect(second.rsh_menuId1).toBe('s_bouIntro');
+    expect(second.rsh_menuId1).toBe('sBouIntro');
   });
 
   it('reports command errors via rsh_status/-Error instead of crashing', () => {

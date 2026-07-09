@@ -64,5 +64,5 @@ Full section in `docs/developer-guide.md` — these constraints drive most desig
 - State persists only as a JSON string round-tripped through `$rsh_json`; `0` means first run → fresh default state.
 - Commands dispatch by `eval`-ing `$rsh_cmd`; errors are surfaced via `$rsh_status`/`$rsh_error`.
 - Menus are static: 9 slots (a self-imposed choice, not a MobileCoach platform limit). Labels (`$rsh_menuLabel1`–`9`, format `"<emoji> <title>"`) and ids (`$rsh_menuId1`–`9`) are separate variables, concatenated per slot in MobileCoach as `$rsh_menuLabelN:$rsh_menuIdN`; on tap MobileCoach splits on `:`, stores the id in a reserved variable, and navigates directly to the dialog with that id.
-- Ids are globally unique across the whole state (each id names a MobileCoach dialog) and level-prefixed (`m_`/`s_`/`a_`).
+- Ids are globally unique across the whole state (each id names a MobileCoach dialog and, with `_` appended, its variable prefix), contain only letters and numbers, and start with their level letter plus an uppercase letter (`mBouMgt`/`sGesGre`/`aRolGes`).
 - Flow branching only reads `$variable` content — booleans and label strings are the library's primary outputs.

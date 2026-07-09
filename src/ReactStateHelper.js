@@ -5,12 +5,19 @@ const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_me
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
 // within their parent, since the same registry is threaded through the whole Module/Session/Activity tree.
-// `prefix` enforces the m_/s_/a_ convention that makes cross-level collisions impossible by construction
-// (see "ID conventions" in CLAUDE.md) — checked here, at the same point ids are registered, rather than
-// trusting callers to follow the convention.
-function registerId(idRegistry, id, levelPrefix) {
-  const prefix = levelPrefix + '_';
-  if (!id.startsWith(prefix)) throw new Error('Id ' + id + ' must start with "' + prefix + '"');
+// `levelLetter` enforces the camelCase id convention (mBouMgt / sGesGre / aRolGes) that makes
+// cross-level collisions impossible by construction — checked here, at the same point ids are
+// registered, rather than trusting callers to follow the convention. The uppercase letter after
+// the level letter keeps the level marker recognizable without a separator; the letters-and-numbers
+// restriction exists because each id, with an underscore appended, doubles as a MobileCoach dialog
+// variable prefix — and prefixes reject underscores anywhere but the end (see
+// "Dialog ids and variable prefixes" in docs/mobilecoach-field-notes.md).
+function registerId(idRegistry, id, levelLetter) {
+  // No end-of-string anchor here — its character cannot appear anywhere in this script (decision #27) —
+  // so the whole-id coverage is checked by rejecting any character outside letters and numbers instead.
+  const startsWithLevelLetter = new RegExp('^' + levelLetter + '[A-Z]').test(id);
+  const hasOnlyLettersAndNumbers = !/[^A-Za-z0-9]/.test(id);
+  if (!startsWithLevelLetter || !hasOnlyLettersAndNumbers) throw new Error('Id ' + id + ' must start with "' + levelLetter + '" followed by an uppercase letter, and contain only letters and numbers');
   if (idRegistry.has(id)) throw new Error('Duplicate id found in state: ' + id);
   idRegistry.add(id);
 }
@@ -208,7 +215,7 @@ class ReactStateHelper {
     return {
       modules: [
         {
-          id: "m_bouMgt",
+          id: "mBouMgt",
           title: "Boundary Management",
           sessions_needed_for_adequate_progress: 1,
           entered_first_at: null,
@@ -216,7 +223,7 @@ class ReactStateHelper {
           times_entered: 0,
           sessions: [
             {
-              id: "s_bouIntro",
+              id: "sBouIntro",
               title: "Einführung",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -226,7 +233,7 @@ class ReactStateHelper {
               isIntro: true,
             },
             {
-              id: "s_gesGre",
+              id: "sGesGre",
               title: "Gesunde Grenzen setzen",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -234,7 +241,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "a_rolGes",
+                  id: "aRolGes",
                   title: "Rollenwechsel bewusst gestalten",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -242,7 +249,7 @@ class ReactStateHelper {
                   completed: false,
                 },
                 {
-                  id: "a_abgKon",
+                  id: "aAbgKon",
                   title: "Abgrenzen mit Klarheit – Das Konsequenzengitter",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -253,7 +260,7 @@ class ReactStateHelper {
               isIntro: false,
             },
             {
-              id: "s_paus",
+              id: "sPaus",
               title: "Pausen",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -261,7 +268,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "a_mikPau",
+                  id: "aMikPau",
                   title: "Mikropausen im Schulalltag",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -274,7 +281,7 @@ class ReactStateHelper {
           ],
         },
         {
-          id: "m_emoReg",
+          id: "mEmoReg",
           title: "Emotionsregulation",
           sessions_needed_for_adequate_progress: 1,
           entered_first_at: null,
@@ -282,7 +289,7 @@ class ReactStateHelper {
           times_entered: 0,
           sessions: [
             {
-              id: "s_emoIntro",
+              id: "sEmoIntro",
               title: "Einführung",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -292,7 +299,7 @@ class ReactStateHelper {
               isIntro: true,
             },
             {
-              id: "s_akzep",
+              id: "sAkzep",
               title: "Akzeptanz",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -300,7 +307,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "a_akzepAct",
+                  id: "aAkzepAct",
                   title: "Akzeptanz",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -311,7 +318,7 @@ class ReactStateHelper {
               isIntro: false,
             },
             {
-              id: "s_neuBew",
+              id: "sNeuBew",
               title: "Neubewertung",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -319,7 +326,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "a_neuBewAct",
+                  id: "aNeuBewAct",
                   title: "Neubewertung",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -330,7 +337,7 @@ class ReactStateHelper {
               isIntro: false,
             },
             {
-              id: "s_umgEmo",
+              id: "sUmgEmo",
               title: "Umgang mit schwierigen Emotionen",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -338,7 +345,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "a_emoSit",
+                  id: "aEmoSit",
                   title: "Emotionsregulation in schwierigen Situationen",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -349,7 +356,7 @@ class ReactStateHelper {
               isIntro: false,
             },
             {
-              id: "s_umgSup",
+              id: "sUmgSup",
               title: "Umgang mit unterdrückten Gefühlen",
               activities_needed_for_adequate_progress: 1,
               entered_first_at: null,
@@ -357,7 +364,7 @@ class ReactStateHelper {
               times_entered: 0,
               activities: [
                 {
-                  id: "a_umgSupAct",
+                  id: "aUmgSupAct",
                   title: "Umgang mit Suppression",
                   entered_first_at: null,
                   entered_last_at: null,
@@ -415,27 +422,28 @@ class ReactStateHelper {
     return this.#findModule(moduleId).hasAdequateProgress();
   }
 
-  // The level to enter is read off the id's prefix (m_/s_/a_, enforced by registerId), so a single
-  // command works after any menu tap regardless of whether the menu listed modules, sessions or activities.
+  // The level to enter is read off the id's level letter (m/s/a followed by an uppercase letter,
+  // enforced by registerId), so a single command works after any menu tap regardless of whether
+  // the menu listed modules, sessions or activities.
   enter(id) {
-    if (id.startsWith('m_')) {
+    if (/^m[A-Z]/.test(id)) {
       const module = this.#findModule(id);
       if (!module) throw new Error('Module ' + id + ' not found');
       this.#state.currentModuleId = id;
       this.#state.currentSessionId = null;
       this.#state.currentActivityId = null;
       module.enter();
-    } else if (id.startsWith('s_')) {
+    } else if (/^s[A-Z]/.test(id)) {
       const session = this.#findSession(id);
       this.#state.currentSessionId = session.id;
       this.#state.currentActivityId = null;
       session.enter();
-    } else if (id.startsWith('a_')) {
+    } else if (/^a[A-Z]/.test(id)) {
       const activity = this.#findActivity(id);
       this.#state.currentActivityId = activity.id;
       activity.enter();
     } else {
-      throw new Error('Cannot enter id ' + id + ': it must start with "m_", "s_" or "a_"');
+      throw new Error('Cannot enter id ' + id + ': it must start with "m", "s" or "a" followed by an uppercase letter');
     }
   }
 
@@ -617,10 +625,10 @@ if (typeof process === 'undefined') {
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $rsh_cmd to the command you'd like to execute, e.g.
-  // - $rsh_cmd = "isSessionCompleted('s_gesGre')"
+  // - $rsh_cmd = "isSessionCompleted('sGesGre')"
   // - $rsh_cmd = "markActivityCompleted()"
-  // - $rsh_cmd = "hasModuleAdequateProgress('m_bouMgt')"
-  // - $rsh_cmd = "getModuleProgress('m_bouMgt')"
+  // - $rsh_cmd = "hasModuleAdequateProgress('mBouMgt')"
+  // - $rsh_cmd = "getModuleProgress('mBouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
   let result, status;
   if (error) {
