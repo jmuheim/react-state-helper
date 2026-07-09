@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { extractWrapperVariables, findUndocumentedVariables } from '../.claude/hooks/check-wrapper-variables.mjs';
+import { extractWrapperVariables, findUndocumentedVariables, findInvalidDollarSigns } from '../.claude/hooks/check-wrapper-variables.mjs';
 
 const hookPath = fileURLToPath(new URL('../.claude/hooks/check-wrapper-variables.mjs', import.meta.url));
 const realSrcPath = fileURLToPath(new URL('../src/ReactStateHelper.js', import.meta.url));
@@ -60,6 +60,26 @@ describe('check-wrapper-variables hook', () => {
       const src = fakeSrc({ outputKeys: ['rsh_json', 'rsh_zebra', 'rsh_alpha'] });
       const doc = fakeDocTable(['rsh_json', 'rsh_cmd', 'rsh_menuLabel1']);
       expect(findUndocumentedVariables(src, doc)).toEqual(['rsh_alpha', 'rsh_zebra']);
+    });
+  });
+
+  describe('findInvalidDollarSigns (MobileCoach paste validator rejects any $ not starting a declared variable, decision #27)', () => {
+    const doc = fakeDocTable(['rsh_json', 'rsh_cmd']);
+
+    it('returns nothing when every $ starts a documented variable name, in code or comments', () => {
+      expect(findInvalidDollarSigns("// $rsh_json holds the state\nconst rsh_json = '$rsh_json';\neval(`helper.$rsh_cmd`);", doc)).toEqual([]);
+    });
+
+    it('reports template interpolation (the $ of ${…} does not start a variable name)', () => {
+      expect(findInvalidDollarSigns('const s = `a${i}b`;', doc)).toEqual([expect.stringContaining('$ not followed by a variable name')]);
+    });
+
+    it('reports $ followed by punctuation, even inside a comment', () => {
+      expect(findInvalidDollarSigns('// the $-prefixed form', doc)).toEqual([expect.stringContaining('$ not followed by a variable name')]);
+    });
+
+    it('reports $names missing from the doc table', () => {
+      expect(findInvalidDollarSigns('// see $rsh_menuLabelN', doc)).toEqual([expect.stringContaining('undocumented variable $rsh_menuLabelN')]);
     });
   });
 

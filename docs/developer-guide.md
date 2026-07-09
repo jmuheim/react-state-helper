@@ -93,12 +93,12 @@ MobileCoach uses `$variableName` variables that are declared upfront in the proj
 
 ### Paste-time script validation: `$` only before declared variable names
 
-When a script is pasted into MobileCoach, the editor scans the **raw text** — code, strings, and comments alike — for `$` signs and rejects the paste ("The text contains unknown variables") unless every `$` is immediately followed by the name of a declared variable. Verified 2026-07-09: even the fragment `$-prefixed` inside a comment was rejected. Consequences for this codebase:
+When JavaScript code is pasted into MobileCoach, the editor scans the **raw text** — code, strings, and comments alike — for `$` signs and rejects the paste ("The text contains unknown variables") unless every `$` is immediately followed by the name of a declared variable. Verified 2026-07-09: even the fragment `$-prefixed` inside a comment was rejected. Consequences for this codebase:
 
 - **No `${…}` template interpolation anywhere** in `src/ReactStateHelper.js` — strings are built with plain `+` concatenation instead (e.g. `o['rsh_menuLabel' + i]`).
 - **No decorative `$` in comments**: writing about a variable is fine (`$rsh_json`), but pseudo-names (`$rsh_menuLabelN`) or phrases like "$-prefixed" break the paste.
 
-Both rules are enforced by `test/MobileCoachPlatformConstraints.test.js` ("every `$` in the source starts a variable name documented in the content-editor guide").
+Both rules are enforced by `test/MobileCoachPlatformConstraints.test.js` ("every `$` in the source starts a variable name documented in the content-editor guide") and flagged already at edit time by the PostToolUse hook `.claude/hooks/check-wrapper-variables.mjs`, which shares the same check (`findInvalidDollarSigns`).
 
 ### State persistence
 

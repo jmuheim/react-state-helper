@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { extractWrapperVariables, findUndocumentedVariables } from '../.claude/hooks/check-wrapper-variables.mjs';
+import { extractWrapperVariables, findUndocumentedVariables, findInvalidDollarSigns } from '../.claude/hooks/check-wrapper-variables.mjs';
 
 // The MobileCoach platform constraints from CLAUDE.md, enforced against the source *text* —
 // violating them never breaks a unit test, only the deployed script (usually silently).
@@ -21,12 +21,7 @@ describe('MobileCoach platform constraints', () => {
 
   describe("paste-time variable validation (MobileCoach scans the raw text for $ signs — code, comments, everything — and rejects the paste unless each one starts a declared variable; verified 2026-07-09: even '$-prefixed' in a comment was rejected)", () => {
     it('every $ in the source starts a variable name documented in the content-editor guide', () => {
-      for (let i = src.indexOf('$'); i !== -1; i = src.indexOf('$', i + 1)) {
-        const token = src.slice(i).match(/^\$[a-zA-Z][a-zA-Z0-9_]*/);
-        const context = JSON.stringify(src.slice(Math.max(0, i - 30), i + 30));
-        expect(token, '$ not followed by a variable name (e.g. ${…} or $-…) near ' + context).not.toBeNull();
-        expect(doc.includes(token[0]), 'undocumented variable ' + token[0] + ' near ' + context).toBe(true);
-      }
+      expect(findInvalidDollarSigns(src, doc)).toEqual([]);
     });
   });
 

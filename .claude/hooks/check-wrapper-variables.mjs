@@ -1,10 +1,14 @@
-// Extracts every MobileCoach $variable the deployment wrapper in src/ReactStateHelper.js reads
-// or writes, and reports the ones missing from the variable table in docs/content-editor-guide.md.
-// A variable that is used by the script but not declared in MobileCoach makes the whole script fail
-// silently (see "Variables" in docs/developer-guide.md), so a new one must never slip in undocumented.
+// Two paste-safety checks for src/ReactStateHelper.js:
+// 1. Extracts every MobileCoach $variable the deployment wrapper reads or writes, and reports the
+//    ones missing from the variable table in docs/content-editor-guide.md. A variable that is used
+//    by the script but not declared in MobileCoach makes the whole script fail silently (see
+//    "Variables" in docs/developer-guide.md), so a new one must never slip in undocumented.
+// 2. Reports every `$` in the source that doesn't start a documented variable name. MobileCoach's
+//    paste-time validator scans the raw text — comments included — and rejects the whole paste on
+//    any such `$` (e.g. `${…}` interpolation or "$-prefixed" in a comment; decision #27).
 //
-// Used from two places, sharing one extraction so they can't drift apart:
-// - test/MobileCoachPlatformConstraints.test.js fails `npm test` on any undocumented variable
+// Used from two places, sharing one implementation so they can't drift apart:
+// - test/MobileCoachPlatformConstraints.test.js fails `npm test` on any violation
 // - the CLI below runs as a PostToolUse hook (.claude/settings.json) and reminds at edit time,
 //   including the MobileCoach-side declaration step that no test can verify
 
@@ -44,6 +48,20 @@ export function findUndocumentedVariables(srcText, docText) {
     .sort();
 }
 
+// Walks every `$` in the source and describes the ones MobileCoach's paste validator would reject:
+// a `$` not followed by a variable name at all (`${…}`, `$-…`), or one naming a variable that is
+// not in the content-editor guide's table (and thus not declared in MobileCoach).
+export function findInvalidDollarSigns(srcText, docText) {
+  const problems = [];
+  for (let i = srcText.indexOf('$'); i !== -1; i = srcText.indexOf('$', i + 1)) {
+    const token = srcText.slice(i).match(/^\$[a-zA-Z][a-zA-Z0-9_]*/);
+    const context = JSON.stringify(srcText.slice(Math.max(0, i - 30), i + 30));
+    if (!token) problems.push(`$ not followed by a variable name near ${context}`);
+    else if (!docText.includes(token[0])) problems.push(`undocumented variable ${token[0]} near ${context}`);
+  }
+  return problems;
+}
+
 // PostToolUse hook entry point: reads the hook event JSON from stdin and only reacts to edits of
 // src/ReactStateHelper.js. Exit 2 feeds stderr back to Claude; exit 0 stays silent.
 function main() {
@@ -59,15 +77,30 @@ function main() {
   const root = new URL('../../', import.meta.url);
   const src = readFileSync(fileURLToPath(new URL('src/ReactStateHelper.js', root)), 'utf8');
   const doc = readFileSync(fileURLToPath(new URL('docs/content-editor-guide.md', root)), 'utf8');
-  const missing = findUndocumentedVariables(src, doc);
-  if (missing.length === 0) return 0;
+  const messages = [];
 
-  console.error(
-    `Wrapper variable(s) not documented in the variable table in docs/content-editor-guide.md: ${missing.map(n => `$${n}`).join(', ')}.\n` +
-    '1. Add them to the table in docs/content-editor-guide.md ("One-time MobileCoach setup").\n' +
-    '2. Declare them in the MobileCoach project (default value 0, access "manageable by service") ' +
-    'before deploying — an undeclared variable makes the script fail silently.'
-  );
+  const missing = findUndocumentedVariables(src, doc);
+  if (missing.length > 0) {
+    messages.push(
+      `Wrapper variable(s) not documented in the variable table in docs/content-editor-guide.md: ${missing.map(n => `$${n}`).join(', ')}.\n` +
+      '1. Add them to the table in docs/content-editor-guide.md ("One-time MobileCoach setup").\n' +
+      '2. Declare them in the MobileCoach project (default value 0, access "manageable by service") ' +
+      'before deploying — an undeclared variable makes the script fail silently.'
+    );
+  }
+
+  const invalidDollars = findInvalidDollarSigns(src, doc);
+  if (invalidDollars.length > 0) {
+    messages.push(
+      "Invalid $ sign(s) in src/ReactStateHelper.js — MobileCoach's paste-time validator rejects the " +
+      'whole script when any $ (comments included) does not start a declared variable name (decision #27). ' +
+      'Use string concatenation instead of `${…}`, and write variable series in comments without the $ ' +
+      '(rsh_menuLabelN):\n- ' + invalidDollars.join('\n- ')
+    );
+  }
+
+  if (messages.length === 0) return 0;
+  console.error(messages.join('\n\n'));
   return 2;
 }
 
