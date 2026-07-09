@@ -12,6 +12,7 @@ Detailed documentation lives in `docs/`, published via GitHub Pages at https://j
 
 - `docs/developer-guide.md` — architecture, data model, state validation, flow-logic (query) commands, test setup, full MobileCoach platform constraints.
 - `docs/content-editor-guide.md` — MobileCoach setup for content editors (doer commands only: enter, complete, populate menus); contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/mobilecoach-field-notes.md` — hands-on MobileCoach platform knowledge (coach selection, debug coaches, rule regex behavior); **append new platform insights here** as they are learned, don't keep them only in conversation.
 
 ## Commands
 

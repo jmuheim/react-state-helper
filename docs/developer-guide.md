@@ -7,20 +7,20 @@ Architecture and platform internals of ReactStateHelper. If you define content i
 State is a JSON tree managed by four classes in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js):
 
 ```
-ReactStateHelper
-└── modules: Module[]
-    └── sessions: Session[]
-        └── activities: Activity[]
+👾 ReactStateHelper
+└── 🗂️ modules: Module[]
+    └── 📑 sessions: Session[]
+        └── 🎯 activities: Activity[]
 ```
 
-| Class | Emoji | Fields (beyond `id`/`title`/`entered_first_at`/`entered_last_at`/`times_entered`) | Notes |
-|---|---|---|---|
-| `Module` | 🗂️ | `sessions_needed_for_adequate_progress`, `sessions[]` | Top-level grouping, e.g. "Boundary Management" |
-| `Session` | 📑 | `activities_needed_for_adequate_progress`, `activities[]`, `isIntro` | `isIntro: true` marks a session that has no activities by design (e.g. an introduction) and counts as completed once entered; it must be the module's first session, and every other session must have at least one activity |
-| `Activity` | 🎯 | `completed` | Bottom of the hierarchy — contains no children; flips to `true` via `markActivityCompleted()` |
+| Class | Fields (beyond `id`/`title`/`entered_first_at`/`entered_last_at`/`times_entered`) | Notes |
+|---|---|---|
+| `Module` | `sessions_needed_for_adequate_progress`, `sessions[]` | Top-level grouping, e.g. "Boundary Management" |
+| `Session` | `activities_needed_for_adequate_progress`, `activities[]`, `isIntro` | `isIntro: true` marks a session that has no activities by design (e.g. an introduction) and counts as completed once entered; it must be the module's first session, and every other session must have at least one activity |
+| `Activity` | `completed` | Bottom of the hierarchy — contains no children; flips to `true` via `markActivityCompleted()` |
 
-- **Completion**: activities are the only things marked completed directly; sessions and modules derive their completion by aggregating their children. An `Activity` is completed once marked. A regular `Session` is completed if it has at least one activity and all of them are completed; an **intro session** (`isIntro: true`) has no activities and is instead completed the moment it has been entered once. A `Module` is completed if **all** of its sessions are completed — intro sessions included, which is why they must be entered rather than being skipped.
-- **Adequate progress**: a softer bar than full completion — a `Module`/`Session` "has adequate progress" once `sessions_needed_for_adequate_progress`/`activities_needed_for_adequate_progress` of its children are completed, even if not all of them are. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything.
+- **Completion**: activities are the only things marked completed directly; sessions and modules derive their completion by aggregating completion status of their children. An `Activity` is completed once marked. A **regular** `Session` (`isIntro: false`) is completed if it has at least one activity and all of them are completed; an **intro** session (`isIntro: true`) has no activities and is instead completed the moment it has been entered once. A `Module` is completed if **all** of its sessions are completed — intro sessions included, which is why they must be entered rather than being skipped.
+- **Adequate progress**: a softer bar than full completion — a `Module` has adequate progress once `sessions_needed_for_adequate_progress` of its children are completed. For example: a module contains 4 sessions, but only 3 need to be completed for adequate progress. The same logic applies to `Session` with `activities_needed_for_adequate_progress`. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything: whenever an activity is marked as complete, the user gets some advice on how to continue in the flow.
 
 ## Architecture
 
