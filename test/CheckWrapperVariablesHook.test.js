@@ -8,15 +8,15 @@ const realSrcPath = fileURLToPath(new URL('../src/ReactStateHelper.js', import.m
 
 // Minimal stand-in for src/ReactStateHelper.js: a class part writing a numbered variable series,
 // the wrapper guard, $-reads, and the output object.
-function fakeSrc({ outputKeys = ['jsStateHelperJson', 'participantGroup'] } = {}) {
-  const menuLine = 'vars[`jsStateHelperMenuLabel${i + 1}`] = item.title;';
+function fakeSrc({ outputKeys = ['rsh_json', 'participantGroup'] } = {}) {
+  const menuLine = 'vars[`rsh_menuLabel${i + 1}`] = item.title;';
   return [
     'class Foo {',
     `  bar() { ${menuLine} }`,
     '}',
     "if (typeof process === 'undefined') {",
-    "  const jsStateHelperJson = '$jsStateHelperJson';",
-    '  const result = eval(`helper.$jsStateHelperCmd`);',
+    "  const rsh_json = '$rsh_json';",
+    '  const result = eval(`helper.$rsh_cmd`);',
     '  let o = {',
     ...outputKeys.map(k => `    ${k}: 1,`),
     '  };',
@@ -33,10 +33,10 @@ describe('check-wrapper-variables hook', () => {
   describe('extractWrapperVariables', () => {
     it('collects $-reads, output object keys, and template-literal series', () => {
       const names = [...extractWrapperVariables(fakeSrc())];
-      expect(names).toContain('jsStateHelperJson'); // $-read and output key
-      expect(names).toContain('jsStateHelperCmd'); // read inside the eval template
+      expect(names).toContain('rsh_json'); // $-read and output key
+      expect(names).toContain('rsh_cmd'); // read inside the eval template
       expect(names).toContain('participantGroup'); // output key, written without $ prefix
-      expect(names).toContain('jsStateHelperMenuLabel'); // numbered series, recorded by base name
+      expect(names).toContain('rsh_menuLabel'); // numbered series, recorded by base name
     });
 
     it('throws when the MobileCoach wrapper guard is missing (must not silently check nothing)', () => {
@@ -46,20 +46,20 @@ describe('check-wrapper-variables hook', () => {
 
   describe('findUndocumentedVariables', () => {
     it('returns an empty list when the doc table documents every variable', () => {
-      const doc = fakeDocTable(['jsStateHelperJson', 'jsStateHelperCmd', 'participantGroup', 'jsStateHelperMenuLabel1']);
+      const doc = fakeDocTable(['rsh_json', 'rsh_cmd', 'participantGroup', 'rsh_menuLabel1']);
       expect(findUndocumentedVariables(fakeSrc(), doc)).toEqual([]);
     });
 
     it('matches a numbered series against its doc-table range row via the base name', () => {
-      // The table only lists $jsStateHelperMenuLabel1 (– $jsStateHelperMenuLabel9), not the base name itself
-      const doc = fakeDocTable(['jsStateHelperJson', 'jsStateHelperCmd', 'participantGroup', 'jsStateHelperMenuLabel1']);
-      expect(findUndocumentedVariables(fakeSrc(), doc)).not.toContain('jsStateHelperMenuLabel');
+      // The table only lists $rsh_menuLabel1 (– $rsh_menuLabel9), not the base name itself
+      const doc = fakeDocTable(['rsh_json', 'rsh_cmd', 'participantGroup', 'rsh_menuLabel1']);
+      expect(findUndocumentedVariables(fakeSrc(), doc)).not.toContain('rsh_menuLabel');
     });
 
     it('reports variables missing from the doc table, sorted', () => {
-      const src = fakeSrc({ outputKeys: ['jsStateHelperJson', 'jsStateHelperZebra', 'jsStateHelperAlpha'] });
-      const doc = fakeDocTable(['jsStateHelperJson', 'jsStateHelperCmd', 'jsStateHelperMenuLabel1']);
-      expect(findUndocumentedVariables(src, doc)).toEqual(['jsStateHelperAlpha', 'jsStateHelperZebra']);
+      const src = fakeSrc({ outputKeys: ['rsh_json', 'rsh_zebra', 'rsh_alpha'] });
+      const doc = fakeDocTable(['rsh_json', 'rsh_cmd', 'rsh_menuLabel1']);
+      expect(findUndocumentedVariables(src, doc)).toEqual(['rsh_alpha', 'rsh_zebra']);
     });
   });
 

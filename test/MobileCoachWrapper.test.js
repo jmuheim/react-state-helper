@@ -12,57 +12,57 @@ const src = readFileSync(fileURLToPath(new URL('../src/ReactStateHelper.js', imp
 
 function runWrapper({ cmd, json = '0' }) {
   const interpolated = src
-    .replaceAll('$jsStateHelperJson', () => json)
-    .replaceAll('$jsStateHelperCmd', () => cmd);
+    .replaceAll('$rsh_json', () => json)
+    .replaceAll('$rsh_cmd', () => cmd);
   return runInNewContext(interpolated, {});
 }
 
 describe('MobileCoach deployment wrapper', () => {
-  it('writes scalar command results to jsStateHelperResult', () => {
+  it('writes scalar command results to rsh_result', () => {
     const o = runWrapper({ cmd: "getModuleProgress('m_bouMgt')" });
-    expect(o.jsStateHelperStatus).toBe('success');
-    expect(o.jsStateHelperResult).toBe(0);
-    expect(o.jsStateHelperError).toBe('none');
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_result).toBe(0);
+    expect(o.rsh_error).toBe('none');
   });
 
   it('writes populated menu labels and ids as top-level keys (only those reach the MobileCoach variables)', () => {
     const o = runWrapper({ cmd: 'populateMenuForModule()' });
-    expect(o.jsStateHelperStatus).toBe('success');
-    expect(o.jsStateHelperMenuLabel1).toBe('👉 Boundary Management');
-    expect(o.jsStateHelperMenuId1).toBe('m_bouMgt');
-    expect(o.jsStateHelperMenuId2).toBe('m_emoReg');
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_menuLabel1).toBe('👉 Boundary Management');
+    expect(o.rsh_menuId1).toBe('m_bouMgt');
+    expect(o.rsh_menuId2).toBe('m_emoReg');
     for (let i = 1; i <= 9; i++) {
-      expect(o).toHaveProperty(`jsStateHelperMenuLabel${i}`);
-      expect(o).toHaveProperty(`jsStateHelperMenuId${i}`);
+      expect(o).toHaveProperty(`rsh_menuLabel${i}`);
+      expect(o).toHaveProperty(`rsh_menuId${i}`);
     }
   });
 
-  it('writes "" to jsStateHelperResult when the command returns nothing (no stale result)', () => {
+  it('writes "" to rsh_result when the command returns nothing (no stale result)', () => {
     const o = runWrapper({ cmd: "enterModule('m_bouMgt')" });
-    expect(o.jsStateHelperStatus).toBe('success');
-    expect(o.jsStateHelperResult).toBe('');
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_result).toBe('');
   });
 
   it('writes all 9 menu label and id slots as "" on runs that do not populate a menu (no stale entries)', () => {
     const o = runWrapper({ cmd: "getModuleProgress('m_bouMgt')" });
-    expect(o.jsStateHelperStatus).toBe('success');
+    expect(o.rsh_status).toBe('success');
     for (let i = 1; i <= 9; i++) {
-      expect(o[`jsStateHelperMenuLabel${i}`]).toBe('');
-      expect(o[`jsStateHelperMenuId${i}`]).toBe('');
+      expect(o[`rsh_menuLabel${i}`]).toBe('');
+      expect(o[`rsh_menuId${i}`]).toBe('');
     }
   });
 
-  it('round-trips state through jsStateHelperJson between runs', () => {
+  it('round-trips state through rsh_json between runs', () => {
     const first = runWrapper({ cmd: "enterModule('m_bouMgt')" });
-    expect(first.jsStateHelperStatus).toBe('success');
-    const second = runWrapper({ cmd: 'populateMenuForSession()', json: first.jsStateHelperJson });
-    expect(second.jsStateHelperStatus).toBe('success');
-    expect(second.jsStateHelperMenuId1).toBe('s_bouIntro');
+    expect(first.rsh_status).toBe('success');
+    const second = runWrapper({ cmd: 'populateMenuForSession()', json: first.rsh_json });
+    expect(second.rsh_status).toBe('success');
+    expect(second.rsh_menuId1).toBe('s_bouIntro');
   });
 
-  it('reports command errors via jsStateHelperStatus/-Error instead of crashing', () => {
+  it('reports command errors via rsh_status/-Error instead of crashing', () => {
     const o = runWrapper({ cmd: 'populateMenuForSession()' }); // no module entered yet
-    expect(o.jsStateHelperStatus).toBe('error');
-    expect(o.jsStateHelperError).toMatch(/No module entered/);
+    expect(o.rsh_status).toBe('error');
+    expect(o.rsh_error).toMatch(/No module entered/);
   });
 });

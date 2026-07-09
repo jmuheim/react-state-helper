@@ -23,14 +23,14 @@ describe('MobileCoach platform constraints', () => {
     it('extraction finds the known wrapper variables (guards the check itself against silently going blind)', () => {
       const names = [...extractWrapperVariables(src)];
       for (const expected of [
-        'jsStateHelperJson',
-        'jsStateHelperCmd',
-        'jsStateHelperResult',
-        'jsStateHelperStatus',
-        'jsStateHelperError',
-        'jsStateHelperSessionsCompleted',
-        'jsStateHelperMenuLabel',
-        'jsStateHelperMenuId',
+        'rsh_json',
+        'rsh_cmd',
+        'rsh_result',
+        'rsh_status',
+        'rsh_error',
+        'rsh_sessionsCompleted',
+        'rsh_menuLabel',
+        'rsh_menuId',
         'participantGroup',
       ]) {
         expect(names).toContain(expected);

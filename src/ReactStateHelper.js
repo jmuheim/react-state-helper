@@ -1,6 +1,6 @@
 // ReactStateHelper, see https://github.com/jmuheim/react-state-helper
 
-const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $jsStateHelperMenuLabel/$jsStateHelperMenuId slots exist
+const MAX_MENU_SLOTS = 9; // hard MobileCoach constraint: only 9 $rsh_menuLabel/$rsh_menuId slots exist
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
@@ -15,7 +15,7 @@ function registerId(idRegistry, id, levelPrefix) {
   idRegistry.add(id);
 }
 
-// In MobileCoach, menu entries are concatenated as "$jsStateHelperMenuLabelN:$jsStateHelperMenuIdN"
+// In MobileCoach, menu entries are concatenated as "$rsh_menuLabelN:$rsh_menuIdN"
 // and split on ":" at tap time to extract the id. How MobileCoach splits an entry with multiple
 // colons (first vs. last) is unknown, so titles must not contain any colon — the entry then
 // always contains exactly one and the split cannot be corrupted.
@@ -529,7 +529,7 @@ class ReactStateHelper {
   }
 
   // The id belonging to the label in the same slot ('' for empty slots). In MobileCoach the two are
-  // concatenated as "$jsStateHelperMenuLabelN:$jsStateHelperMenuIdN" to form the routable menu entry.
+  // concatenated as "$rsh_menuLabelN:$rsh_menuIdN" to form the routable menu entry.
   getMenuId(slot) {
     return this.#menuIds[slot - 1] ?? '';
   }
@@ -591,21 +591,21 @@ globalThis.ReactStateHelper = ReactStateHelper;
 // The following code should only be executed inside MobileCoach!
 // For this we examine `process`, which is a Node.js global and thus absent in MobileCoach.
 if (typeof process === 'undefined') {
-  // $jsStateHelperJson is a MobileCoach variable interpolated into this script before execution.
+  // $rsh_json is a MobileCoach variable interpolated into this script before execution.
   // It holds the JSON serialized state from the previous run, or anything else on the very first run.
-  const jsStateHelperJson = '$jsStateHelperJson';
+  const rsh_json = '$rsh_json';
 
-  // Initialises the helper with the state from the previous run (if $jsStateHelperJson contains valid JSON);
+  // Initialises the helper with the state from the previous run (if $rsh_json contains valid JSON);
   // otherwise initialise default state (fresh start of the app).
   let helper;
 
-  // If any error surfaces, it will be reported via $jsStateHelperError instead of crashing the whole script with no output at all.
+  // If any error surfaces, it will be reported via $rsh_error instead of crashing the whole script with no output at all.
   let error;
 
   try {
-    if (jsStateHelperJson === '0') throw new Error(); // MobileCoach default for uninitialised variables
-    JSON.parse(jsStateHelperJson);
-    helper = ReactStateHelper.loadExistingState(jsStateHelperJson);
+    if (rsh_json === '0') throw new Error(); // MobileCoach default for uninitialised variables
+    JSON.parse(rsh_json);
+    helper = ReactStateHelper.loadExistingState(rsh_json);
   } catch {
     try {
       helper = ReactStateHelper.initDefaultState();
@@ -614,20 +614,20 @@ if (typeof process === 'undefined') {
     }
   }
 
-  // Inside MobileCoach, before calling ReactStateHelper, set $jsStateHelperCmd to the command you'd like to execute, e.g.
-  // - $jsStateHelperCmd = "isSessionCompleted('s_gesGre')"
-  // - $jsStateHelperCmd = "markActivityCompleted()"
-  // - $jsStateHelperCmd = "hasModuleAdequateProgress('m_bouMgt')"
-  // - $jsStateHelperCmd = "getModuleProgress('m_bouMgt')"
+  // Inside MobileCoach, before calling ReactStateHelper, set $rsh_cmd to the command you'd like to execute, e.g.
+  // - $rsh_cmd = "isSessionCompleted('s_gesGre')"
+  // - $rsh_cmd = "markActivityCompleted()"
+  // - $rsh_cmd = "hasModuleAdequateProgress('m_bouMgt')"
+  // - $rsh_cmd = "getModuleProgress('m_bouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
   let result, status;
   if (error) {
     status = 'error';
   } else {
     try {
-      result = eval(`helper.$jsStateHelperCmd`);
+      result = eval(`helper.$rsh_cmd`);
       status = 'success';
-    } catch (e) { // If there's any error, details about it can be inspected through $jsStateHelperError
+    } catch (e) { // If there's any error, details about it can be inspected through $rsh_error
       status = 'error';
       error = e.message;
     }
@@ -635,13 +635,13 @@ if (typeof process === 'undefined') {
 
   let o = {
     // MobileCoach will save these elements to corresponding variables,
-    // i.e. jsStateHelperJson becomes $jsStateHelperJson.
-    jsStateHelperJson:              helper ? helper.toString() : jsStateHelperJson,
+    // i.e. rsh_json becomes $rsh_json.
+    rsh_json:              helper ? helper.toString() : rsh_json,
     // '' when the command returned nothing (enter…, mark…, populate…), so the variable never holds a stale value from an earlier run.
-    jsStateHelperResult:            result === undefined ? '' : result,
-    jsStateHelperStatus:            status,
-    jsStateHelperError:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    jsStateHelperSessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
+    rsh_result:            result === undefined ? '' : result,
+    rsh_status:            status,
+    rsh_error:             error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    rsh_sessionsCompleted: helper ? helper.allCompletedSessionsAsCsv() : '',
     participantGroup:               helper ? helper.getParticipantLocation() : null
   };
 
@@ -649,8 +649,8 @@ if (typeof process === 'undefined') {
   // on every run. A populateMenuFor…() command fills them; after any other command every
   // slot is '' (hidden), so (re)populate the menu right before displaying it.
   for (let i = 1; i <= MAX_MENU_SLOTS; i++) {
-    o[`jsStateHelperMenuLabel${i}`] = helper ? helper.getMenuLabel(i) : '';
-    o[`jsStateHelperMenuId${i}`] = helper ? helper.getMenuId(i) : '';
+    o[`rsh_menuLabel${i}`] = helper ? helper.getMenuLabel(i) : '';
+    o[`rsh_menuId${i}`] = helper ? helper.getMenuId(i) : '';
   }
 
   o
