@@ -1,10 +1,10 @@
-// Two paste-safety checks for src/ReactStateHelper.js:
+// Two deploy-safety checks for src/ReactStateHelper.js:
 // 1. Extracts every MobileCoach $variable the deployment wrapper reads or writes, and reports the
 //    ones missing from the variable table in docs/content-editor-guide.md. A variable that is used
 //    by the script but not declared in MobileCoach makes the whole script fail silently (see
 //    "Variables" in docs/developer-guide.md), so a new one must never slip in undocumented.
-// 2. Reports every `$` in the source that doesn't start a documented variable name. MobileCoach's
-//    paste-time validator scans the raw text — comments included — and rejects the whole paste on
+// 2. Reports every `$` in the source that doesn't start a documented variable name. When the script
+//    editor is saved ("Ok"), MobileCoach scans the raw text — comments included — and rejects it on
 //    any such `$` (e.g. `${…}` interpolation or "$-prefixed" in a comment; decision #27).
 //
 // Used from two places, sharing one implementation so they can't drift apart:
@@ -35,8 +35,8 @@ export function extractWrapperVariables(srcText) {
 
   // Numbered series written via string concatenation, e.g. o['rsh_menuLabel' + i] — recorded
   // under their base name, which the table's range row ("$rsh_menuLabel1 – $rsh_menuLabel9")
-  // matches as a substring. (Template literals are banned in the source: MobileCoach's paste-time
-  // validator scans the raw text for $ signs, and `${` would trip it.)
+  // matches as a substring. (Template literals are banned in the source: MobileCoach's script
+  // editor scans the raw text for $ signs on save, and `${` would trip it.)
   for (const [, name] of srcText.matchAll(/'(rsh_[a-zA-Z0-9_]*)'\s*\+/g)) names.add(name);
 
   return names;
@@ -48,7 +48,7 @@ export function findUndocumentedVariables(srcText, docText) {
     .sort();
 }
 
-// Walks every `$` in the source and describes the ones MobileCoach's paste validator would reject:
+// Walks every `$` in the source and describes the ones MobileCoach's script editor would reject:
 // a `$` not followed by a variable name at all (`${…}`, `$-…`), or one naming a variable that is
 // not in the content-editor guide's table (and thus not declared in MobileCoach).
 export function findInvalidDollarSigns(srcText, docText) {
@@ -92,8 +92,8 @@ function main() {
   const invalidDollars = findInvalidDollarSigns(src, doc);
   if (invalidDollars.length > 0) {
     messages.push(
-      "Invalid $ sign(s) in src/ReactStateHelper.js — MobileCoach's paste-time validator rejects the " +
-      'whole script when any $ (comments included) does not start a declared variable name (decision #27). ' +
+      "Invalid $ sign(s) in src/ReactStateHelper.js — MobileCoach's script editor rejects the whole " +
+      'script on save when any $ (comments included) does not start a declared variable name (decision #27). ' +
       'Use string concatenation instead of `${…}`, and refer to variable series in comments via real ' +
       'declared names ($rsh_menuLabel1), never pseudo-names like $rsh_menuLabelN:\n- ' + invalidDollars.join('\n- ')
     );

@@ -19,7 +19,7 @@ describe('MobileCoach platform constraints', () => {
     });
   });
 
-  describe("paste-time variable validation (MobileCoach scans the raw text for $ signs — code, comments, everything — and rejects the paste unless each one starts a declared variable; verified 2026-07-09: even '$-prefixed' in a comment was rejected)", () => {
+  describe("script-editor validation on save (MobileCoach scans the raw text for $ signs — code, comments, everything — and rejects the save unless each one starts a declared variable; verified 2026-07-09: even '$-prefixed' in a comment was rejected)", () => {
     it('every $ in the source starts a variable name documented in the content-editor guide', () => {
       expect(findInvalidDollarSigns(src, doc)).toEqual([]);
     });

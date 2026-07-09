@@ -63,7 +63,7 @@ describe('check-wrapper-variables hook', () => {
     });
   });
 
-  describe('findInvalidDollarSigns (MobileCoach paste validator rejects any $ not starting a declared variable, decision #27)', () => {
+  describe('findInvalidDollarSigns (on save, the MobileCoach script editor rejects any $ not starting a declared variable, decision #27)', () => {
     const doc = fakeDocTable(['rsh_json', 'rsh_cmd']);
 
     it('returns nothing when every $ starts a documented variable name, in code or comments', () => {
