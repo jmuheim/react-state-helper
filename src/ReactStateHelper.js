@@ -657,7 +657,7 @@ if (typeof process === 'undefined') {
   }
 
   // getProgressAdvice() throws before any module was entered (e.g. on the very first run), so it
-  // is guarded here: a failing advice must never crash the whole output object.
+  // is guarded here: a failing advice must never crash the whole output object (decision #37).
   let progressAdvice = '';
   if (helper) {
     try {
