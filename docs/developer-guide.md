@@ -17,7 +17,7 @@ State is a JSON tree managed by four classes in [`src/ReactStateHelper.js`](http
 |---|---|---|
 | `Module` | `sessions_needed_for_adequate_progress`, `sessions[]` | Top-level grouping, e.g. "Boundary Management" |
 | `Session` | `activities_needed_for_adequate_progress`, `activities[]`, `isIntro` | `isIntro: true` marks a session that has no activities by design (e.g. an introduction) and counts as completed once entered; it must be the module's first session, and every other session must have at least one activity |
-| `Activity` | `completed` | Bottom of the hierarchy — contains no children; flips to `true` via `markActivityCompleted()` |
+| `Activity` | `completed` | Bottom of the hierarchy — contains no children; flips to `true` via `completeActivity()` |
 
 - **Completion**: activities are the only things marked completed directly; sessions and modules derive their completion by aggregating completion status of their children. An `Activity` is completed once marked. A **regular** `Session` (`isIntro: false`) is completed if it has at least one activity and all of them are completed; an **intro** session (`isIntro: true`) has no activities and is instead completed the moment it has been entered once. A `Module` is completed if **all** of its sessions are completed — intro sessions included, which is why they must be entered rather than being skipped.
 - **Adequate progress**: a softer bar than full completion — a `Module` has adequate progress once `sessions_needed_for_adequate_progress` of its children are completed. For example: a module contains 4 sessions, but only 3 need to be completed for adequate progress. The same logic applies to `Session` with `activities_needed_for_adequate_progress`. Used to decide e.g. whether to nudge the participant onward instead of insisting they finish everything: whenever an activity is marked as complete, the user gets some advice on how to continue in the flow.
@@ -65,7 +65,7 @@ Navigation happens through a single `enter(id)` method: the id's level letter (`
 
 ## Flow-logic commands
 
-Content editors only issue the "doer" commands (`enter(…)`, `markActivityCompleted()`, `populateMenuFor…()` — see the [content editor guide's cheat-sheet](content-editor-guide.md#command-cheat-sheet)). The query commands below are developer territory: they return booleans, numbers, and display strings that feed MobileCoach's variable-based conditional branching (see "No conditional logic in flows beyond variables" below), and wiring that branching is a developer task.
+Content editors only issue the "doer" commands (`enter(…)`, `completeActivity()`, `populateMenuFor…()` — see the [content editor guide's cheat-sheet](content-editor-guide.md#command-cheat-sheet)). The query commands below are developer territory: they return booleans, numbers, and display strings that feed MobileCoach's variable-based conditional branching (see "No conditional logic in flows beyond variables" below), and wiring that branching is a developer task.
 
 They are issued the same way as every other command — set `$rsh_cmd`, run the script, read `$rsh_result` (the mechanics are described in the content editor guide under [Running a command](content-editor-guide.md#running-a-command)). The same location preconditions apply: `enter(…)` the module before its session, and a command issued without its preconditions sets `$rsh_status` = `error`.
 
@@ -106,7 +106,7 @@ There is no database or session store accessible from JS. State is round-tripped
 
 ### Command dispatch
 
-MobileCoach has no way to call specific JS functions directly. Instead, inside MobileCoach, the variable `$rsh_cmd` needs to be set to a string like `"markActivityCompleted()"` before the JS script is executed. The script then `eval`s it against the helper instance. While `eval` is generally dangerous, it is safe here because we are in full control of what gets set in `$rsh_cmd`. If, however, the eval throws an error, it is caught and written to `$rsh_status` (`"error"`) and `$rsh_error` (the message), so failures can be inspected inside MobileCoach. Commands that return nothing write `""` into `$rsh_result`, so it never holds a stale value from an earlier run.
+MobileCoach has no way to call specific JS functions directly. Instead, inside MobileCoach, the variable `$rsh_cmd` needs to be set to a string like `"completeActivity()"` before the JS script is executed. The script then `eval`s it against the helper instance. While `eval` is generally dangerous, it is safe here because we are in full control of what gets set in `$rsh_cmd`. If, however, the eval throws an error, it is caught and written to `$rsh_status` (`"error"`) and `$rsh_error` (the message), so failures can be inspected inside MobileCoach. Commands that return nothing write `""` into `$rsh_result`, so it never holds a stale value from an earlier run.
 
 ### Menus are static by default
 

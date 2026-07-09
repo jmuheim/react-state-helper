@@ -387,7 +387,7 @@ class ReactStateHelper {
     return JSON.stringify(this.#state);
   }
 
-  markActivityCompleted() {
+  completeActivity() {
     if (!this.#state.currentActivityId) throw new Error('No activity entered yet');
     this.#findActivity(this.#state.currentActivityId).markCompleted();
   }
@@ -626,7 +626,7 @@ if (typeof process === 'undefined') {
 
   // Inside MobileCoach, before calling ReactStateHelper, set $rsh_cmd to the command you'd like to execute, e.g.
   // - $rsh_cmd = "isSessionCompleted('sGesGre')"
-  // - $rsh_cmd = "markActivityCompleted()"
+  // - $rsh_cmd = "completeActivity()"
   // - $rsh_cmd = "hasModuleAdequateProgress('mBouMgt')"
   // - $rsh_cmd = "getModuleProgress('mBouMgt')"
   // Please be extra careful! Typos or syntax errors will break this!
