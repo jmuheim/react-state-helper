@@ -10,10 +10,10 @@ Currently only the error message is written back (TODO in `src/ReactStateHelper.
 - **Why open:** unclear which extra information (the command that ran, a state snapshot, a stack) is actually inspectable and useful inside MobileCoach, and whether variable size limits constrain it.
 - **Resolved by:** provoking a real failure in MobileCoach and deciding what would have shortened the debugging.
 
-## Dedicated variable instead of repurposed `$participantGroup`
+## Better names for the `populateMenuFor…()` commands
 
-`getParticipantLocation()` writes the participant's location into `$participantGroup` because it is one of the few easily inspectable variables (decision #16 — README calls it a "mis-use").
+`populateMenuForModule()` fills the menu with *all modules*, yet "for module" (singular) reads as scoped to a single one; `populateMenuForSession()` / `ForActivity()` likewise name the level of the *listed items*, not the scope they draw from.
 
-- **Placeholder:** keep the repurposing.
-- **Why open:** a dedicated `$rsh_location` would be cleaner and free `$participantGroup` for real group assignment, but might lose the easy inspectability that motivated the choice.
-- **Resolved by:** checking whether a purpose-declared variable is equally inspectable in the MobileCoach UI.
+- **Placeholder:** keep the #20 names.
+- **Why open:** flagged in the 2026-07-09 naming review but deliberately deferred to its own PR — these are the most editor-facing command names, so a new scheme (e.g. `populateModuleMenu()`) deserves its own round of thought.
+- **Resolved by:** picking a scheme in the follow-up PR and logging the decision.
