@@ -4,8 +4,10 @@ const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_me
 
 // Id of the MobileCoach dialog that shows the module-selection menu (the one calling
 // populateMenuWithModules()). The sessions menu routes its back entry here, so the dialog must be
-// named exactly like this in MobileCoach. It cannot collide with a state id: registerId requires
-// an uppercase letter after the level letter, so "modulesMenu" is rejected as a module id.
+// named exactly like this in MobileCoach. It is a pure routing target, never passed to enter():
+// dialogs enter themselves, and while the modules menu is displayed the participant's location
+// deliberately stays in the previous context. It cannot collide with a state id: registerId
+// requires an uppercase letter after the level letter, so "modulesMenu" is rejected as a module id.
 const MODULES_MENU_DIALOG_ID = 'modulesMenu';
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
@@ -427,14 +429,7 @@ class ReactStateHelper {
   // enforced by registerId), so a single command works after any menu tap regardless of whether
   // the menu listed modules, sessions or activities.
   enter(id) {
-    if (id === MODULES_MENU_DIALOG_ID) {
-      // Tapping the sessions menu's back entry routes to the module-overview dialog, and the same
-      // generic enter(...) follow-up rule runs after any menu tap — so this id must be enterable
-      // too. Entering the overview means leaving the module: the whole navigation is reset.
-      this.#state.currentModuleId = null;
-      this.#state.currentSessionId = null;
-      this.#state.currentActivityId = null;
-    } else if (/^m[A-Z]/.test(id)) {
+    if (/^m[A-Z]/.test(id)) {
       const module = this.#findModule(id);
       if (!module) throw new Error('Module ' + id + ' not found');
       this.#state.currentModuleId = id;

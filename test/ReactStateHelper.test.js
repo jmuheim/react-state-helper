@@ -490,23 +490,8 @@ describe('ReactStateHelper', () => {
       expect(state.currentActivityId).toBeNull();
     });
 
-    it('entering the module overview (back entry of the sessions menu) resets the whole navigation', () => {
-      helper.enter('mMod1');
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1');
-      helper.enter('modulesMenu');
-      const state = JSON.parse(helper.toString());
-      expect(state.currentModuleId).toBeNull();
-      expect(state.currentSessionId).toBeNull();
-      expect(state.currentActivityId).toBeNull();
-      expect(helper.getParticipantLocation()).toBeNull();
-    });
-
-    it('entering the module overview works before any module was entered', () => {
-      expect(() => helper.enter('modulesMenu')).not.toThrow();
-      expect(helper.getParticipantLocation()).toBeNull();
-    });
-
+    // The modulesMenu back-entry id is a pure routing target and never reaches enter():
+    // dialogs enter themselves after navigation, so no test grants it enter() semantics.
     it('entering a session resets currentActivityId', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');

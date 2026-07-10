@@ -49,7 +49,7 @@ Observed (2026-07-10): when the tapped menu id (the content of `$participantNext
 Consequences:
 
 - Every id a menu can emit must have a dialog of exactly the same name — including the `modulesMenu` back-entry target introduced by decision #38. A typo'd dialog id is one more member of the silent-failure family (alongside undeclared variables): if a flow freezes right after a menu tap, compare the tapped id against the dialog ids first.
-- The considered alternative of intercepting the back tap in-dialog (no dedicated dialog) would technically be possible — the flow survives the unmatched id — but was rejected in decision #38 for other reasons (duplicated menu blocks in every module dialog, stale participant location).
+- The considered alternative of intercepting the back tap in-dialog (no dedicated dialog) would technically be possible — the flow survives the unmatched id — but was rejected in decision #38 for another reason: the modules-menu block would be duplicated into every module dialog.
 
 ## Dialog skeleton: non-module dialogs around the real modules
 
