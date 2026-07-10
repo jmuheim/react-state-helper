@@ -55,5 +55,5 @@ Consequences:
 
 At the top level of the dialog structure, the *real* modules (those in the JSON data model, navigable via menus) are framed by two dialogs that look like modules in the editor but are not part of the state:
 
-- **Einführung** — entered once at app start, never navigable again afterwards; hosts the pre-questionnaire and, as a sub-dialog, the `modulesMenu` dialog (the module-selection menu the sessions menus' back entries route to — menu routing only cares about the dialog id, not where the dialog is nested).
+- **Einführung** — entered once at app start, never navigable again afterwards; hosts the pre-questionnaire and, currently, the `modulesMenu` dialog as a sub-dialog (the module-selection menu the sessions menus' back entries route to — menu routing only cares about the dialog id, not where the dialog is nested). *(TODO: `modulesMenu` probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; it only sits in the Einführung because that's where it is displayed first.)*
 - **Abschluss** — the counterpart at the end: participants re-take the same questionnaire (post). Like the Einführung, it is not in the JSON model and cannot be reached through the library's menus.
