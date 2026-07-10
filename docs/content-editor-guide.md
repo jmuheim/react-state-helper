@@ -69,7 +69,7 @@ As a content editor you only ever issue three kinds of commands: **entering** a 
 | `completeActivity()` | module + session + activity entered | Marks the current activity as completed |
 | `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus a back entry (`Zurück zu 🗂️ <module title>` → the parent module's dialog) |
 | `populateMenuWithModules()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
-| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Zurück zur 🗂️ Modulauswahl` → the `menuModules` dialog) |
+| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Zurück zur 🗂️ Modulauswahl` → the `modulesMenu` dialog) |
 
 The library also offers **flow-logic commands** (completion booleans, progress numbers, advice text) that feed MobileCoach's conditional branching. Those are wired into the flows by developers and documented in the [developer guide](developer-guide.md#flow-logic-commands) — as a content editor you never need to issue them.
 
@@ -99,10 +99,10 @@ Menu items that are neither completed nor the next one get no emoji prefix.
 
 The sessions and activities menus automatically append a back entry in the slot after their last item (which is why sessions and activities are capped at 8 per parent — see [structural limits](#how-content-is-structured) above):
 
-- Sessions menu: `Zurück zur 🗂️ Modulauswahl`, routing to the dialog id `menuModules` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `menuModules`**, or the back entry leads nowhere.
+- Sessions menu: `Zurück zur 🗂️ Modulauswahl`, routing to the dialog id `modulesMenu` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `modulesMenu`**, or the back entry leads nowhere (a tap on an id without a matching dialog silently pauses the flow, see the [field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). Where the dialog lives doesn't matter — in our setup it is a sub-dialog of the *Einführung* dialog — only its id does.
 - Activities menu: `Zurück zu 🗂️ <module title>`, routing to the parent module's own dialog.
 
-The generic follow-up rule `enter($participantNextMicroDialogIdentifier)` keeps working after a back tap: `enter('menuModules')` resets the participant's location entirely (no current module/session/activity), and entering the parent module clears the current session/activity as usual. The back entry never gets the ✅/👉 prefix. The modules menu has no back entry — it is already the top level.
+The generic follow-up rule `enter($participantNextMicroDialogIdentifier)` keeps working after a back tap: `enter('modulesMenu')` resets the participant's location entirely (no current module/session/activity), and entering the parent module clears the current session/activity as usual. The back entry never gets the ✅/👉 prefix. The modules menu has no back entry — it is already the top level.
 
 ## Troubleshooting
 

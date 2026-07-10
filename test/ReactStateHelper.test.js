@@ -494,7 +494,7 @@ describe('ReactStateHelper', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
-      helper.enter('menuModules');
+      helper.enter('modulesMenu');
       const state = JSON.parse(helper.toString());
       expect(state.currentModuleId).toBeNull();
       expect(state.currentSessionId).toBeNull();
@@ -503,7 +503,7 @@ describe('ReactStateHelper', () => {
     });
 
     it('entering the module overview works before any module was entered', () => {
-      expect(() => helper.enter('menuModules')).not.toThrow();
+      expect(() => helper.enter('modulesMenu')).not.toThrow();
       expect(helper.getParticipantLocation()).toBeNull();
     });
 
@@ -648,7 +648,7 @@ describe('ReactStateHelper', () => {
     it('appends a back-to-module-overview entry in the slot after the last session', () => {
       helper.populateMenuWithSessions();
       expect(helper.getMenuLabel(4)).toBe('Zurück zur 🗂️ Modulauswahl');
-      expect(helper.getMenuId(4)).toBe('menuModules');
+      expect(helper.getMenuId(4)).toBe('modulesMenu');
     });
 
     it('fills unused slots with empty string', () => {

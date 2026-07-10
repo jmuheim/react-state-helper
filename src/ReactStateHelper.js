@@ -5,8 +5,8 @@ const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_me
 // Id of the MobileCoach dialog that shows the module-selection menu (the one calling
 // populateMenuWithModules()). The sessions menu routes its back entry here, so the dialog must be
 // named exactly like this in MobileCoach. It cannot collide with a state id: registerId requires
-// an uppercase letter after the level letter, so "menuModules" is rejected as a module id.
-const MODULE_OVERVIEW_DIALOG_ID = 'menuModules';
+// an uppercase letter after the level letter, so "modulesMenu" is rejected as a module id.
+const MODULE_OVERVIEW_DIALOG_ID = 'modulesMenu';
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
