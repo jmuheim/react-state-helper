@@ -6,7 +6,7 @@ const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_me
 // populateMenuWithModules()). The sessions menu routes its back entry here, so the dialog must be
 // named exactly like this in MobileCoach. It cannot collide with a state id: registerId requires
 // an uppercase letter after the level letter, so "modulesMenu" is rejected as a module id.
-const MODULE_OVERVIEW_DIALOG_ID = 'modulesMenu';
+const MODULES_MENU_DIALOG_ID = 'modulesMenu';
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
@@ -427,7 +427,7 @@ class ReactStateHelper {
   // enforced by registerId), so a single command works after any menu tap regardless of whether
   // the menu listed modules, sessions or activities.
   enter(id) {
-    if (id === MODULE_OVERVIEW_DIALOG_ID) {
+    if (id === MODULES_MENU_DIALOG_ID) {
       // Tapping the sessions menu's back entry routes to the module-overview dialog, and the same
       // generic enter(...) follow-up rule runs after any menu tap — so this id must be enterable
       // too. Entering the overview means leaving the module: the whole navigation is reset.
@@ -548,7 +548,7 @@ class ReactStateHelper {
     const sessions = this.#findModule(this.#state.currentModuleId).sessions;
     this.#menuLabels = this.#buildMenuLabels(sessions);
     this.#menuIds = this.#buildMenuIds(sessions);
-    this.#addBackEntry(sessions.length, 'Zurück zur ' + ReactStateHelper.#EMOJIS.module + ' Modulauswahl', MODULE_OVERVIEW_DIALOG_ID);
+    this.#addBackEntry(sessions.length, 'Zurück zur ' + ReactStateHelper.#EMOJIS.module + ' Modulauswahl', MODULES_MENU_DIALOG_ID);
   }
 
   populateMenuWithActivities() {
