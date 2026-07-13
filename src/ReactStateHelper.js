@@ -17,6 +17,11 @@ const ALL_MODULES_MENU_DIALOG_ID = 'allModulesMenu';
 // back entry routes to it, it is never passed to enter(), and registerId rejects it by name.
 const ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID = 'allSessionsOfCurrentModuleMenu';
 
+// MobileCoach additionally contains an allActivitiesOfCurrentSessionMenu dialog (showing the
+// current session's activities menu, the counterpart to the two dialogs above). No menu entry
+// emits its id yet, so nothing routes to it — it gets no constant and no enter()/registerId
+// handling until something does.
+
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
 // within their parent, since the same registry is threaded through the whole Module/Session/Activity tree.
