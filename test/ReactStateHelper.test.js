@@ -632,7 +632,7 @@ describe('ReactStateHelper', () => {
 
     it('appends a back-to-module-overview entry in the slot after the last session', () => {
       helper.populateMenuWithSessions();
-      expect(helper.getMenuLabel(4)).toBe('Zurück zur 🗂️ Modulauswahl');
+      expect(helper.getMenuLabel(4)).toBe('Ein anderes 🗂️ Modul wählen');
       expect(helper.getMenuId(4)).toBe('modulesMenu');
     });
 
@@ -677,7 +677,7 @@ describe('ReactStateHelper', () => {
         }
       }
       helper.populateMenuWithSessions();
-      expect(helper.getMenuLabel(4)).toBe('Zurück zur 🗂️ Modulauswahl');
+      expect(helper.getMenuLabel(4)).toBe('Ein anderes 🗂️ Modul wählen');
     });
 
     it('throws if no module has been entered', () => {
@@ -706,7 +706,7 @@ describe('ReactStateHelper', () => {
 
     it('appends a back-to-parent-module entry in the slot after the last activity', () => {
       helper.populateMenuWithActivities();
-      expect(helper.getMenuLabel(3)).toBe('Zurück zu 🗂️ Modul Eins');
+      expect(helper.getMenuLabel(3)).toBe('Eine andere 📑 Session wählen');
       expect(helper.getMenuId(3)).toBe('mMod1');
     });
 

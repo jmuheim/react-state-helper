@@ -67,9 +67,9 @@ As a content editor you only ever issue three kinds of commands: **entering** a 
 | `enter('sGesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
 | `enter('aRolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `completeActivity()` | module + session + activity entered | Marks the current activity as completed |
-| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus a back entry (`Zurück zu 🗂️ <module title>` → the parent module's dialog) |
+| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus a back entry (`Eine andere 📑 Session wählen` → the parent module's dialog) |
 | `populateMenuWithModules()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
-| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Zurück zur 🗂️ Modulauswahl` → the `modulesMenu` dialog) |
+| `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Ein anderes 🗂️ Modul wählen` → the `modulesMenu` dialog) |
 
 The library also offers **flow-logic commands** (completion booleans, progress numbers, advice text) that feed MobileCoach's conditional branching. Those are wired into the flows by developers and documented in the [developer guide](developer-guide.md#flow-logic-commands) — as a content editor you never need to issue them.
 
@@ -89,8 +89,8 @@ Labels (and the advice text of the developer-facing [`getProgressAdvice()`](deve
 |---|---|---|
 | `completed` | ✅ | a completed item in a menu, and prefixed to the current level's name in `getProgressAdvice()` |
 | `next` | 👉 | the first not-yet-completed item in a menu (menus only) |
-| `module` | 🗂️ | module references in `getProgressAdvice()` |
-| `session` | 📑 | session references in `getProgressAdvice()` |
+| `module` | 🗂️ | module references in `getProgressAdvice()` and the sessions menu's back entry |
+| `session` | 📑 | session references in `getProgressAdvice()` and the activities menu's back entry |
 | `activity` | 🎯 | activity references in `getProgressAdvice()` |
 
 Menu items that are neither completed nor the next one get no emoji prefix.
@@ -99,8 +99,8 @@ Menu items that are neither completed nor the next one get no emoji prefix.
 
 The sessions and activities menus automatically append a back entry in the slot after their last item (which is why sessions and activities are capped at 8 per parent — see [structural limits](#how-content-is-structured) above):
 
-- Sessions menu: `Zurück zur 🗂️ Modulauswahl`, routing to the dialog id `modulesMenu` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `modulesMenu`**, or the back entry leads nowhere (a tap on an id without a matching dialog silently pauses the flow, see the [field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). Where the dialog lives doesn't matter — in our setup it is currently a sub-dialog of the *Einführung* dialog — only its id does. *(TODO: it probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; keeping it in the Einführung only reflects that that's where it is displayed first.)*
-- Activities menu: `Zurück zu 🗂️ <module title>`, routing to the parent module's own dialog.
+- Sessions menu: `Ein anderes 🗂️ Modul wählen`, routing to the dialog id `modulesMenu` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `modulesMenu`**, or the back entry leads nowhere (a tap on an id without a matching dialog silently pauses the flow, see the [field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). Where the dialog lives doesn't matter — in our setup it is currently a sub-dialog of the *Einführung* dialog — only its id does. *(TODO: it probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; keeping it in the Einführung only reflects that that's where it is displayed first.)*
+- Activities menu: `Eine andere 📑 Session wählen`, routing to the parent module's own dialog.
 
 A back tap needs no library command of its own — `enter('modulesMenu')` is **never** called. While the modules menu is displayed, the participant's tracked location simply stays in the previous context; it changes when the tapped entry's dialog runs its own `enter(…)` (entering a module clears the current session/activity as usual). The back entry never gets the ✅/👉 prefix. The modules menu has no back entry — it is already the top level.
 

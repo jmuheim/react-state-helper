@@ -541,7 +541,7 @@ class ReactStateHelper {
     // menu is displayed the participant's location deliberately stays in the previous context.
     // It cannot collide with a state id: registerId requires an uppercase letter after the level
     // letter, so "modulesMenu" is rejected as a module id.
-    this.#addBackEntry(sessions.length, 'Zurück zur ' + ReactStateHelper.#EMOJIS.module + ' Modulauswahl', 'modulesMenu');
+    this.#addBackEntry(sessions.length, 'Ein anderes ' + ReactStateHelper.#EMOJIS.module + ' Modul wählen', 'modulesMenu');
   }
 
   populateMenuWithActivities() {
@@ -551,7 +551,7 @@ class ReactStateHelper {
     const activities = this.#findSession(this.#state.currentSessionId).activities;
     this.#menuLabels = this.#buildMenuLabels(activities);
     this.#menuIds = this.#buildMenuIds(activities);
-    this.#addBackEntry(activities.length, 'Zurück zu ' + ReactStateHelper.#EMOJIS.module + ' ' + module.title, module.id);
+    this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', module.id);
   }
 
   // Puts the back entry into the slot right after the last item. That slot always exists: state
