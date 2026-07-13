@@ -90,7 +90,8 @@ class Module {
     // An intro session completes on first entry alone; without at least one session that has activities,
     // a module could be "completed" without any real work — so at least one non-intro session is required.
     if (module.sessions.every(s => s.activities.length === 0)) throw new Error('Module ' + id + ' has no sessions with activities (every module needs at least one non-intro session)');
-    if (module.sessions.length > MAX_MENU_SLOTS) throw new Error('Module ' + id + ' has ' + module.sessions.length + ' sessions, but at most ' + MAX_MENU_SLOTS + ' are supported');
+    // One slot fewer than the menu offers: the sessions menu appends a back entry after the sessions.
+    if (module.sessions.length > MAX_MENU_SLOTS - 1) throw new Error('Module ' + id + ' has ' + module.sessions.length + ' sessions, but at most ' + (MAX_MENU_SLOTS - 1) + ' are supported (one menu slot is reserved for the back entry)');
     if (module.sessions_needed_for_adequate_progress < 1 || module.sessions_needed_for_adequate_progress > module.sessions.length) throw new Error('Module ' + id + ' has an unachievable sessions_needed_for_adequate_progress (' + module.sessions_needed_for_adequate_progress + ') for its ' + module.sessions.length + ' session(s)');
     const nonFirstIntroSession = module.sessions.find((s, i) => s.is_intro && i !== 0);
     if (nonFirstIntroSession) throw new Error('Session ' + nonFirstIntroSession.id + ' in module ' + id + ' is marked is_intro but is not the first session — only the first session may be an intro');
@@ -142,7 +143,8 @@ class Session {
     registerId(idRegistry, id, 's');
     validateTitle(title, 'Session ' + id);
     const session = new Session({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), is_intro });
-    if (session.activities.length > MAX_MENU_SLOTS) throw new Error('Session ' + id + ' has ' + session.activities.length + ' activities, but at most ' + MAX_MENU_SLOTS + ' are supported');
+    // One slot fewer than the menu offers: the activities menu appends a back entry after the activities.
+    if (session.activities.length > MAX_MENU_SLOTS - 1) throw new Error('Session ' + id + ' has ' + session.activities.length + ' activities, but at most ' + (MAX_MENU_SLOTS - 1) + ' are supported (one menu slot is reserved for the back entry)');
     // Only intro sessions (is_intro: true) may have no activities; every other session needs at least one.
     if (!session.is_intro && session.activities.length === 0) throw new Error('Session ' + id + ' has no activities (set is_intro: true if this is intentional)');
     // Sessions without activities (i.e. intros) have no achievable threshold to check.
@@ -419,6 +421,12 @@ class ReactStateHelper {
   // enforced by registerId), so a single command works after any menu tap regardless of whether
   // the menu listed modules, sessions or activities.
   enter(id) {
+    // 'modulesMenu' (the sessions menu's back-entry target, see populateMenuWithSessions) is the one
+    // menu id that must never be entered: showing the module-selection menu leaves the participant's
+    // location unchanged on purpose, and each module dialog starts with an enter command for its own
+    // id anyway. Without this guard the generic level-letter error below would suggest the id itself
+    // is malformed.
+    if (id === 'modulesMenu') throw new Error('modulesMenu must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
     if (/^m[A-Z]/.test(id)) {
       const module = this.#findModule(id);
       if (!module) throw new Error('Module ' + id + ' not found');
@@ -533,14 +541,30 @@ class ReactStateHelper {
     const sessions = this.#findModule(this.#state.currentModuleId).sessions;
     this.#menuLabels = this.#buildMenuLabels(sessions);
     this.#menuIds = this.#buildMenuIds(sessions);
+    // 'modulesMenu' is the id of the MobileCoach dialog that shows the module-selection menu (the
+    // one calling populateMenuWithModules()) — the dialog must be named exactly like this. It is a
+    // pure routing target, never passed to enter(): dialogs enter themselves, and while the modules
+    // menu is displayed the participant's location deliberately stays in the previous context.
+    // It cannot collide with a state id: registerId requires an uppercase letter after the level
+    // letter, so "modulesMenu" is rejected as a module id.
+    this.#addBackEntry(sessions.length, 'Ein anderes ' + ReactStateHelper.#EMOJIS.module + ' Modul wählen', 'modulesMenu');
   }
 
   populateMenuWithActivities() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
+    const module = this.#findModule(this.#state.currentModuleId);
     const activities = this.#findSession(this.#state.currentSessionId).activities;
     this.#menuLabels = this.#buildMenuLabels(activities);
     this.#menuIds = this.#buildMenuIds(activities);
+    this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', module.id);
+  }
+
+  // Puts the back entry into the slot right after the last item. That slot always exists: state
+  // validation caps sessions per module and activities per session at MAX_MENU_SLOTS - 1.
+  #addBackEntry(itemCount, label, id) {
+    this.#menuLabels[itemCount] = label;
+    this.#menuIds[itemCount] = id;
   }
 
   // Slot numbers run 1–9, matching the MobileCoach menu label variables. Empty until one of the
