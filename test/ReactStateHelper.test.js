@@ -836,14 +836,14 @@ describe('ReactStateHelper', () => {
         helper.enter('mMod1');
         helper.enter('sSes1a');
         helper.enter('aAct1a1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Du hast in Session "📑 Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder zu Modul "🗂️ Modul Eins" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast in Session "📑 Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder eine andere 📑 Session bzw. ein anderes 🗂️ Modul wählen.');
       });
 
       it('returns a session-complete message when all activities are done (sSes3a: threshold 1, 1 activity)', () => {
         helper.enter('mMod3');
         helper.enter('sSes3a');
         helper.enter('aAct3a1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Du hast Session "📑 Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu Modul "🗂️ Modul Drei" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast Session "📑 Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder eine andere 📑 Session bzw. ein anderes 🗂️ Modul wählen.');
       });
     });
   });

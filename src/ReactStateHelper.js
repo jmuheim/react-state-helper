@@ -515,7 +515,6 @@ class ReactStateHelper {
   getProgressAdvice() {
     const { module: m, session: s, activity: a } = ReactStateHelper.#EMOJIS;
     if (this.#state.currentSessionId) {
-      const module = this.#findModule(this.#state.currentModuleId);
       const session = this.#findSession(this.#state.currentSessionId);
       const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
       const nextActivity = session.activities.find(act => !act.isCompleted());
@@ -524,7 +523,7 @@ class ReactStateHelper {
         subLabelSingular: 'Aktivität', subLabelPlural: 'Aktivitäten', subEmoji: a,
         completed: session.countCompletedActivities(), total: session.activities.length, threshold: session.activities_needed_for_adequate_progress,
         notStartedYet: !activity, nextItem: nextActivity,
-        next: { label: 'Modul', emoji: m, title: module.title }, nextVerb: 'zurückgehen',
+        skipPart: ', oder eine andere ' + s + ' Session bzw. ein anderes ' + m + ' Modul wählen',
       });
     }
     if (this.#state.currentModuleId) {
@@ -539,15 +538,15 @@ class ReactStateHelper {
         subLabelSingular: 'Session', subLabelPlural: 'Sessions', subEmoji: s,
         completed: completedSessions, total: completableSessions.length, threshold: module.sessions_needed_for_adequate_progress,
         notStartedYet: completedSessions === 0, nextItem: nextUncompletedSession,
-        next: nextModule ? { label: 'Modul', emoji: m, title: nextModule.title } : null, nextVerb: 'weitergehen',
+        skipPart: nextModule ? ', oder zu Modul "' + m + ' ' + nextModule.title + '" weitergehen' : null,
       });
     }
     throw new Error('No module entered yet');
   }
 
-  #buildProgressAdviceString({ labelSingular, labelPlural, emoji, title, subLabelSingular, subLabelPlural, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
-    const skipPart = next ? ', oder zu ' + next.label + ' "' + next.emoji + ' ' + next.title + '" ' + nextVerb : '';
-    const allCoveredPart = next ? '' : ' — und das gilt auch für alle anderen ' + labelPlural;
+  #buildProgressAdviceString({ labelSingular, labelPlural, emoji, title, subLabelSingular, subLabelPlural, subEmoji, completed, total, threshold, notStartedYet, nextItem, skipPart }) {
+    const allCoveredPart = skipPart === null ? ' — und das gilt auch für alle anderen ' + labelPlural : '';
+    if (skipPart === null) skipPart = '';
     if (completed >= total) return 'Du hast ' + labelSingular + ' "' + emoji + ' ' + title + '" erfolgreich abgeschlossen' + allCoveredPart + '. Die enthaltenen ' + subLabelPlural + ' kannst du jederzeit erneut besuchen' + skipPart + '.';
     if (completed >= threshold) return 'Du hast in ' + labelSingular + ' "' + emoji + ' ' + title + '" ausreichend Fortschritt gemacht' + allCoveredPart + '. Du kannst bleiben und weitere ' + subEmoji + ' ' + subLabelPlural + ' abschliessen' + skipPart + '.';
     if (notStartedYet) return 'Beginne mit einer der verfügbaren ' + subEmoji + ' ' + subLabelPlural + ' in ' + labelSingular + ' "' + emoji + ' ' + title + '".';
