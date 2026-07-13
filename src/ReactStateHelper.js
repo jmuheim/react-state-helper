@@ -522,13 +522,13 @@ class ReactStateHelper {
   }
 
   #buildProgressAdviceString({ labelSingular, labelPlural, emoji, title, subLabelSingular, subLabelPlural, subEmoji, completed, total, threshold, notStartedYet, nextItem, next, nextVerb }) {
-    const skipPart = next ? ', oder zu ' + next.emoji + ' ' + next.label + ' "' + next.title + '" ' + nextVerb : '';
+    const skipPart = next ? ', oder zu ' + next.label + ' "' + next.emoji + ' ' + next.title + '" ' + nextVerb : '';
     const allCoveredPart = next ? '' : ' — und das gilt auch für alle anderen ' + labelPlural;
-    if (completed >= total) return 'Du hast ' + emoji + ' ' + labelSingular + ' "' + title + '" erfolgreich abgeschlossen' + allCoveredPart + '. Die enthaltenen ' + subLabelPlural + ' kannst du jederzeit erneut besuchen' + skipPart + '.';
-    if (completed >= threshold) return 'Du hast in ' + emoji + ' ' + labelSingular + ' "' + title + '" ausreichend Fortschritt gemacht' + allCoveredPart + '. Du kannst bleiben und weitere ' + subEmoji + ' ' + subLabelPlural + ' abschliessen' + skipPart + '.';
-    if (notStartedYet) return 'Beginne mit einer der verfügbaren ' + subEmoji + ' ' + subLabelPlural + ' in ' + emoji + ' ' + labelSingular + ' "' + title + '".';
+    if (completed >= total) return 'Du hast ' + labelSingular + ' "' + emoji + ' ' + title + '" erfolgreich abgeschlossen' + allCoveredPart + '. Die enthaltenen ' + subLabelPlural + ' kannst du jederzeit erneut besuchen' + skipPart + '.';
+    if (completed >= threshold) return 'Du hast in ' + labelSingular + ' "' + emoji + ' ' + title + '" ausreichend Fortschritt gemacht' + allCoveredPart + '. Du kannst bleiben und weitere ' + subEmoji + ' ' + subLabelPlural + ' abschliessen' + skipPart + '.';
+    if (notStartedYet) return 'Beginne mit einer der verfügbaren ' + subEmoji + ' ' + subLabelPlural + ' in ' + labelSingular + ' "' + emoji + ' ' + title + '".';
     if (!nextItem) throw new Error('No uncompleted ' + subLabelSingular + ' found in ' + labelSingular + ' "' + title + '" despite being below threshold');
-    return 'Mach weiter in ' + emoji + ' ' + labelSingular + ' "' + title + '" — zum Beispiel mit ' + subEmoji + ' ' + subLabelSingular + ' "' + nextItem.title + '".';
+    return 'Mach weiter in ' + labelSingular + ' "' + emoji + ' ' + title + '" — zum Beispiel mit ' + subLabelSingular + ' "' + subEmoji + ' ' + nextItem.title + '".';
   }
 
   populateMenuWithModules() {

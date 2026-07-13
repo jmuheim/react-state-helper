@@ -760,20 +760,20 @@ describe('ReactStateHelper', () => {
         });
 
         it('returns a start-with message when no session has been entered yet', () => {
-          expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 📑 Sessions in 🗂️ Modul "Modul Eins".');
+          expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 📑 Sessions in Modul "🗂️ Modul Eins".');
         });
 
         it('returns a keep-going message when some sessions done but below threshold (mMod3: threshold 2)', () => {
           helper.enter('mMod3');
           helper.enter('sSes3a'); helper.enter('aAct3a1'); helper.completeActivity();
           helper.enter('mMod3');
-          expect(helper.getProgressAdvice()).toBe('Mach weiter in 🗂️ Modul "Modul Drei" — zum Beispiel mit 📑 Session "Session Drei B".');
+          expect(helper.getProgressAdvice()).toBe('Mach weiter in Modul "🗂️ Modul Drei" — zum Beispiel mit Session "📑 Session Drei B".');
         });
 
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enter('sSes1a'); helper.enter('aAct1a1'); helper.completeActivity(); helper.enter('aAct1a2'); helper.completeActivity();
           helper.enter('mMod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschliessen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in Modul "🗂️ Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschliessen, oder zu Modul "🗂️ Modul Zwei" weitergehen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -781,7 +781,7 @@ describe('ReactStateHelper', () => {
           helper.enter('mMod1');
           helper.enter('sSes1b'); helper.enter('aAct1b1'); helper.completeActivity();
           helper.enter('mMod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Eins" erfolgreich abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast Modul "🗂️ Modul Eins" erfolgreich abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu Modul "🗂️ Modul Zwei" weitergehen.');
         });
       });
 
@@ -792,7 +792,7 @@ describe('ReactStateHelper', () => {
           helper.enter('mMod3');
           helper.enter('sSes3b'); helper.enter('aAct3b1'); helper.completeActivity();
           helper.enter('mMod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschliessen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in Modul "🗂️ Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschliessen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -803,7 +803,7 @@ describe('ReactStateHelper', () => {
           helper.enter('mMod3');
           helper.enter('sSes3c'); helper.enter('aAct3c1'); helper.completeActivity();
           helper.enter('mMod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Drei" erfolgreich abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast Modul "🗂️ Modul Drei" erfolgreich abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
         });
       });
     });
@@ -812,28 +812,28 @@ describe('ReactStateHelper', () => {
       it('returns a start-with message when no activity has been entered yet', () => {
         helper.enter('mMod1');
         helper.enter('sSes1a');
-        expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 🎯 Aktivitäten in 📑 Session "Session Eins A".');
+        expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 🎯 Aktivitäten in Session "📑 Session Eins A".');
       });
 
       it('returns a keep-going message when an activity is done but below threshold (sSes2b: threshold 2)', () => {
         helper.enter('mMod2');
         helper.enter('sSes2b');
         helper.enter('aAct2b1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Mach weiter in 📑 Session "Session Zwei B" — zum Beispiel mit 🎯 Aktivität "Aktivität 2b-2".');
+        expect(helper.getProgressAdvice()).toBe('Mach weiter in Session "📑 Session Zwei B" — zum Beispiel mit Aktivität "🎯 Aktivität 2b-2".');
       });
 
       it('returns an adequate-progress message once the threshold is met but not all activities are done (sSes1a: threshold 1, 2 activities)', () => {
         helper.enter('mMod1');
         helper.enter('sSes1a');
         helper.enter('aAct1a1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Du hast in 📑 Session "Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder zu 🗂️ Modul "Modul Eins" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast in Session "📑 Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder zu Modul "🗂️ Modul Eins" zurückgehen.');
       });
 
       it('returns a session-complete message when all activities are done (sSes3a: threshold 1, 1 activity)', () => {
         helper.enter('mMod3');
         helper.enter('sSes3a');
         helper.enter('aAct3a1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Du hast 📑 Session "Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Drei" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast Session "📑 Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu Modul "🗂️ Modul Drei" zurückgehen.');
       });
     });
   });

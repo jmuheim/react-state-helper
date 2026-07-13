@@ -350,8 +350,18 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 *(2026-07-13 — numbered 41 because #40 is already claimed by the pending `docs/future-work-ideas` branch.)*
 
+> Refined by #42: in `getProgressAdvice()` texts the level emoji moves inside the quoted title, so the quoted string matches this entry's menu-label format.
+
 **Decision:** Every menu label starts with its level emoji — 🗂️ for modules, 📑 for sessions, 🎯 for activities — giving the format `"<level emoji> <title>[ <status emoji>]"` (refines #20's `"<emoji> <title>"`). The status markers move from prefix to suffix: a completed item ends in ✅, the first not-yet-completed item ends in 👈 (flipped from 👉 so it points at its own label). Items that are neither get only the level prefix. Back entries keep their fixed labels from #39 (no level prefix, no status marker), and `getProgressAdvice()` texts are unchanged — they already carried the level emojis inline.
 
 **Why:** the level emojis appeared on every surface (advice texts, back entries) *except* the menu items themselves — a menu of bare titles didn't visually state what kind of thing is being chosen. Prefixing the level emoji also gives every label in a menu the same shape: previously the title's start position jumped right whenever a ✅/👉 prefix appeared. With the prefix slot taken by the level emoji, the status markers trail the title — consistent with the completion overview's marker-after-id convention (#34). **Rejected:** stacking both emojis in front (`✅ 🗂️ Titel`) — two emojis before the first word reads cluttered and the title offset still varies; keeping 👉 as the trailing marker — at the right edge a right-pointing hand points away from the label it marks.
 
 **Watch for:** every label is now longer by one emoji (two for marked items) — relevant if a MobileCoach length limit for menu buttons or variables ever surfaces (same unknown family as `$rsh_error`/`$rsh_completionOverview`). No new variables to declare; the existing `$rsh_menuLabel1`–`9` simply carry the new format.
+
+## 42. Advice texts quote items in menu-label format: the level emoji sits inside the quotes
+
+**Decision:** In `getProgressAdvice()` texts, every quoted item reference carries its level emoji inside the quotes — `Modul "🗂️ Modul Eins"` instead of `🗂️ Modul "Modul Eins"`. This applies to all quoted references in the advice templates: the current item, the "oder zu … weitergehen/zurückgehen" target, and the "zum Beispiel mit …" sub-item example. Plural references without a quoted title (e.g. "weitere 📑 Sessions abschliessen") keep the emoji before the label word, since there is no title to attach it to. Refines #41, whose note said advice texts were unchanged.
+
+**Why:** with the emoji outside, the quoted string was the bare title while the menus show `"<level emoji> <title>"` (#41) — the same item read differently in an advice sentence than on the button the participant is about to tap. Moving the emoji inside the quotes makes the quoted string identical to the menu label's stable prefix part, so advice text and menu visually name the same thing. **Rejected:** emoji both outside and inside — duplicates the emoji in every reference; dropping the emoji from advice texts entirely — loses the level cue exactly where the participant is told where to go next.
+
+**Watch for:** nothing new — message lengths are unchanged and no variables are affected.

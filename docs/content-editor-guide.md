@@ -87,10 +87,10 @@ Every menu label starts with the emoji of its level (`🗂️ <module title>`, `
 
 | Key | Emoji | Used for |
 |---|---|---|
-| `module` | 🗂️ | prefixed to every modules-menu label, module references in `getProgressAdvice()`, and the sessions menu's back entry |
-| `session` | 📑 | prefixed to every sessions-menu label, session references in `getProgressAdvice()`, and the activities menu's back entry |
-| `activity` | 🎯 | prefixed to every activities-menu label and activity references in `getProgressAdvice()` |
-| `completed` | ✅ | appended to a completed item in a menu, and prefixed to the current level's name in `getProgressAdvice()` |
+| `module` | 🗂️ | prefixed to every modules-menu label, to quoted module titles in `getProgressAdvice()` (`Modul "🗂️ Modul Eins"` — inside the quotes, matching the menu-label format), and used in the sessions menu's back entry |
+| `session` | 📑 | prefixed to every sessions-menu label, to quoted session titles in `getProgressAdvice()`, and used in the activities menu's back entry |
+| `activity` | 🎯 | prefixed to every activities-menu label and to quoted activity titles in `getProgressAdvice()` |
+| `completed` | ✅ | appended to a completed item in a menu, and to a completed item's id in `$rsh_completionOverview` |
 | `next` | 👈 | appended to the first not-yet-completed item in a menu (menus only) |
 
 Menu items that are neither completed nor the next one get no status emoji — just the level prefix.
