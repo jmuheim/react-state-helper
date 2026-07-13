@@ -2,14 +2,6 @@
 
 const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_menuId1 to $rsh_menuId9 are declared in MobileCoach
 
-// Id of the MobileCoach dialog that shows the module-selection menu (the one calling
-// populateMenuWithModules()). The sessions menu routes its back entry here, so the dialog must be
-// named exactly like this in MobileCoach. It is a pure routing target, never passed to enter():
-// dialogs enter themselves, and while the modules menu is displayed the participant's location
-// deliberately stays in the previous context. It cannot collide with a state id: registerId
-// requires an uppercase letter after the level letter, so "modulesMenu" is rejected as a module id.
-const MODULES_MENU_DIALOG_ID = 'modulesMenu';
-
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
 // within their parent, since the same registry is threaded through the whole Module/Session/Activity tree.
@@ -543,7 +535,13 @@ class ReactStateHelper {
     const sessions = this.#findModule(this.#state.currentModuleId).sessions;
     this.#menuLabels = this.#buildMenuLabels(sessions);
     this.#menuIds = this.#buildMenuIds(sessions);
-    this.#addBackEntry(sessions.length, 'Zurück zur ' + ReactStateHelper.#EMOJIS.module + ' Modulauswahl', MODULES_MENU_DIALOG_ID);
+    // 'modulesMenu' is the id of the MobileCoach dialog that shows the module-selection menu (the
+    // one calling populateMenuWithModules()) — the dialog must be named exactly like this. It is a
+    // pure routing target, never passed to enter(): dialogs enter themselves, and while the modules
+    // menu is displayed the participant's location deliberately stays in the previous context.
+    // It cannot collide with a state id: registerId requires an uppercase letter after the level
+    // letter, so "modulesMenu" is rejected as a module id.
+    this.#addBackEntry(sessions.length, 'Zurück zur ' + ReactStateHelper.#EMOJIS.module + ' Modulauswahl', 'modulesMenu');
   }
 
   populateMenuWithActivities() {
