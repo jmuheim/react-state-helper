@@ -490,8 +490,10 @@ describe('ReactStateHelper', () => {
       expect(state.currentActivityId).toBeNull();
     });
 
-    // The modulesMenu back-entry id is a pure routing target and never reaches enter():
-    // dialogs enter themselves after navigation, so no test grants it enter() semantics.
+    it('throws for the modulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
+      expect(() => helper.enter('modulesMenu')).toThrow('Cannot enter id modulesMenu: it must start with "m", "s" or "a" followed by an uppercase letter');
+    });
+
     it('entering a session resets currentActivityId', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
