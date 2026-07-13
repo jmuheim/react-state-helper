@@ -482,7 +482,7 @@ class ReactStateHelper {
 
   static #EMOJIS = {
     completed: '✅',
-    next: '👉',
+    next: '👈',
     module: '🗂️',
     session: '📑',
     activity: '🎯',
@@ -532,14 +532,14 @@ class ReactStateHelper {
   }
 
   populateMenuWithModules() {
-    this.#menuLabels = this.#buildMenuLabels(this.#state.modules);
+    this.#menuLabels = this.#buildMenuLabels(this.#state.modules, ReactStateHelper.#EMOJIS.module);
     this.#menuIds = this.#buildMenuIds(this.#state.modules);
   }
 
   populateMenuWithSessions() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     const sessions = this.#findModule(this.#state.currentModuleId).sessions;
-    this.#menuLabels = this.#buildMenuLabels(sessions);
+    this.#menuLabels = this.#buildMenuLabels(sessions, ReactStateHelper.#EMOJIS.session);
     this.#menuIds = this.#buildMenuIds(sessions);
     // 'modulesMenu' is the id of the MobileCoach dialog that shows the module-selection menu (the
     // one calling populateMenuWithModules()) — the dialog must be named exactly like this. It is a
@@ -555,7 +555,7 @@ class ReactStateHelper {
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
     const module = this.#findModule(this.#state.currentModuleId);
     const activities = this.#findSession(this.#state.currentSessionId).activities;
-    this.#menuLabels = this.#buildMenuLabels(activities);
+    this.#menuLabels = this.#buildMenuLabels(activities, ReactStateHelper.#EMOJIS.activity);
     this.#menuIds = this.#buildMenuIds(activities);
     this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', module.id);
   }
@@ -581,7 +581,9 @@ class ReactStateHelper {
     return this.#menuIds[slot - 1] ?? '';
   }
 
-  #buildMenuLabels(items) {
+  // Every label starts with the level emoji; the status marker (✅ done, 👈 next up) is appended
+  // after the title, matching the marker-after-id convention of the completion overview.
+  #buildMenuLabels(items, levelEmoji) {
     const { completed: completedEmoji, next: nextEmoji } = ReactStateHelper.#EMOJIS;
     const labels = [];
     let nextAssigned = false;
@@ -590,12 +592,12 @@ class ReactStateHelper {
       if (!item) {
         labels.push('');
       } else if (item.isCompleted()) {
-        labels.push((completedEmoji ? completedEmoji + ' ' : '') + item.title);
+        labels.push(levelEmoji + ' ' + item.title + ' ' + completedEmoji);
       } else if (!nextAssigned) {
-        labels.push((nextEmoji ? nextEmoji + ' ' : '') + item.title);
+        labels.push(levelEmoji + ' ' + item.title + ' ' + nextEmoji);
         nextAssigned = true;
       } else {
-        labels.push(item.title);
+        labels.push(levelEmoji + ' ' + item.title);
       }
     }
     return labels;

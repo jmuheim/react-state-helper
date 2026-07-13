@@ -167,6 +167,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 > Refined by #36: the `populateMenuFor…()` names introduced here are renamed `populateMenuWith…()` (plural).
 
+> Refined by #41: the label format becomes `"<level emoji> <title>[ <status emoji>]"` — the level emoji always prefixes the title, and the status markers (✅, 👈 instead of 👉) trail it.
+
 *(2026-07-08)*
 
 **Decision:** `getMenuLabel(slot)` returns only the display text `"<emoji> <title>"`; the new `getMenuId(slot)` returns the bare id. The wrapper writes `$jsStateHelperMenuId1`–`9` alongside `$jsStateHelperMenuLabel1`–`9` on every run (same `""`-reset behavior, see #19). The content editor concatenates the two per slot in the menu definition — `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1` — so the `:` that MobileCoach splits on at tap time is added in MobileCoach, not in JS. Supersedes #11's `"<emoji> <title>:<id>"` label format. Because the methods now populate ids as well as labels, they were renamed `populateMenuForModule()` / `ForSession()` / `ForActivity()` (refines #10; nothing is deployed yet, so renaming `$jsStateHelperCmd` command strings is free).
@@ -343,3 +345,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** "Zurück" misdescribed what happens: a tap doesn't go back — the participant's tracked location deliberately stays in the previous context (#38), and the entry's real purpose is to pick a *different* session/module. Wording it as a choice also matches what the target dialog shows (a selection menu). Dropping the module title from the activities-menu label removes the only variable-length back label; the fixed wording can't overflow with long module titles. **Rejected:** keeping "Zurück …" wording — actively misleading about the navigation model; naming the routed-to level (`Ein anderes Modul wählen` on the activities menu, since it routes to the module dialog) — the participant thinks in terms of what they want next (another session), not which dialog re-renders on the way there.
 
 **Watch for:** the labels still say "ein anderes/eine andere" even when only one module or session exists — harmless, but revisit if single-module coaches become the norm.
+
+## 41. Menu labels carry the level emoji as prefix; status markers trail the title
+
+*(2026-07-13 — numbered 41 because #40 is already claimed by the pending `docs/future-work-ideas` branch.)*
+
+**Decision:** Every menu label starts with its level emoji — 🗂️ for modules, 📑 for sessions, 🎯 for activities — giving the format `"<level emoji> <title>[ <status emoji>]"` (refines #20's `"<emoji> <title>"`). The status markers move from prefix to suffix: a completed item ends in ✅, the first not-yet-completed item ends in 👈 (flipped from 👉 so it points at its own label). Items that are neither get only the level prefix. Back entries keep their fixed labels from #39 (no level prefix, no status marker), and `getProgressAdvice()` texts are unchanged — they already carried the level emojis inline.
+
+**Why:** the level emojis appeared on every surface (advice texts, back entries) *except* the menu items themselves — a menu of bare titles didn't visually state what kind of thing is being chosen. Prefixing the level emoji also gives every label in a menu the same shape: previously the title's start position jumped right whenever a ✅/👉 prefix appeared. With the prefix slot taken by the level emoji, the status markers trail the title — consistent with the completion overview's marker-after-id convention (#34). **Rejected:** stacking both emojis in front (`✅ 🗂️ Titel`) — two emojis before the first word reads cluttered and the title offset still varies; keeping 👉 as the trailing marker — at the right edge a right-pointing hand points away from the label it marks.
+
+**Watch for:** every label is now longer by one emoji (two for marked items) — relevant if a MobileCoach length limit for menu buttons or variables ever surfaces (same unknown family as `$rsh_error`/`$rsh_completionOverview`). No new variables to declare; the existing `$rsh_menuLabel1`–`9` simply carry the new format.
