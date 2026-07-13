@@ -36,6 +36,26 @@ Consequences:
 
 The reserved variable that receives the right-hand side of a tapped menu entry (the part after the `:`, i.e. the dialog id) is called `$participantNextMicroDialogIdentifier`. MobileCoach then navigates to the micro dialog whose id matches its content — this is the variable behind the menu routing described above, and it can also be read in follow-up rules to branch on which entry was tapped.
 
+## Variables are never cleaned up: stale values survive forever
+
+MobileCoach has no lifecycle for participant variables: once something is written, it stays until something else overwrites it — the platform never resets or expires a value, even when it is clearly spent. Example: `$participantNextMicroDialogIdentifier` receives the tapped menu id (see above), but after MobileCoach has navigated to that dialog, the variable keeps its value indefinitely; it is not consumed by the jump. This appears to be the platform's general attitude, not a bug in one variable.
+
+Consequences:
+
+- A variable's content answers "what was written *last*", never "is this current" — branching on a variable like `$participantNextMicroDialogIdentifier` outside its immediate context may act on a value left over from a much earlier interaction.
+- Any freshness guarantee has to come from our side: the library's always-write-every-run model (decision #19, reaffirmed in #37) is the countermeasure, not platform redundancy. This tension is central to the [null-init / direct-write open question](open-questions.md#invert-the-output-flow-pre-initialise-all-variables-to-null-commands-write-results-directly): the platform won't clean up after us, so whatever the script stops overwriting simply stays stale.
+
+## Moving between dialogs: cascading vs. jumping
+
+Dialogs are containers of flow elements (messages, decision points, …), handled by rules one after another in sequence. There are two ways to move to another dialog, with opposite return behavior:
+
+- **Cascading:** after the jumped-to dialog finishes, control returns to where it came from.
+- **Jumping:** one-way — control does *not* return.
+
+Unverified: what a **jump from within a cascade** does to the pending return chain — does the jump abandon the whole cascade (the stacked "go back" targets are dropped), or does the cascade's return still fire when the jumped-to dialog finishes? Needs a live test with a cascade at least two levels deep, jumping out of the innermost dialog.
+
+(Stub — a fuller write-up of dialog internals, rule sequencing, variable writes, and if/else trees is planned; see the [flow-export open question](open-questions.md#check-the-mobilecoach-flow-export-html-into-the-repo).)
+
 ## Dialog ids and variable prefixes: both set from the same id
 
 Each dialog has a user-definable **id** and a user-definable **variable prefix**. The id identifies the dialog and can be used to jump to it (menu routing navigates to the dialog whose id was tapped); the prefix namespaces the dialog's variables. We set both from the same library id: the id verbatim (`mBouMgt`), the prefix with an underscore appended (`$mBouMgt_`).
