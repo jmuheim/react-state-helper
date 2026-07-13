@@ -490,8 +490,8 @@ describe('ReactStateHelper', () => {
       expect(state.currentActivityId).toBeNull();
     });
 
-    it('throws a dedicated error for the modulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
-      expect(() => helper.enter('modulesMenu')).toThrow('modulesMenu must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
+    it('throws a dedicated error for the allModulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
+      expect(() => helper.enter('allModulesMenu')).toThrow('allModulesMenu must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
     });
 
     it('entering a session resets currentActivityId', () => {
@@ -635,7 +635,7 @@ describe('ReactStateHelper', () => {
     it('appends a back-to-module-overview entry in the slot after the last session', () => {
       helper.populateMenuWithSessions();
       expect(helper.getMenuLabel(4)).toBe('Ein anderes 🗂️ Modul wählen');
-      expect(helper.getMenuId(4)).toBe('modulesMenu');
+      expect(helper.getMenuId(4)).toBe('allModulesMenu');
     });
 
     it('fills unused slots with empty string', () => {
@@ -928,6 +928,12 @@ describe('ReactStateHelper', () => {
       // which only allows letters and numbers before the trailing underscore.
       state.modules[0].id = 'mBou_Mgt';
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id mBou_Mgt must start with "m" followed by an uppercase letter, and contain only letters and numbers');
+    });
+
+    it('throws a dedicated error when a state id uses the reserved allModulesMenu dialog id', () => {
+      const state = minimalValidState();
+      state.modules[0].id = 'allModulesMenu';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id allModulesMenu is reserved for the dialog showing the module-selection menu and cannot be used as a state id');
     });
 
     it('throws when a module threshold exceeds its own session count', () => {
