@@ -494,6 +494,10 @@ describe('ReactStateHelper', () => {
       expect(() => helper.enter('allModulesMenu')).toThrow('allModulesMenu must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
     });
 
+    it('throws a dedicated error for the allSessionsOfCurrentModuleMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
+      expect(() => helper.enter('allSessionsOfCurrentModuleMenu')).toThrow('allSessionsOfCurrentModuleMenu must never be entered: it only routes to the dialog that shows the session-selection menu of the current module, which leaves the location unchanged — the location changes when the participant taps a session and that dialog runs enter with its own id');
+    });
+
     it('entering a session resets currentActivityId', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
@@ -706,10 +710,10 @@ describe('ReactStateHelper', () => {
       expect(helper.getMenuId(2)).toBe('aAct1a2');
     });
 
-    it('appends a back-to-parent-module entry in the slot after the last activity', () => {
+    it('appends a back-to-sessions-menu entry in the slot after the last activity', () => {
       helper.populateMenuWithActivities();
       expect(helper.getMenuLabel(3)).toBe('Eine andere 📑 Session wählen');
-      expect(helper.getMenuId(3)).toBe('mMod1');
+      expect(helper.getMenuId(3)).toBe('allSessionsOfCurrentModuleMenu');
     });
 
     it('appends a back-to-module-overview entry in the slot after the session back entry', () => {
@@ -940,6 +944,12 @@ describe('ReactStateHelper', () => {
       const state = minimalValidState();
       state.modules[0].id = 'allModulesMenu';
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id allModulesMenu is reserved for the dialog showing the module-selection menu and cannot be used as a state id');
+    });
+
+    it('throws a dedicated error when a state id uses the reserved allSessionsOfCurrentModuleMenu dialog id', () => {
+      const state = minimalValidState();
+      state.modules[0].id = 'allSessionsOfCurrentModuleMenu';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id allSessionsOfCurrentModuleMenu is reserved for the dialog showing the session-selection menu of the current module and cannot be used as a state id');
     });
 
     it('throws when a module threshold exceeds its own session count', () => {

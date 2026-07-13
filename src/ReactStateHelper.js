@@ -4,12 +4,18 @@ const MAX_MENU_SLOTS = 9; // only $rsh_menuLabel1 to $rsh_menuLabel9 and $rsh_me
 
 // The id of the MobileCoach dialog that shows the module-selection menu (the one calling
 // populateMenuWithModules()) — the dialog must be named exactly like this. It is a pure routing
-// target: the sessions menu's back entry routes to it, but it is never passed to enter() —
-// dialogs enter themselves, and while the modules menu is displayed the participant's location
-// deliberately stays in the previous context. It cannot collide with a state id: registerId
-// rejects it by name, and the convention check (uppercase letter after the level letter) would
-// reject it anyway, since the second letter here is lowercase.
+// target: the sessions and activities menus' back entries route to it, but it is never passed
+// to enter() — dialogs enter themselves, and while the modules menu is displayed the
+// participant's location deliberately stays in the previous context. It cannot collide with a
+// state id: registerId rejects it by name, and the convention check (uppercase letter after the
+// level letter) would reject it anyway, since the second letter here is lowercase.
 const ALL_MODULES_MENU_DIALOG_ID = 'allModulesMenu';
+
+// The id of the MobileCoach dialog that shows the session-selection menu of the current module
+// (the one calling populateMenuWithSessions()) — the dialog must be named exactly like this.
+// Like ALL_MODULES_MENU_DIALOG_ID it is a pure routing target: the activities menu's session
+// back entry routes to it, it is never passed to enter(), and registerId rejects it by name.
+const ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID = 'allSessionsOfCurrentModuleMenu';
 
 // Registers an id the moment its Module/Session/Activity is instantiated, the same way a DB unique
 // constraint rejects an INSERT — this is what makes ids unique across the *entire* state, not just
@@ -22,10 +28,11 @@ const ALL_MODULES_MENU_DIALOG_ID = 'allModulesMenu';
 // variable prefix — and prefixes reject underscores anywhere but the end (see
 // "Dialog ids and variable prefixes" in docs/mobilecoach-field-notes.md).
 function registerId(idRegistry, id, levelLetter) {
-  // The reserved menu dialog id could never pass the convention check below anyway (its second
-  // letter is lowercase), but rejecting it by name says what is actually wrong instead of
+  // The reserved menu dialog ids could never pass the convention check below anyway (their second
+  // letter is lowercase), but rejecting them by name says what is actually wrong instead of
   // complaining about the id's format (decision #44).
   if (id === ALL_MODULES_MENU_DIALOG_ID) throw new Error('Id ' + ALL_MODULES_MENU_DIALOG_ID + ' is reserved for the dialog showing the module-selection menu and cannot be used as a state id');
+  if (id === ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID) throw new Error('Id ' + ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID + ' is reserved for the dialog showing the session-selection menu of the current module and cannot be used as a state id');
   // No end-of-string anchor here — its character cannot appear anywhere in this script (decision #27) —
   // so the whole-id coverage is checked by rejecting any character outside letters and numbers instead.
   const startsWithLevelLetter = new RegExp('^' + levelLetter + '[A-Z]').test(id);
@@ -434,10 +441,11 @@ class ReactStateHelper {
   // enforced by registerId), so a single command works after any menu tap regardless of whether
   // the menu listed modules, sessions or activities.
   enter(id) {
-    // The back-entry target is the one menu id that must never be entered (see the constant's
-    // declaration at the top of the file). Without this guard the generic level-letter error below
-    // would suggest the id itself is malformed.
+    // The back-entry targets are the menu ids that must never be entered (see the constants'
+    // declarations at the top of the file). Without these guards the generic level-letter error
+    // below would suggest the id itself is malformed.
     if (id === ALL_MODULES_MENU_DIALOG_ID) throw new Error(ALL_MODULES_MENU_DIALOG_ID + ' must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
+    if (id === ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID) throw new Error(ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID + ' must never be entered: it only routes to the dialog that shows the session-selection menu of the current module, which leaves the location unchanged — the location changes when the participant taps a session and that dialog runs enter with its own id');
     if (/^m[A-Z]/.test(id)) {
       const module = this.#findModule(id);
       if (!module) throw new Error('Module ' + id + ' not found');
@@ -558,11 +566,10 @@ class ReactStateHelper {
   populateMenuWithActivities() {
     if (!this.#state.currentModuleId) throw new Error('No module entered yet');
     if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    const module = this.#findModule(this.#state.currentModuleId);
     const activities = this.#findSession(this.#state.currentSessionId).activities;
     this.#menuLabels = this.#buildMenuLabels(activities, ReactStateHelper.#EMOJIS.activity);
     this.#menuIds = this.#buildMenuIds(activities);
-    this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', module.id);
+    this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID);
     this.#addBackEntry(activities.length + 1, 'Ein anderes ' + ReactStateHelper.#EMOJIS.module + ' Modul wählen', ALL_MODULES_MENU_DIALOG_ID);
   }
 
