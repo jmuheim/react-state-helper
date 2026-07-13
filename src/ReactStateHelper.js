@@ -421,6 +421,11 @@ class ReactStateHelper {
   // enforced by registerId), so a single command works after any menu tap regardless of whether
   // the menu listed modules, sessions or activities.
   enter(id) {
+    // 'modulesMenu' (the sessions menu's back-entry target, see populateMenuWithSessions) is the one
+    // menu id that must never be entered: dialogs enter themselves, and while the modules menu is
+    // displayed the participant deliberately stays in the previous context. Without this guard the
+    // generic level-letter error below would suggest the id itself is malformed.
+    if (id === 'modulesMenu') throw new Error('modulesMenu must never be entered: it is a pure routing target (the dialog showing the module-selection menu) — the location changes when the tapped entry\'s dialog enters itself');
     if (/^m[A-Z]/.test(id)) {
       const module = this.#findModule(id);
       if (!module) throw new Error('Module ' + id + ' not found');

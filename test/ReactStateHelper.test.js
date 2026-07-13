@@ -490,8 +490,8 @@ describe('ReactStateHelper', () => {
       expect(state.currentActivityId).toBeNull();
     });
 
-    it('throws for the modulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
-      expect(() => helper.enter('modulesMenu')).toThrow('Cannot enter id modulesMenu: it must start with "m", "s" or "a" followed by an uppercase letter');
+    it('throws a dedicated error for the modulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
+      expect(() => helper.enter('modulesMenu')).toThrow('modulesMenu must never be entered: it is a pure routing target (the dialog showing the module-selection menu) — the location changes when the tapped entry\'s dialog enters itself');
     });
 
     it('entering a session resets currentActivityId', () => {
