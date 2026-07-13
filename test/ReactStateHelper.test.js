@@ -563,10 +563,10 @@ describe('ReactStateHelper', () => {
   });
 
   describe('populateMenuWithModules', () => {
-    it('marks the first incomplete module as 👉 and leaves the rest plain', () => {
+    it('marks the first incomplete module with a trailing 👈 and leaves the rest plain', () => {
       helper.populateMenuWithModules();
-      expect(helper.getMenuLabel(1)).toBe('👉 Modul Eins');
-      expect(helper.getMenuLabel(2)).toBe('Modul Zwei');
+      expect(helper.getMenuLabel(1)).toBe('🗂️ Modul Eins 👈');
+      expect(helper.getMenuLabel(2)).toBe('🗂️ Modul Zwei');
     });
 
     it('provides each module id in the slot matching its label', () => {
@@ -583,7 +583,7 @@ describe('ReactStateHelper', () => {
       }
     });
 
-    it('marks a completed module with ✅', () => {
+    it('marks a completed module with a trailing ✅', () => {
       helper.enter('mMod1');
       const mod1Data = testState.modules.find(m => m.id === 'mMod1');
       for (const ses of mod1Data.sessions) {
@@ -593,11 +593,11 @@ describe('ReactStateHelper', () => {
         }
       }
       helper.populateMenuWithModules();
-      expect(helper.getMenuLabel(1)).toBe('✅ Modul Eins');
-      expect(helper.getMenuLabel(2)).toBe('👉 Modul Zwei');
+      expect(helper.getMenuLabel(1)).toBe('🗂️ Modul Eins ✅');
+      expect(helper.getMenuLabel(2)).toBe('🗂️ Modul Zwei 👈');
     });
 
-    it('marks no module as 👉 when all are ✅', () => {
+    it('marks no module as 👈 when all are ✅', () => {
       for (const mod of testState.modules) {
         helper.enter(mod.id);
         for (const ses of mod.sessions) {
@@ -608,8 +608,8 @@ describe('ReactStateHelper', () => {
         }
       }
       helper.populateMenuWithModules();
-      expect(helper.getMenuLabel(1)).toBe('✅ Modul Eins');
-      expect(helper.getMenuLabel(2)).toBe('✅ Modul Zwei');
+      expect(helper.getMenuLabel(1)).toBe('🗂️ Modul Eins ✅');
+      expect(helper.getMenuLabel(2)).toBe('🗂️ Modul Zwei ✅');
     });
   });
 
@@ -618,11 +618,11 @@ describe('ReactStateHelper', () => {
       helper.enter('mMod1');
     });
 
-    it('marks the first incomplete session as 👉 and leaves the rest plain', () => {
+    it('marks the first incomplete session with a trailing 👈 and leaves the rest plain', () => {
       helper.populateMenuWithSessions();
-      expect(helper.getMenuLabel(1)).toBe('👉 Intro Eins');
-      expect(helper.getMenuLabel(2)).toBe('Session Eins A');
-      expect(helper.getMenuLabel(3)).toBe('Session Eins B');
+      expect(helper.getMenuLabel(1)).toBe('📑 Intro Eins 👈');
+      expect(helper.getMenuLabel(2)).toBe('📑 Session Eins A');
+      expect(helper.getMenuLabel(3)).toBe('📑 Session Eins B');
     });
 
     it('provides each session id in the slot matching its label', () => {
@@ -646,14 +646,14 @@ describe('ReactStateHelper', () => {
       }
     });
 
-    it('marks a completed session with ✅', () => {
+    it('marks a completed session with a trailing ✅', () => {
       helper.enter('sSes1a');
       helper.enter('aAct1a1'); helper.completeActivity();
       helper.enter('aAct1a2'); helper.completeActivity();
       helper.populateMenuWithSessions();
-      expect(helper.getMenuLabel(1)).toBe('👉 Intro Eins');
-      expect(helper.getMenuLabel(2)).toBe('✅ Session Eins A');
-      expect(helper.getMenuLabel(3)).toBe('Session Eins B');
+      expect(helper.getMenuLabel(1)).toBe('📑 Intro Eins 👈');
+      expect(helper.getMenuLabel(2)).toBe('📑 Session Eins A ✅');
+      expect(helper.getMenuLabel(3)).toBe('📑 Session Eins B');
     });
 
     it('marks all sessions as ✅ when all are completed (intro becomes ✅ as soon as it is entered)', () => {
@@ -665,12 +665,12 @@ describe('ReactStateHelper', () => {
         }
       }
       helper.populateMenuWithSessions();
-      expect(helper.getMenuLabel(1)).toBe('✅ Intro Eins');
-      expect(helper.getMenuLabel(2)).toBe('✅ Session Eins A');
-      expect(helper.getMenuLabel(3)).toBe('✅ Session Eins B');
+      expect(helper.getMenuLabel(1)).toBe('📑 Intro Eins ✅');
+      expect(helper.getMenuLabel(2)).toBe('📑 Session Eins A ✅');
+      expect(helper.getMenuLabel(3)).toBe('📑 Session Eins B ✅');
     });
 
-    it('never marks the back entry with 👉 or ✅', () => {
+    it('never marks the back entry with 👈 or ✅', () => {
       const mod1Data = testState.modules.find(m => m.id === 'mMod1');
       for (const ses of mod1Data.sessions) {
         helper.enter(ses.id);
@@ -694,10 +694,10 @@ describe('ReactStateHelper', () => {
       helper.enter('sSes1a');
     });
 
-    it('marks the first incomplete activity as 👉 and leaves the rest plain', () => {
+    it('marks the first incomplete activity with a trailing 👈 and leaves the rest plain', () => {
       helper.populateMenuWithActivities();
-      expect(helper.getMenuLabel(1)).toBe('👉 Aktivität 1a-1');
-      expect(helper.getMenuLabel(2)).toBe('Aktivität 1a-2 – Untertitel');
+      expect(helper.getMenuLabel(1)).toBe('🎯 Aktivität 1a-1 👈');
+      expect(helper.getMenuLabel(2)).toBe('🎯 Aktivität 1a-2 – Untertitel');
     });
 
     it('provides each activity id in the slot matching its label', () => {
@@ -720,11 +720,11 @@ describe('ReactStateHelper', () => {
       }
     });
 
-    it('marks a completed activity with ✅', () => {
+    it('marks a completed activity with a trailing ✅', () => {
       helper.enter('aAct1a1'); helper.completeActivity();
       helper.populateMenuWithActivities();
-      expect(helper.getMenuLabel(1)).toBe('✅ Aktivität 1a-1');
-      expect(helper.getMenuLabel(2)).toBe('👉 Aktivität 1a-2 – Untertitel');
+      expect(helper.getMenuLabel(1)).toBe('🎯 Aktivität 1a-1 ✅');
+      expect(helper.getMenuLabel(2)).toBe('🎯 Aktivität 1a-2 – Untertitel 👈');
     });
 
     it('throws if no module has been entered', () => {
@@ -732,12 +732,12 @@ describe('ReactStateHelper', () => {
       expect(() => helper.populateMenuWithActivities()).toThrow('No module entered yet');
     });
 
-    it('marks no activity as 👉 when all are ✅', () => {
+    it('marks no activity as 👈 when all are ✅', () => {
       helper.enter('aAct1a1'); helper.completeActivity();
       helper.enter('aAct1a2'); helper.completeActivity();
       helper.populateMenuWithActivities();
-      expect(helper.getMenuLabel(1)).toBe('✅ Aktivität 1a-1');
-      expect(helper.getMenuLabel(2)).toBe('✅ Aktivität 1a-2 – Untertitel');
+      expect(helper.getMenuLabel(1)).toBe('🎯 Aktivität 1a-1 ✅');
+      expect(helper.getMenuLabel(2)).toBe('🎯 Aktivität 1a-2 – Untertitel ✅');
     });
 
     it('throws if no session has been entered', () => {
