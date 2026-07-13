@@ -156,8 +156,8 @@ class Session {
     registerId(idRegistry, id, 's');
     validateTitle(title, 'Session ' + id);
     const session = new Session({ id, title, activities_needed_for_adequate_progress, entered_first_at, entered_last_at, times_entered, activities: activities.map(a => Activity.fromJSON(a, idRegistry)), is_intro });
-    // One slot fewer than the menu offers: the activities menu appends a back entry after the activities.
-    if (session.activities.length > MAX_MENU_SLOTS - 1) throw new Error('Session ' + id + ' has ' + session.activities.length + ' activities, but at most ' + (MAX_MENU_SLOTS - 1) + ' are supported (one menu slot is reserved for the back entry)');
+    // Two slots fewer than the menu offers: the activities menu appends two back entries after the activities.
+    if (session.activities.length > MAX_MENU_SLOTS - 2) throw new Error('Session ' + id + ' has ' + session.activities.length + ' activities, but at most ' + (MAX_MENU_SLOTS - 2) + ' are supported (two menu slots are reserved for the back entries)');
     // Only intro sessions (is_intro: true) may have no activities; every other session needs at least one.
     if (!session.is_intro && session.activities.length === 0) throw new Error('Session ' + id + ' has no activities (set is_intro: true if this is intentional)');
     // Sessions without activities (i.e. intros) have no achievable threshold to check.
@@ -563,10 +563,12 @@ class ReactStateHelper {
     this.#menuLabels = this.#buildMenuLabels(activities, ReactStateHelper.#EMOJIS.activity);
     this.#menuIds = this.#buildMenuIds(activities);
     this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', module.id);
+    this.#addBackEntry(activities.length + 1, 'Ein anderes ' + ReactStateHelper.#EMOJIS.module + ' Modul wählen', ALL_MODULES_MENU_DIALOG_ID);
   }
 
-  // Puts the back entry into the slot right after the last item. That slot always exists: state
-  // validation caps sessions per module and activities per session at MAX_MENU_SLOTS - 1.
+  // Puts a back entry into the given slot right after the last item (or after the previous back
+  // entry). Those slots always exist: state validation caps sessions per module at
+  // MAX_MENU_SLOTS - 1 (one back entry) and activities per session at MAX_MENU_SLOTS - 2 (two).
   #addBackEntry(itemCount, label, id) {
     this.#menuLabels[itemCount] = label;
     this.#menuIds[itemCount] = id;
