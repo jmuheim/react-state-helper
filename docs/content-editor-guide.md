@@ -25,7 +25,7 @@ Two progress notions exist per module/session:
 
 An **intro session** is a session with no activities of its own (just a stepping stone into the module, e.g. `sBouIntro`). It must be marked `is_intro: true` in the state definition and be the module's **first** session. Because it has no activities, it counts as completed as soon as the participant enters it once — so it *does* count toward the module being completed, but it never affects the finer-grained progress percentage.
 
-Structural limits, checked when state loads: at most **9** modules (that's how many menu slots exist), and **8** sessions per module and **8** activities per session (the sessions and activities menus reserve their last slot for a back entry, see [Menus](#menus)); every module needs at least one session with activities; every non-intro session needs at least one activity; an intro session may only be a module's first session.
+Structural limits, checked when state loads: at most **9** modules (that's how many menu slots exist), **8** sessions per module (the sessions menu reserves its last slot for a back entry) and **7** activities per session (the activities menu reserves its last two slots for back entries, see [Menus](#menus)); every module needs at least one session with activities; every non-intro session needs at least one activity; an intro session may only be a module's first session.
 
 ## One-time MobileCoach setup
 
@@ -67,7 +67,7 @@ As a content editor you only ever issue three kinds of commands: **entering** a 
 | `enter('sGesGre')` | module entered | Sets the current session (and clears activity); records visit timestamps and count |
 | `enter('aRolGes')` | module + session entered | Sets the current activity; records visit timestamps and count |
 | `completeActivity()` | module + session + activity entered | Marks the current activity as completed |
-| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus a back entry (`Eine andere 📑 Session wählen` → the parent module's dialog) |
+| `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus two back entries (`Eine andere 📑 Session wählen` → the parent module's dialog, then `Ein anderes 🗂️ Modul wählen` → the `allModulesMenu` dialog) |
 | `populateMenuWithModules()` | — | Fills `$rsh_menuLabel1–9` and `$rsh_menuId1–9` with one entry per module |
 | `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Ein anderes 🗂️ Modul wählen` → the `allModulesMenu` dialog) |
 
@@ -87,7 +87,7 @@ Every menu label starts with the emoji of its level (`🗂️ <module title>`, `
 
 | Key | Emoji | Used for |
 |---|---|---|
-| `module` | 🗂️ | prefixed to every modules-menu label, to quoted module titles in `getProgressAdvice()` (`Modul "🗂️ Modul Eins"` — inside the quotes, matching the menu-label format), and used in the sessions menu's back entry |
+| `module` | 🗂️ | prefixed to every modules-menu label, to quoted module titles in `getProgressAdvice()` (`Modul "🗂️ Modul Eins"` — inside the quotes, matching the menu-label format), and used in the sessions and activities menus' back entries |
 | `session` | 📑 | prefixed to every sessions-menu label, to quoted session titles in `getProgressAdvice()`, and used in the activities menu's back entry |
 | `activity` | 🎯 | prefixed to every activities-menu label and to quoted activity titles in `getProgressAdvice()` |
 | `completed` | ✅ | appended to a completed item in a menu, and to a completed item's id in `$rsh_completionOverview` |
@@ -97,12 +97,12 @@ Menu items that are neither completed nor the next one get no status emoji — j
 
 ### Back entries
 
-The sessions and activities menus automatically append a back entry in the slot after their last item (which is why sessions and activities are capped at 8 per parent — see [structural limits](#how-content-is-structured) above):
+The sessions and activities menus automatically append back entries in the slots after their last item (which is why sessions are capped at 8 per module and activities at 7 per session — see [structural limits](#how-content-is-structured) above):
 
 - Sessions menu: `Ein anderes 🗂️ Modul wählen`, routing to the dialog id `allModulesMenu` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `allModulesMenu`**, or the back entry leads nowhere (a tap on an id without a matching dialog silently pauses the flow, see the [field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). Where the dialog lives doesn't matter — in our setup it is currently a sub-dialog of the *Einführung* dialog — only its id does. *(TODO: it probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; keeping it in the Einführung only reflects that that's where it is displayed first.)*
-- Activities menu: `Eine andere 📑 Session wählen`, routing to the parent module's own dialog.
+- Activities menu: `Eine andere 📑 Session wählen`, routing to the parent module's own dialog, followed by `Ein anderes 🗂️ Modul wählen`, routing to `allModulesMenu` just like the sessions menu's entry — so a participant can switch modules without hopping through the sessions menu first.
 
-A back tap needs no library command of its own — `enter('allModulesMenu')` is **never** called (doing so by mistake puts a dedicated "allModulesMenu must never be entered" message into `$rsh_error`). While the modules menu is displayed, the participant's tracked location simply stays in the previous context; it changes when the tapped entry's dialog runs its own `enter(…)` (entering a module clears the current session/activity as usual). The back entry never gets a level prefix or the ✅/👈 status emoji — its label is fixed. The modules menu has no back entry — it is already the top level.
+A back tap needs no library command of its own — `enter('allModulesMenu')` is **never** called (doing so by mistake puts a dedicated "allModulesMenu must never be entered" message into `$rsh_error`). While the modules menu is displayed, the participant's tracked location simply stays in the previous context; it changes when the tapped entry's dialog runs its own `enter(…)` (entering a module clears the current session/activity as usual). Back entries never get a level prefix or the ✅/👈 status emoji — their labels are fixed. The modules menu has no back entry — it is already the top level.
 
 ## Troubleshooting
 
