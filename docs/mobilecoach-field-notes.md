@@ -48,12 +48,12 @@ Observed (2026-07-10): when the tapped menu id (the content of `$participantNext
 
 Consequences:
 
-- Every id a menu can emit must have a dialog of exactly the same name — including the `modulesMenu` back-entry target introduced by decision #38. A typo'd dialog id is one more member of the silent-failure family (alongside undeclared variables): if a flow freezes right after a menu tap, compare the tapped id against the dialog ids first.
+- Every id a menu can emit must have a dialog of exactly the same name — including the `allModulesMenu` back-entry target introduced by decision #38 (as `modulesMenu`; renamed in decision #43). A typo'd dialog id is one more member of the silent-failure family (alongside undeclared variables): if a flow freezes right after a menu tap, compare the tapped id against the dialog ids first.
 - The considered alternative of intercepting the back tap in-dialog (no dedicated dialog) would technically be possible — the flow survives the unmatched id — but was rejected in decision #38 for another reason: the modules-menu block would be duplicated into every module dialog.
 
 ## Dialog skeleton: non-module dialogs around the real modules
 
 At the top level of the dialog structure, the *real* modules (those in the JSON data model, navigable via menus) are framed by two dialogs that look like modules in the editor but are not part of the state:
 
-- **Einführung** — entered once at app start, never navigable again afterwards; hosts the pre-questionnaire and, currently, the `modulesMenu` dialog as a sub-dialog (the module-selection menu the sessions menus' back entries route to — menu routing only cares about the dialog id, not where the dialog is nested). *(TODO: `modulesMenu` probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; it only sits in the Einführung because that's where it is displayed first.)*
+- **Einführung** — entered once at app start, never navigable again afterwards; hosts the pre-questionnaire and, currently, the `allModulesMenu` dialog as a sub-dialog (the module-selection menu the sessions menus' back entries route to — menu routing only cares about the dialog id, not where the dialog is nested). *(TODO: `allModulesMenu` probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; it only sits in the Einführung because that's where it is displayed first.)*
 - **Abschluss** — the counterpart at the end: participants re-take the same questionnaire (post). Like the Einführung, it is not in the JSON model and cannot be reached through the library's menus.

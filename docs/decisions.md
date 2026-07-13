@@ -331,6 +331,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 ## 38. Sessions and activities menus append an automatic back entry; `modulesMenu` is the reserved module-overview dialog id
 
 > Refined by #39: the labels are now `Ein anderes 🗂️ Modul wählen` / `Eine andere 📑 Session wählen`; routing and caps unchanged.
+> Refined by #43: the reserved id is renamed to `allModulesMenu`; everything else unchanged.
+> Refined by #44: `registerId` now rejects the reserved id by name after all — the case rule alone was judged too implicit.
 
 **Decision:** `populateMenuWithSessions()` appends `Zurück zur 🗂️ Modulauswahl` in the slot after the last session, routing to the module-overview dialog — the reserved id `modulesMenu`; the MobileCoach dialog that shows the modules menu must carry exactly that id. `populateMenuWithActivities()` appends `Zurück zu 🗂️ <module title>`, routing to the parent module's own dialog. `modulesMenu` is a pure routing target: `enter('modulesMenu')` is never called, and a dedicated guard rejects it with an explanatory error ("modulesMenu must never be entered: …") — the generic malformed-id message would mislead, since this is an id the library itself emits into the menu variables. To guarantee the back entry a free slot, state validation now caps sessions per module and activities per session at `MAX_MENU_SLOTS - 1` (8); modules stay capped at 9, since the top-level menu has no back entry.
 
@@ -365,3 +367,19 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** with the emoji outside, the quoted string was the bare title while the menus show `"<level emoji> <title>"` (#41) — the same item read differently in an advice sentence than on the button the participant is about to tap. Moving the emoji inside the quotes makes the quoted string identical to the menu label's stable prefix part, so advice text and menu visually name the same thing. **Rejected:** emoji both outside and inside — duplicates the emoji in every reference; dropping the emoji from advice texts entirely — loses the level cue exactly where the participant is told where to go next.
 
 **Watch for:** nothing new — message lengths are unchanged and no variables are affected.
+
+## 43. The reserved module-overview dialog id is `allModulesMenu` (was `modulesMenu`)
+
+**Decision:** The reserved id the sessions menu's back entry routes to (#38) is renamed from `modulesMenu` to `allModulesMenu` — in the emitted menu id, the `enter()` guard and its error message, and all docs. Everything else about #38 is unchanged: it remains a pure routing target that is never entered, and the MobileCoach dialog showing the module-selection menu must now carry exactly the id `allModulesMenu`.
+
+**Why:** the MobileCoach dialog structure has gained two similar menu dialogs, `allSessionsOfCurrentModuleMenu` and `allActivitiesOfCurrentSessionMenu`, and the `all…Menu` pattern keeps all three consistently named. Collision safety survives the rename even though the id now starts with a level letter (`a` for activities): `registerId` requires an uppercase letter after the level letter, and the second letter of `allModulesMenu` is lowercase. **Rejected:** keeping `modulesMenu` — one menu dialog named against the pattern of its two siblings is a standing invitation for typos; renaming the two new dialogs to the short pattern instead (`sessionsMenu`, `activitiesMenu`) — their names must express *whose* sessions/activities they list (the current module's/session's), which the short form drops.
+
+**Watch for:** the module-overview dialog in MobileCoach must be renamed to `allModulesMenu` before the next copy-over, or the sessions menus' back entries route to a no-longer-existing id — a tap then pauses the flow silently ([field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). The two sibling dialog names are MobileCoach-side only — the library emits neither.
+
+## 44. `registerId` rejects the reserved menu dialog id by name
+
+**Decision:** `registerId` rejects `allModulesMenu` (held in the `ALL_MODULES_MENU_DIALOG_ID` constant) with a dedicated error — "Id allModulesMenu is reserved for the dialog showing the module-selection menu and cannot be used as a state id" — before the naming-convention checks run. This refines #38, which concluded no reserved-word check was needed.
+
+**Why:** the collision safety was a coincidence of letter casing — the convention check (uppercase letter after the level letter) rejects the reserved id only because its second letter happens to be lowercase, a property nobody guards when the id is renamed (as #43 just did). And when the case rule does fire, its message complains about the id's *format*, misdescribing the actual conflict: the id is well-formed for a dialog, it is just reserved. The explicit check makes the guarantee deliberate and the error truthful. **Rejected:** relying on the case rule alone (the #38 position) — safe today, but implicit and wrongly worded when triggered; checking in each `fromJSON` instead — `registerId` is the single choke point every id already passes through.
+
+**Watch for:** nothing MobileCoach-side — the check runs at state load/registration only; no new variables, no emitted-value changes.
