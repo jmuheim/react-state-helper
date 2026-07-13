@@ -28,3 +28,4 @@ By moving the state logic into a single JavaScript snippet, all the "magic trick
 
 - 📜 **[Decision log](decisions.md)** — append-only, numbered design decisions with their rationale and rejected alternatives.
 - ❓ **[Open questions](open-questions.md)** — unresolved design questions, each with its current placeholder and what would settle it.
+- 🗒️ **[Backlog](backlog.md)** — intended work not yet started, roughly in sequence; items graduate into the decision log when they ship.

@@ -43,7 +43,7 @@ MobileCoach has no lifecycle for participant variables: once something is writte
 Consequences:
 
 - A variable's content answers "what was written *last*", never "is this current" — branching on a variable like `$participantNextMicroDialogIdentifier` outside its immediate context may act on a value left over from a much earlier interaction.
-- Any freshness guarantee has to come from our side: the library's always-write-every-run model (decision #19, reaffirmed in #37) is the countermeasure, not platform redundancy. This tension is central to the [null-init / direct-write open question](open-questions.md#invert-the-output-flow-pre-initialise-all-variables-to-null-commands-write-results-directly): the platform won't clean up after us, so whatever the script stops overwriting simply stays stale.
+- Any freshness guarantee has to come from our side: the library's always-write-every-run model (decision #19, reaffirmed in #37) is the countermeasure, not platform redundancy. This tension is central to the [null-init / direct-write backlog item](backlog.md#invert-the-output-flow-pre-initialise-all-variables-to-null-commands-write-results-directly): the platform won't clean up after us, so whatever the script stops overwriting simply stays stale.
 
 ## Moving between dialogs: cascading vs. jumping
 
@@ -54,7 +54,7 @@ Dialogs are containers of flow elements (messages, decision points, …), handle
 
 Unverified: what a **jump from within a cascade** does to the pending return chain — does the jump abandon the whole cascade (the stacked "go back" targets are dropped), or does the cascade's return still fire when the jumped-to dialog finishes? Needs a live test with a cascade at least two levels deep, jumping out of the innermost dialog.
 
-(Stub — a fuller write-up of dialog internals, rule sequencing, variable writes, and if/else trees is planned; see the [flow-export open question](open-questions.md#check-the-mobilecoach-flow-export-html-into-the-repo).)
+(Stub — a fuller write-up of dialog internals, rule sequencing, variable writes, and if/else trees is planned; see the [flow-export backlog item](backlog.md#check-the-mobilecoach-flow-export-html-into-the-repo).)
 
 ## Dialog ids and variable prefixes: both set from the same id
 
