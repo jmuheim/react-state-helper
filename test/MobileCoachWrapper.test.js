@@ -28,7 +28,7 @@ describe('MobileCoach deployment wrapper', () => {
   it('writes populated menu labels and ids as top-level keys (only those reach the MobileCoach variables)', () => {
     const o = runWrapper({ cmd: 'populateMenuWithModules()' });
     expect(o.rsh_status).toBe('success');
-    expect(o.rsh_menuLabel1).toBe('👉 Boundary Management');
+    expect(o.rsh_menuLabel1).toBe('🗂️ Boundary Management 👈');
     expect(o.rsh_menuId1).toBe('mBouMgt');
     expect(o.rsh_menuId2).toBe('mEmoReg');
     for (let i = 1; i <= 9; i++) {

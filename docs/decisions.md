@@ -169,6 +169,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 > Refined by #36: the `populateMenuFor…()` names introduced here are renamed `populateMenuWith…()` (plural).
 
+> Refined by #41: the label format becomes `"<level emoji> <title>[ <status emoji>]"` — the level emoji always prefixes the title, and the status markers (✅, 👈 instead of 👉) trail it.
+
 *(2026-07-08)*
 
 **Decision:** `getMenuLabel(slot)` returns only the display text `"<emoji> <title>"`; the new `getMenuId(slot)` returns the bare id. The wrapper writes `$jsStateHelperMenuId1`–`9` alongside `$jsStateHelperMenuLabel1`–`9` on every run (same `""`-reset behavior, see #19). The content editor concatenates the two per slot in the menu definition — `$jsStateHelperMenuLabel1:$jsStateHelperMenuId1` — so the `:` that MobileCoach splits on at tap time is added in MobileCoach, not in JS. Supersedes #11's `"<emoji> <title>:<id>"` label format. Because the methods now populate ids as well as labels, they were renamed `populateMenuForModule()` / `ForSession()` / `ForActivity()` (refines #10; nothing is deployed yet, so renaming `$jsStateHelperCmd` command strings is free).
@@ -355,3 +357,13 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** the 2026-07-13 idea-collection session stretched `docs/open-questions.md` to hold planned work — "Placeholder: not yet implemented" was the tell that two different contracts were being mixed, which would erode the open-questions file's usefulness as a list of actual unknowns. This is the `docs/roadmap.md` that #17 considered and skipped, whose revisit trigger ("if a multi-PR feature queue forms") has now fired: six queued items spanning multiple future PRs. **Rejected:** GitHub Issues — checkboxes, labels, and PR cross-linking for free, but they live outside the repo, are not versioned alongside the docs, and would split the source of truth against #18's docs-as-source-of-truth setup.
 
 **Watch for:** backlog items drifting into stale plans — each item's *Open design points* reflect what was known at write time; re-check them against the field notes and decision log when picking an item up. And the dividing line cuts both ways: a backlog item that turns out to hinge on an unknown should spawn an open question, not silently stall.
+
+## 41. Menu labels carry the level emoji as prefix; status markers trail the title
+
+*(2026-07-13)*
+
+**Decision:** Every menu label starts with its level emoji — 🗂️ for modules, 📑 for sessions, 🎯 for activities — giving the format `"<level emoji> <title>[ <status emoji>]"` (refines #20's `"<emoji> <title>"`). The status markers move from prefix to suffix: a completed item ends in ✅, the first not-yet-completed item ends in 👈 (flipped from 👉 so it points at its own label). Items that are neither get only the level prefix. Back entries keep their fixed labels from #39 (no level prefix, no status marker), and `getProgressAdvice()` texts are unchanged — they already carried the level emojis inline.
+
+**Why:** the level emojis appeared on every surface (advice texts, back entries) *except* the menu items themselves — a menu of bare titles didn't visually state what kind of thing is being chosen. Prefixing the level emoji also gives every label in a menu the same shape: previously the title's start position jumped right whenever a ✅/👉 prefix appeared. With the prefix slot taken by the level emoji, the status markers trail the title — consistent with the completion overview's marker-after-id convention (#34). **Rejected:** stacking both emojis in front (`✅ 🗂️ Titel`) — two emojis before the first word reads cluttered and the title offset still varies; keeping 👉 as the trailing marker — at the right edge a right-pointing hand points away from the label it marks.
+
+**Watch for:** every label is now longer by one emoji (two for marked items) — relevant if a MobileCoach length limit for menu buttons or variables ever surfaces (same unknown family as `$rsh_error`/`$rsh_completionOverview`). No new variables to declare; the existing `$rsh_menuLabel1`–`9` simply carry the new format.

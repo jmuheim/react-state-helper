@@ -41,7 +41,7 @@ Structural limits, checked when state loads: at most **9** modules (that's how m
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
    | `$rsh_completionOverview` | One-line snapshot of the whole completion state, for quick inspection: each module wraps its sessions in `[ ]`, each session its activities in `( )`, and every completed item carries ✅ right after its id — e.g. `mBouMgt[sBouIntro✅ sGesGre✅(aRolGes✅ aAbgKon✅) sPaus(aMikPau)]` |
    | `$rsh_progressAdvice` | Ready-to-display advice sentence about how to continue (see [`getProgressAdvice()`](developer-guide.md#flow-logic-commands)), refreshed on **every** run; `""` until a module has been entered |
-   | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<emoji> <title>"`) populated by `populateMenuWithModules()` / `populateMenuWithSessions()` / `populateMenuWithActivities()`; written on **every** run — any other command resets all slots to `""` |
+   | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<level emoji> <title>[ <status emoji>]"`) populated by `populateMenuWithModules()` / `populateMenuWithSessions()` / `populateMenuWithActivities()`; written on **every** run — any other command resets all slots to `""` |
    | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — updated automatically after every run (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
@@ -77,23 +77,23 @@ The library also offers **flow-logic commands** (completion booleans, progress n
 
 MobileCoach has no dynamic list constructs — menu entries are hard-coded in the flow. The workaround:
 
-1. Call one of the `populateMenuWith…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$rsh_menuLabel1`–`$rsh_menuLabel9` (display text, `"<emoji> <title>"`, e.g. `"✅ Emotionsregulation"`) and `$rsh_menuId1`–`$rsh_menuId9` (the matching id, e.g. `mEmoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
+1. Call one of the `populateMenuWith…()` commands (see cheat-sheet, mind the preconditions) **immediately before displaying the menu** — every other command resets all slots to `""`. It fills `$rsh_menuLabel1`–`$rsh_menuLabel9` (display text, `"<level emoji> <title>[ <status emoji>]"`, e.g. `"🗂️ Emotionsregulation ✅"`) and `$rsh_menuId1`–`$rsh_menuId9` (the matching id, e.g. `mEmoReg`); unused slots are set to `""` so MobileCoach can hide them. 9 slots is a hard maximum.
 2. In the menu definition, concatenate label and id per slot with a colon: `$rsh_menuLabel1:$rsh_menuId1`. MobileCoach splits on `:` — the **left** side is displayed to the participant, the **right** side (the id) is stored to the reserved variable `$participantNextMicroDialogIdentifier` when the button is tapped.
 3. MobileCoach reads that variable and navigates directly to the dialog with that id. Just make sure each module/session/activity id has a dialog of exactly the same name.
 
 > **Note:** titles must not contain a colon — state loading rejects them. MobileCoach performs the `:`-split on the raw menu definition text before variables are interpolated ([field note](mobilecoach-field-notes.md#menu-entries-split-on-the-raw-definition-text-not-on-variable-content)), so a colon inside a label would be displayed literally rather than corrupt the split; whether the validation can therefore be dropped is an [open question](open-questions.md#drop-the-title-colon-validation).
 
-Labels (and the advice text of the developer-facing [`getProgressAdvice()`](developer-guide.md#flow-logic-commands) command) are prefixed with an emoji from the `#EMOJIS` map in the source:
+Every menu label starts with the emoji of its level (`🗂️ <module title>`, `📑 <session title>`, `🎯 <activity title>`), and a status emoji may be appended after the title. All emojis come from the `#EMOJIS` map in the source:
 
 | Key | Emoji | Used for |
 |---|---|---|
-| `completed` | ✅ | a completed item in a menu, and prefixed to the current level's name in `getProgressAdvice()` |
-| `next` | 👉 | the first not-yet-completed item in a menu (menus only) |
-| `module` | 🗂️ | module references in `getProgressAdvice()` and the sessions menu's back entry |
-| `session` | 📑 | session references in `getProgressAdvice()` and the activities menu's back entry |
-| `activity` | 🎯 | activity references in `getProgressAdvice()` |
+| `module` | 🗂️ | prefixed to every modules-menu label, module references in `getProgressAdvice()`, and the sessions menu's back entry |
+| `session` | 📑 | prefixed to every sessions-menu label, session references in `getProgressAdvice()`, and the activities menu's back entry |
+| `activity` | 🎯 | prefixed to every activities-menu label and activity references in `getProgressAdvice()` |
+| `completed` | ✅ | appended to a completed item in a menu, and prefixed to the current level's name in `getProgressAdvice()` |
+| `next` | 👈 | appended to the first not-yet-completed item in a menu (menus only) |
 
-Menu items that are neither completed nor the next one get no emoji prefix.
+Menu items that are neither completed nor the next one get no status emoji — just the level prefix.
 
 ### Back entries
 
@@ -102,7 +102,7 @@ The sessions and activities menus automatically append a back entry in the slot 
 - Sessions menu: `Ein anderes 🗂️ Modul wählen`, routing to the dialog id `modulesMenu` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `modulesMenu`**, or the back entry leads nowhere (a tap on an id without a matching dialog silently pauses the flow, see the [field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). Where the dialog lives doesn't matter — in our setup it is currently a sub-dialog of the *Einführung* dialog — only its id does. *(TODO: it probably won't stay there — the plan is to move it into the "Magic Menu" dialog, since it is called again and again from within modules; keeping it in the Einführung only reflects that that's where it is displayed first.)*
 - Activities menu: `Eine andere 📑 Session wählen`, routing to the parent module's own dialog.
 
-A back tap needs no library command of its own — `enter('modulesMenu')` is **never** called (doing so by mistake puts a dedicated "modulesMenu must never be entered" message into `$rsh_error`). While the modules menu is displayed, the participant's tracked location simply stays in the previous context; it changes when the tapped entry's dialog runs its own `enter(…)` (entering a module clears the current session/activity as usual). The back entry never gets the ✅/👉 prefix. The modules menu has no back entry — it is already the top level.
+A back tap needs no library command of its own — `enter('modulesMenu')` is **never** called (doing so by mistake puts a dedicated "modulesMenu must never be entered" message into `$rsh_error`). While the modules menu is displayed, the participant's tracked location simply stays in the previous context; it changes when the tapped entry's dialog runs its own `enter(…)` (entering a module clears the current session/activity as usual). The back entry never gets a level prefix or the ✅/👈 status emoji — its label is fixed. The modules menu has no back entry — it is already the top level.
 
 ## Troubleshooting
 
