@@ -6,7 +6,7 @@ import { extractWrapperVariables, findUndocumentedVariables, findInvalidDollarSi
 // The MobileCoach platform constraints from CLAUDE.md, enforced against the source *text* —
 // violating them never breaks a unit test, only the deployed script (usually silently).
 const src = readFileSync(fileURLToPath(new URL('../src/ReactStateHelper.js', import.meta.url)), 'utf8');
-const doc = readFileSync(fileURLToPath(new URL('../docs/content-editor-guide.md', import.meta.url)), 'utf8');
+const doc = readFileSync(fileURLToPath(new URL('../docs/developer-guide.md', import.meta.url)), 'utf8');
 
 describe('MobileCoach platform constraints', () => {
   describe('self-containedness (the script is copy-pasted verbatim into MobileCoach)', () => {
@@ -20,12 +20,12 @@ describe('MobileCoach platform constraints', () => {
   });
 
   describe("script-editor validation on save (MobileCoach scans the raw text for $ signs — code, comments, everything — and rejects the save unless each one starts a declared variable; verified 2026-07-09: even '$-prefixed' in a comment was rejected)", () => {
-    it('every $ in the source starts a variable name documented in the content-editor guide', () => {
+    it('every $ in the source starts a variable name documented in the developer guide', () => {
       expect(findInvalidDollarSigns(src, doc)).toEqual([]);
     });
   });
 
-  describe('wrapper variables stay in sync with the variable table in docs/content-editor-guide.md', () => {
+  describe('wrapper variables stay in sync with the variable table in docs/developer-guide.md', () => {
     it('extraction finds the known wrapper variables (guards the check itself against silently going blind)', () => {
       const names = [...extractWrapperVariables(src)];
       for (const expected of [
@@ -42,7 +42,7 @@ describe('MobileCoach platform constraints', () => {
       }
     });
 
-    it('documents every wrapper variable in the content-editor guide (an undeclared variable fails silently in MobileCoach)', () => {
+    it('documents every wrapper variable in the developer guide (an undeclared variable fails silently in MobileCoach)', () => {
       expect(findUndocumentedVariables(src, doc)).toEqual([]);
     });
   });

@@ -20,8 +20,8 @@ By moving the state logic into a single JavaScript snippet, all the "magic trick
 
 ## Guides
 
-- ✏️ **[Content editor guide](content-editor-guide.md)** — for the people defining modules, sessions, and activities in MobileCoach: id conventions, the variables to declare (and the silent-failure gotcha), the editor-facing command cheat-sheet (enter, complete, populate menus), and menu/routing setup. No JavaScript knowledge required.
-- 🛠️ **[Developer guide](developer-guide.md)** — architecture, data model, state validation, the flow-logic commands (completion booleans, progress numbers, advice text), test setup, and the MobileCoach platform constraints that drive the design.
+- 🛠️ **[Developer guide](developer-guide.md)** — architecture, data model, state validation, the MobileCoach setup (variables to declare and the silent-failure gotcha, command cheat-sheet, menu/routing setup), the flow-logic commands (completion booleans, progress numbers, advice text), test setup, and the MobileCoach platform constraints that drive the design.
+- ✏️ **[Content editor guide](content-editor-guide.md)** — currently a stub pointing to the developer guide; a new, focused guide for the people defining content in MobileCoach is planned.
 - 📋 **[MobileCoach field notes](mobilecoach-field-notes.md)** — hands-on platform knowledge gathered while setting things up in MobileCoach: coach selection, debug coaches, rule regex behavior. Append new insights as they come up.
 
 ## Project records

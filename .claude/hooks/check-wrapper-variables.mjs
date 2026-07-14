@@ -1,6 +1,6 @@
 // Two deploy-safety checks for src/ReactStateHelper.js:
 // 1. Extracts every MobileCoach $variable the deployment wrapper reads or writes, and reports the
-//    ones missing from the variable table in docs/content-editor-guide.md. A variable that is used
+//    ones missing from the variable table in docs/developer-guide.md. A variable that is used
 //    by the script but not declared in MobileCoach makes the whole script fail silently (see
 //    "Variables" in docs/developer-guide.md), so a new one must never slip in undocumented.
 // 2. Reports every `$` in the source that doesn't start a documented variable name. When the script
@@ -50,7 +50,7 @@ export function findUndocumentedVariables(srcText, docText) {
 
 // Walks every `$` in the source and describes the ones MobileCoach's script editor would reject:
 // a `$` not followed by a variable name at all (`${…}`, `$-…`), or one naming a variable that is
-// not in the content-editor guide's table (and thus not declared in MobileCoach).
+// not in the developer guide's table (and thus not declared in MobileCoach).
 export function findInvalidDollarSigns(srcText, docText) {
   const problems = [];
   for (let i = srcText.indexOf('$'); i !== -1; i = srcText.indexOf('$', i + 1)) {
@@ -76,14 +76,14 @@ function main() {
 
   const root = new URL('../../', import.meta.url);
   const src = readFileSync(fileURLToPath(new URL('src/ReactStateHelper.js', root)), 'utf8');
-  const doc = readFileSync(fileURLToPath(new URL('docs/content-editor-guide.md', root)), 'utf8');
+  const doc = readFileSync(fileURLToPath(new URL('docs/developer-guide.md', root)), 'utf8');
   const messages = [];
 
   const missing = findUndocumentedVariables(src, doc);
   if (missing.length > 0) {
     messages.push(
-      `Wrapper variable(s) not documented in the variable table in docs/content-editor-guide.md: ${missing.map(n => `$${n}`).join(', ')}.\n` +
-      '1. Add them to the table in docs/content-editor-guide.md ("One-time MobileCoach setup").\n' +
+      `Wrapper variable(s) not documented in the variable table in docs/developer-guide.md: ${missing.map(n => `$${n}`).join(', ')}.\n` +
+      '1. Add them to the table in docs/developer-guide.md ("One-time MobileCoach setup").\n' +
       '2. Declare them in the MobileCoach project (default value 0, access "manageable by service") ' +
       'before deploying — an undeclared variable makes the script fail silently.'
     );

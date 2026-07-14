@@ -10,8 +10,8 @@ A plain JavaScript library for managing hierarchical app state (modules → sess
 
 Detailed documentation lives in `docs/`, published via GitHub Pages at https://jmuheim.github.io/react-state-helper/ — **the docs site is the source of truth**; this file and the README only keep essentials plus links. When a change makes a docs page stale, update the page.
 
-- `docs/developer-guide.md` — architecture, data model, state validation, flow-logic (query) commands, test setup, full MobileCoach platform constraints.
-- `docs/content-editor-guide.md` — MobileCoach setup for content editors (doer commands only: enter, complete, populate menus); contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/developer-guide.md` — architecture, data model, state validation, MobileCoach setup (doer commands, menu/routing setup), flow-logic (query) commands, test setup, full MobileCoach platform constraints; contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/content-editor-guide.md` — currently a stub pointing to the developer guide; a new, focused content editor guide is planned.
 - `docs/mobilecoach-field-notes.md` — hands-on MobileCoach platform knowledge (coach selection, debug coaches, rule regex behavior); **append new platform insights here** as they are learned, don't keep them only in conversation.
 
 ## Commands
@@ -37,7 +37,7 @@ Design decisions and their rationale (including rejected alternatives) live in `
 ## Pre-merge checklist
 
 - New/changed behavior has tests; `npm test` is green.
-- Any new wrapper variable is added to the variable table in `docs/content-editor-guide.md` **and** declared in MobileCoach (default `0`, access "manageable by service") before deploy.
+- Any new wrapper variable is added to the variable table in `docs/developer-guide.md` **and** declared in MobileCoach (default `0`, access "manageable by service") before deploy.
 - `src/ReactStateHelper.js` is still one self-contained script — enforced by `test/MobileCoachPlatformConstraints.test.js`.
 - README / CLAUDE.md / docs pages / `docs/decisions.md` are updated wherever the change makes them stale.
 
