@@ -45,6 +45,8 @@ Structural limits, checked when state loads: at most **9** modules (that's how m
    | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
    | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — updated automatically after every run (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
+3. Also declare `$debugBanner` — the one variable whose default is **not** `0`: its default value is the marker `⚠️ DEBUGGER INFO ⚠️`. The script never touches it; flows prepend it to every DEBUGGER-facing message (see the [debug coaches field note](mobilecoach-field-notes.md#coach-selection-and-debug-coaches)).
+
 **⚠️ The silent-failure gotcha:** If any variable is missing or has the wrong access setting, the script fails silently and halts the flow mid-conversation — with **no error output** whatsoever. This is extremely painful to debug. Before testing anything, double-check that *every* variable in the table above is declared with default value `0` and access "manageable by service".
 
 ## Running a command

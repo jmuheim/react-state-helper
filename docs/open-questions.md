@@ -1,6 +1,6 @@
 # Open questions
 
-Living document, unlike the append-only `docs/decisions.md`. Each item: what is unresolved, the current placeholder, and what resolves it. When one is settled, log the outcome in the decision log (via `/log-decision`) and delete the item here.
+Living document, unlike the append-only `docs/decisions.md`. Each item: what is unresolved, the current placeholder, and what resolves it. When one is settled, log the outcome in the decision log (via `/log-decision`) and delete the item here. Note the distinction from `docs/backlog.md`: an open question is something we **don't know enough about to decide**; work we have already decided we want to do is a backlog item.
 
 ## Richer diagnostics in `$rsh_error`
 

@@ -137,6 +137,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 **Considered and skipped, with revisit triggers:** Claude Code skills (CLAUDE.md is ~100 lines, far under the ~250-line split threshold, and the MobileCoach constraints are needed in nearly every session — revisit if CLAUDE.md outgrows that); a path-based skill-routing hook (no skills to route to); `docs/roadmap.md` (single-file library with a working feature-per-PR flow — revisit if a multi-PR feature queue forms); Dependabot (one devDependency, zero runtime dependencies, deployment is copy-paste); reviewer subagents (the suite runs in ~250 ms).
 
+> Refined by #38: the `docs/roadmap.md` revisit trigger fired (six queued items, 2026-07-13) — added as `docs/backlog.md`.
+
 ## 18. Documentation is published via plain GitHub Pages from `docs/`, and the docs site is the source of truth
 
 > Refined by #25: the command cheat-sheet is split by audience — the content editor guide keeps only the editor-facing doer commands; the query/flow-logic commands moved to the developer guide.
@@ -349,9 +351,19 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 **Watch for:** the labels still say "ein anderes/eine andere" even when only one module or session exists — harmless, but revisit if single-module coaches become the norm.
 
+## 40. Intended work lives in `docs/backlog.md`; open questions return to genuine unknowns only
+
+*(2026-07-13)*
+
+**Decision:** Added `docs/backlog.md`, a living document for intended-but-not-started work, ordered roughly by intended sequence. Each item carries **Today** (current state), **Open design points** (what still needs deciding inside the item), and **Done when** (completion criteria including the `/log-decision` graduation). `docs/open-questions.md` returns to its original contract — genuine unknowns with a placeholder — and its intro now states the dividing line: an open question is something we *don't know enough about to decide*; a backlog item is work we *have decided we want to do*. The six future-work ideas collected on 2026-07-13 (JSON extraction from the script, per-concern script split, `;`-batch commands, output-flow inversion, flow-export check-in, enter-helper dialogs) moved from open questions to the backlog.
+
+**Why:** the 2026-07-13 idea-collection session stretched `docs/open-questions.md` to hold planned work — "Placeholder: not yet implemented" was the tell that two different contracts were being mixed, which would erode the open-questions file's usefulness as a list of actual unknowns. This is the `docs/roadmap.md` that #17 considered and skipped, whose revisit trigger ("if a multi-PR feature queue forms") has now fired: six queued items spanning multiple future PRs. **Rejected:** GitHub Issues — checkboxes, labels, and PR cross-linking for free, but they live outside the repo, are not versioned alongside the docs, and would split the source of truth against #18's docs-as-source-of-truth setup.
+
+**Watch for:** backlog items drifting into stale plans — each item's *Open design points* reflect what was known at write time; re-check them against the field notes and decision log when picking an item up. And the dividing line cuts both ways: a backlog item that turns out to hinge on an unknown should spawn an open question, not silently stall.
+
 ## 41. Menu labels carry the level emoji as prefix; status markers trail the title
 
-*(2026-07-13 — numbered 41 because #40 is already claimed by the pending `docs/future-work-ideas` branch.)*
+*(2026-07-13)*
 
 > Refined by #42: in `getProgressAdvice()` texts the level emoji moves inside the quoted title, so the quoted string matches this entry's menu-label format.
 
@@ -410,3 +422,11 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** the old tail was wrong on two counts. "Zurückgehen" misdescribed the navigation model the same way the old back-entry labels did before #39 — nothing goes back, the participant *chooses* where to continue. And it named the very module the participant is already inside, offering a single exit where the activities menu shown in the same context offers two since #45: another session, another module. The new tail names exactly those two back entries, so advice and menu speak the same language — the same advice-matches-menu reasoning as #42, extended from item references to the continuation options. As a side benefit, the fixed wording drops the only variable-length tail at session level (the same overflow-safety point #39 made for the labels). **Rejected:** keeping "zurückgehen" with the module title — misleading on both counts above; naming only one of the two alternatives — undersells the menu the participant actually gets; quoting the back-entry labels verbatim in the sentence ("… oder "Eine andere 📑 Session wählen"") — imperative button labels don't inline grammatically into a sentence.
 
 **Watch for:** #39's single-module caveat now applies to advice too — "eine andere Session bzw. ein anderes Modul" reads oddly when only one module or session exists. The tail also assumes the participant sees a menu carrying both back entries; true wherever session-level advice is shown today, revisit if advice ever surfaces next to a menu that lacks them.
+
+## 48. Debug messages are prefixed with the MobileCoach-owned banner variable `$debugBanner`
+
+**Decision:** Every DEBUGGER-facing message in the flows starts with the content of `$debugBanner`, a variable owned by MobileCoach: declared there with the marker `⚠️ DEBUGGER INFO ⚠️` as its **default value** (not `0`), prepended to debug text elements on the flow side. The script does not write or read it today; it may interpolate it later if script-emitted debug messages ever need the marker. Shipped — this graduates the "Unify DEBUGGER messages behind a shared prefix variable" backlog item.
+
+**Why:** debug-only output (shown when `$coachName` matches `DEBUGGER.*`) must be instantly distinguishable from participant content, and the marker has to live in exactly one place so every message uses the identical string. **Rejected:** a script-owned `$rsh_debugPrefix` auto-written on every run — it would make the marker repo-versioned, but costs a wrapper variable and script involvement for what is a flow-side display concern, and has an availability gap: an auto-written banner exists only after the script has run at least once, while flows may show debug messages before any script run; a MobileCoach default value is there from the very start.
+
+**Watch for:** the marker string lives only in MobileCoach, unversioned — the field notes record its existence and exact value so it isn't tribal knowledge; keep that note current if the wording ever changes. Because of the `$`-scan on save, `$debugBanner` must stay declared before any script or pasted snippet mentions it literally. Still open, tracked with the enter-helper backlog item: whether the script's future DEBUGGER-guard messages interpolate `'$debugBanner'` themselves, and the misconfiguration guard for a banner left at default `'0'` (raise via `$rsh_error` instead of rendering debug messages with a bare `0`).
