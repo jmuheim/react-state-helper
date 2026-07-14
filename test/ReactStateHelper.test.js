@@ -350,13 +350,13 @@ describe('ReactStateHelper', () => {
 
     it('returns just the module id after entering a module but no session yet', () => {
       helper.enter('mMod1');
-      expect(helper.getParticipantLocation()).toBe('mMod1');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod1');
     });
 
     it('returns "moduleId: sessionId" after entering a module and session', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
-      expect(helper.getParticipantLocation()).toBe('mMod1: sSes1a');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod1: 📑sSes1a');
     });
 
     it('updates to the most recently entered module and session', () => {
@@ -364,14 +364,14 @@ describe('ReactStateHelper', () => {
       helper.enter('sSes1a');
       helper.enter('mMod2');
       helper.enter('sSes2a');
-      expect(helper.getParticipantLocation()).toBe('mMod2: sSes2a');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod2: 📑sSes2a');
     });
 
     it('appends the activity id once an activity has been entered', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
-      expect(helper.getParticipantLocation()).toBe('mMod1: sSes1a: aAct1a1');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod1: 📑sSes1a: 🎯aAct1a1');
     });
 
     it('drops the activity id again after entering a new session', () => {
@@ -379,7 +379,7 @@ describe('ReactStateHelper', () => {
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
       helper.enter('sSes1b');
-      expect(helper.getParticipantLocation()).toBe('mMod1: sSes1b');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod1: 📑sSes1b');
     });
 
     it('drops the session and activity ids after entering a new module', () => {
@@ -387,7 +387,7 @@ describe('ReactStateHelper', () => {
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
       helper.enter('mMod2');
-      expect(helper.getParticipantLocation()).toBe('mMod2');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod2');
     });
 
     it('drops the activity id but keeps the session id after re-entering the same session', () => {
@@ -395,7 +395,7 @@ describe('ReactStateHelper', () => {
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
       helper.enter('sSes1a');
-      expect(helper.getParticipantLocation()).toBe('mMod1: sSes1a');
+      expect(helper.getParticipantLocation()).toBe('🗂️mMod1: 📑sSes1a');
     });
 
     it('sets entered_first_at on first enter of a module and does not overwrite it', () => {
@@ -460,7 +460,7 @@ describe('ReactStateHelper', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.getParticipantLocation()).toBe('mMod1: sSes1a');
+      expect(restored.getParticipantLocation()).toBe('🗂️mMod1: 📑sSes1a');
     });
 
     it('throws if the moduleId does not exist', () => {
