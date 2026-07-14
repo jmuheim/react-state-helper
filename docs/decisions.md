@@ -333,6 +333,9 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 ## 38. Sessions and activities menus append an automatic back entry; `modulesMenu` is the reserved module-overview dialog id
 
 > Refined by #39: the labels are now `Ein anderes 🗂️ Modul wählen` / `Eine andere 📑 Session wählen`; routing and caps unchanged.
+> Refined by #43: the reserved id is renamed to `allModulesMenu`; everything else unchanged.
+> Refined by #44: `registerId` now rejects the reserved id by name after all — the case rule alone was judged too implicit.
+> Refined by #45: the activities menu appends a second back entry to the module overview; activities per session are capped at 7.
 
 **Decision:** `populateMenuWithSessions()` appends `Zurück zur 🗂️ Modulauswahl` in the slot after the last session, routing to the module-overview dialog — the reserved id `modulesMenu`; the MobileCoach dialog that shows the modules menu must carry exactly that id. `populateMenuWithActivities()` appends `Zurück zu 🗂️ <module title>`, routing to the parent module's own dialog. `modulesMenu` is a pure routing target: `enter('modulesMenu')` is never called, and a dedicated guard rejects it with an explanatory error ("modulesMenu must never be entered: …") — the generic malformed-id message would mislead, since this is an id the library itself emits into the menu variables. To guarantee the back entry a free slot, state validation now caps sessions per module and activities per session at `MAX_MENU_SLOTS - 1` (8); modules stay capped at 9, since the top-level menu has no back entry.
 
@@ -362,8 +365,60 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 *(2026-07-13)*
 
+> Refined by #42: in `getProgressAdvice()` texts the level emoji moves inside the quoted title, so the quoted string matches this entry's menu-label format.
+
 **Decision:** Every menu label starts with its level emoji — 🗂️ for modules, 📑 for sessions, 🎯 for activities — giving the format `"<level emoji> <title>[ <status emoji>]"` (refines #20's `"<emoji> <title>"`). The status markers move from prefix to suffix: a completed item ends in ✅, the first not-yet-completed item ends in 👈 (flipped from 👉 so it points at its own label). Items that are neither get only the level prefix. Back entries keep their fixed labels from #39 (no level prefix, no status marker), and `getProgressAdvice()` texts are unchanged — they already carried the level emojis inline.
 
 **Why:** the level emojis appeared on every surface (advice texts, back entries) *except* the menu items themselves — a menu of bare titles didn't visually state what kind of thing is being chosen. Prefixing the level emoji also gives every label in a menu the same shape: previously the title's start position jumped right whenever a ✅/👉 prefix appeared. With the prefix slot taken by the level emoji, the status markers trail the title — consistent with the completion overview's marker-after-id convention (#34). **Rejected:** stacking both emojis in front (`✅ 🗂️ Titel`) — two emojis before the first word reads cluttered and the title offset still varies; keeping 👉 as the trailing marker — at the right edge a right-pointing hand points away from the label it marks.
 
 **Watch for:** every label is now longer by one emoji (two for marked items) — relevant if a MobileCoach length limit for menu buttons or variables ever surfaces (same unknown family as `$rsh_error`/`$rsh_completionOverview`). No new variables to declare; the existing `$rsh_menuLabel1`–`9` simply carry the new format.
+
+## 42. Advice texts quote items in menu-label format: the level emoji sits inside the quotes
+
+**Decision:** In `getProgressAdvice()` texts, every quoted item reference carries its level emoji inside the quotes — `Modul "🗂️ Modul Eins"` instead of `🗂️ Modul "Modul Eins"`. This applies to all quoted references in the advice templates: the current item, the "oder zu … weitergehen/zurückgehen" target, and the "zum Beispiel mit …" sub-item example. Plural references without a quoted title (e.g. "weitere 📑 Sessions abschliessen") keep the emoji before the label word, since there is no title to attach it to. Refines #41, whose note said advice texts were unchanged.
+
+**Why:** with the emoji outside, the quoted string was the bare title while the menus show `"<level emoji> <title>"` (#41) — the same item read differently in an advice sentence than on the button the participant is about to tap. Moving the emoji inside the quotes makes the quoted string identical to the menu label's stable prefix part, so advice text and menu visually name the same thing. **Rejected:** emoji both outside and inside — duplicates the emoji in every reference; dropping the emoji from advice texts entirely — loses the level cue exactly where the participant is told where to go next.
+
+**Watch for:** nothing new — message lengths are unchanged and no variables are affected.
+
+## 43. The reserved module-overview dialog id is `allModulesMenu` (was `modulesMenu`)
+
+**Decision:** The reserved id the sessions menu's back entry routes to (#38) is renamed from `modulesMenu` to `allModulesMenu` — in the emitted menu id, the `enter()` guard and its error message, and all docs. Everything else about #38 is unchanged: it remains a pure routing target that is never entered, and the MobileCoach dialog showing the module-selection menu must now carry exactly the id `allModulesMenu`.
+
+**Why:** the MobileCoach dialog structure has gained two similar menu dialogs, `allSessionsOfCurrentModuleMenu` and `allActivitiesOfCurrentSessionMenu`, and the `all…Menu` pattern keeps all three consistently named. Collision safety survives the rename even though the id now starts with a level letter (`a` for activities): `registerId` requires an uppercase letter after the level letter, and the second letter of `allModulesMenu` is lowercase. **Rejected:** keeping `modulesMenu` — one menu dialog named against the pattern of its two siblings is a standing invitation for typos; renaming the two new dialogs to the short pattern instead (`sessionsMenu`, `activitiesMenu`) — their names must express *whose* sessions/activities they list (the current module's/session's), which the short form drops.
+
+**Watch for:** the module-overview dialog in MobileCoach must be renamed to `allModulesMenu` before the next copy-over, or the sessions menus' back entries route to a no-longer-existing id — a tap then pauses the flow silently ([field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). The two sibling dialog names are MobileCoach-side only — the library emits neither.
+
+## 44. `registerId` rejects the reserved menu dialog id by name
+
+**Decision:** `registerId` rejects `allModulesMenu` (held in the `ALL_MODULES_MENU_DIALOG_ID` constant) with a dedicated error — "Id allModulesMenu is reserved for the dialog showing the module-selection menu and cannot be used as a state id" — before the naming-convention checks run. This refines #38, which concluded no reserved-word check was needed.
+
+**Why:** the collision safety was a coincidence of letter casing — the convention check (uppercase letter after the level letter) rejects the reserved id only because its second letter happens to be lowercase, a property nobody guards when the id is renamed (as #43 just did). And when the case rule does fire, its message complains about the id's *format*, misdescribing the actual conflict: the id is well-formed for a dialog, it is just reserved. The explicit check makes the guarantee deliberate and the error truthful. **Rejected:** relying on the case rule alone (the #38 position) — safe today, but implicit and wrongly worded when triggered; checking in each `fromJSON` instead — `registerId` is the single choke point every id already passes through.
+
+**Watch for:** nothing MobileCoach-side — the check runs at state load/registration only; no new variables, no emitted-value changes.
+
+## 45. The activities menu carries a second back entry to the module overview; activities are capped at 7 per session
+
+> Refined by #46: the session back entry now routes to the reserved `allSessionsOfCurrentModuleMenu` dialog id instead of the parent module's own dialog.
+
+**Decision:** `populateMenuWithActivities()` appends `Ein anderes 🗂️ Modul wählen` (routing to `allModulesMenu`) in the slot after its existing `Eine andere 📑 Session wählen` back entry — the same label/target the sessions menu emits (#39, #43). The activities menu thus ends in two back entries: choose another session, choose another module. To guarantee both a free slot, state validation caps activities per session at `MAX_MENU_SLOTS - 2` (7, was 8); sessions per module stay capped at 8, modules at 9. Refines #38.
+
+**Why:** from an activities menu, reaching a different module took two hops — back to the sessions menu (via the parent module's dialog), then back again to the module overview. A participant deep in one module who wants to switch modules is a normal navigation move, and menus are the only navigation surface (#38), so the shortcut belongs in the menu. Ordering puts the nearer level first: session (one level up) before module (two levels up). Like the sessions menu's entry, it is a pure routing target — no library command runs on tap, the location changes when the target module's dialog enters itself. **Rejected:** keeping the two-hop route — works, but costs a full dialog round-trip through the module dialog just to render another menu; appending the module entry only when a slot happens to be free — the same silently-disappearing-entry trap #38 already rejected for the first back entry.
+
+**Watch for:** state definitions with 8 activities in a session now fail validation (fine — nothing is deployed yet, the MobileCoach copy-over is testing-only). The `allModulesMenu` dialog-naming requirement (#43) now matters for activities menus too: if the dialog is misnamed, taps on this entry pause the flow silently.
+
+## 46. The activities menu's session back entry routes to the reserved `allSessionsOfCurrentModuleMenu` dialog id
+
+**Decision:** `populateMenuWithActivities()` no longer points `Eine andere 📑 Session wählen` at the parent module's own dialog; it emits the new reserved dialog id `allSessionsOfCurrentModuleMenu` (constant `ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID`) — the MobileCoach dialog that shows the current module's session-selection menu, i.e. the one calling `populateMenuWithSessions()`. Like `allModulesMenu` (#43) it is a pure routing target: `enter()` rejects it with a dedicated guard, and `registerId` rejects it as a state id by name (#44). Refines #45.
+
+**Why:** routing through the module's own dialog re-runs that dialog's `enter(<module id>)`, which bumps the module's `times_entered` and timestamps just to re-render a menu the participant was already inside — polluting usage data with navigation noise — and replays whatever content the module dialog carries before its menu. A dedicated menu dialog shows the sessions menu and nothing else, exactly how the module overview already works (#38, #43); the participant's tracked location now also stays in the previous context while the sessions menu is displayed, matching the modules-menu semantics instead of silently clearing the current session. **Rejected:** keeping the module's dialog as target (the #45 wiring) — see above; teaching `enter()` not to count back-navigation — impossible, the library cannot distinguish a back tap from a genuine module entry, both arrive as a plain dialog navigation.
+
+**Watch for:** a dialog named exactly `allSessionsOfCurrentModuleMenu` (calling `populateMenuWithSessions()`) must exist in MobileCoach, or session back taps pause the flow silently — the same misnaming trap as #43/#45, now on a second dialog. No new variables.
+
+## 47. Session-level advice tails mirror the activities menu's two back entries
+
+**Decision:** The session-level `getProgressAdvice()` messages (adequate-progress and session-complete) end with `, oder eine andere 📑 Session bzw. ein anderes 🗂️ Modul wählen.` instead of `, oder zu Modul "🗂️ <current module>" zurückgehen.`. Module-level messages are unchanged (`, oder zu Modul "🗂️ <next module>" weitergehen.`, or the "und das gilt auch für alle anderen Module" variant when no module follows). Internally, `#buildProgressAdviceString` now takes a pre-built `skipPart` string from its callers instead of a `next` target plus `nextVerb` — the new tail names two alternatives and no title, which the old template could not express; `null` still selects the all-covered variant.
+
+**Why:** the old tail was wrong on two counts. "Zurückgehen" misdescribed the navigation model the same way the old back-entry labels did before #39 — nothing goes back, the participant *chooses* where to continue. And it named the very module the participant is already inside, offering a single exit where the activities menu shown in the same context offers two since #45: another session, another module. The new tail names exactly those two back entries, so advice and menu speak the same language — the same advice-matches-menu reasoning as #42, extended from item references to the continuation options. As a side benefit, the fixed wording drops the only variable-length tail at session level (the same overflow-safety point #39 made for the labels). **Rejected:** keeping "zurückgehen" with the module title — misleading on both counts above; naming only one of the two alternatives — undersells the menu the participant actually gets; quoting the back-entry labels verbatim in the sentence ("… oder "Eine andere 📑 Session wählen"") — imperative button labels don't inline grammatically into a sentence.
+
+**Watch for:** #39's single-module caveat now applies to advice too — "eine andere Session bzw. ein anderes Modul" reads oddly when only one module or session exists. The tail also assumes the participant sees a menu carrying both back entries; true wherever session-level advice is shown today, revisit if advice ever surfaces next to a menu that lacks them.

@@ -17,3 +17,11 @@ MobileCoach splits menu entries on the raw definition text before variable inter
 - **Placeholder:** keep the validation — colons in titles are still rejected at state load.
 - **Why open:** dropping it is a behavior change that deserves its own decision (and maybe titles with colons are undesirable for readability anyway); also, the observation used a lone variable without an id part, so a confirming live test with the full `label:id` construct wouldn't hurt.
 - **Resolved by:** deciding keep-vs-drop, logging it via `/log-decision`, and (if dropped) removing `validateTitle()` and its tests.
+
+## Rename the default branch `master` → `main`
+
+The repo was initialized locally (git's own default is still `master`; GitHub's `main` default only applies to repos created on github.com). Purely cosmetic, but `main` is the current convention, and the rename gets more expensive as automation accretes around the name.
+
+- **Placeholder:** stay on `master`.
+- **Why open:** low priority; needs one deliberate pass rather than a piecemeal change.
+- **Resolved by:** using GitHub's branch rename (retargets PRs, redirects URLs, updates the Pages source), then in the same pass: update `branches: [master]` in `.github/workflows/test.yml`, verify/rename the `protect-master` ruleset, rewrite `.claude/commands/push-to-master.md` (→ `/push-to-main`), update `blob/master/` links in `docs/developer-guide.md` and `docs/content-editor-guide.md` plus `master` mentions in CLAUDE.md (decision-log entries stay as historical record), rename local branches, and verify CI, Pages, and the ruleset still work. Logged via `/log-decision` either way (rename or deliberate keep).

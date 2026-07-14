@@ -490,8 +490,12 @@ describe('ReactStateHelper', () => {
       expect(state.currentActivityId).toBeNull();
     });
 
-    it('throws a dedicated error for the modulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
-      expect(() => helper.enter('modulesMenu')).toThrow('modulesMenu must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
+    it('throws a dedicated error for the allModulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
+      expect(() => helper.enter('allModulesMenu')).toThrow('allModulesMenu must never be entered: it only routes to the dialog that shows the module-selection menu, which leaves the location unchanged — the location changes when the participant taps a module and that dialog runs enter with its own id');
+    });
+
+    it('throws a dedicated error for the allSessionsOfCurrentModuleMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
+      expect(() => helper.enter('allSessionsOfCurrentModuleMenu')).toThrow('allSessionsOfCurrentModuleMenu must never be entered: it only routes to the dialog that shows the session-selection menu of the current module, which leaves the location unchanged — the location changes when the participant taps a session and that dialog runs enter with its own id');
     });
 
     it('entering a session resets currentActivityId', () => {
@@ -635,7 +639,7 @@ describe('ReactStateHelper', () => {
     it('appends a back-to-module-overview entry in the slot after the last session', () => {
       helper.populateMenuWithSessions();
       expect(helper.getMenuLabel(4)).toBe('Ein anderes 🗂️ Modul wählen');
-      expect(helper.getMenuId(4)).toBe('modulesMenu');
+      expect(helper.getMenuId(4)).toBe('allModulesMenu');
     });
 
     it('fills unused slots with empty string', () => {
@@ -706,15 +710,21 @@ describe('ReactStateHelper', () => {
       expect(helper.getMenuId(2)).toBe('aAct1a2');
     });
 
-    it('appends a back-to-parent-module entry in the slot after the last activity', () => {
+    it('appends a back-to-sessions-menu entry in the slot after the last activity', () => {
       helper.populateMenuWithActivities();
       expect(helper.getMenuLabel(3)).toBe('Eine andere 📑 Session wählen');
-      expect(helper.getMenuId(3)).toBe('mMod1');
+      expect(helper.getMenuId(3)).toBe('allSessionsOfCurrentModuleMenu');
+    });
+
+    it('appends a back-to-module-overview entry in the slot after the session back entry', () => {
+      helper.populateMenuWithActivities();
+      expect(helper.getMenuLabel(4)).toBe('Ein anderes 🗂️ Modul wählen');
+      expect(helper.getMenuId(4)).toBe('allModulesMenu');
     });
 
     it('fills unused slots with empty string', () => {
       helper.populateMenuWithActivities();
-      for (let i = 4; i <= 9; i++) {
+      for (let i = 5; i <= 9; i++) {
         expect(helper.getMenuLabel(i)).toBe('');
         expect(helper.getMenuId(i)).toBe('');
       }
@@ -760,20 +770,20 @@ describe('ReactStateHelper', () => {
         });
 
         it('returns a start-with message when no session has been entered yet', () => {
-          expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 📑 Sessions in 🗂️ Modul "Modul Eins".');
+          expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 📑 Sessions in Modul "🗂️ Modul Eins".');
         });
 
         it('returns a keep-going message when some sessions done but below threshold (mMod3: threshold 2)', () => {
           helper.enter('mMod3');
           helper.enter('sSes3a'); helper.enter('aAct3a1'); helper.completeActivity();
           helper.enter('mMod3');
-          expect(helper.getProgressAdvice()).toBe('Mach weiter in 🗂️ Modul "Modul Drei" — zum Beispiel mit 📑 Session "Session Drei B".');
+          expect(helper.getProgressAdvice()).toBe('Mach weiter in Modul "🗂️ Modul Drei" — zum Beispiel mit Session "📑 Session Drei B".');
         });
 
         it('returns good-progress message when threshold met but sessions remain', () => {
           helper.enter('sSes1a'); helper.enter('aAct1a1'); helper.completeActivity(); helper.enter('aAct1a2'); helper.completeActivity();
           helper.enter('mMod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschliessen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in Modul "🗂️ Modul Eins" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 📑 Sessions abschliessen, oder zu Modul "🗂️ Modul Zwei" weitergehen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -781,7 +791,7 @@ describe('ReactStateHelper', () => {
           helper.enter('mMod1');
           helper.enter('sSes1b'); helper.enter('aAct1b1'); helper.completeActivity();
           helper.enter('mMod1');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Eins" erfolgreich abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Zwei" weitergehen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast Modul "🗂️ Modul Eins" erfolgreich abgeschlossen. Die enthaltenen Sessions kannst du jederzeit erneut besuchen, oder zu Modul "🗂️ Modul Zwei" weitergehen.');
         });
       });
 
@@ -792,7 +802,7 @@ describe('ReactStateHelper', () => {
           helper.enter('mMod3');
           helper.enter('sSes3b'); helper.enter('aAct3b1'); helper.completeActivity();
           helper.enter('mMod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast in 🗂️ Modul "Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschliessen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast in Modul "🗂️ Modul Drei" ausreichend Fortschritt gemacht — und das gilt auch für alle anderen Module. Du kannst bleiben und weitere 📑 Sessions abschliessen.');
         });
 
         it('returns all-completed message when all sessions are done', () => {
@@ -803,7 +813,7 @@ describe('ReactStateHelper', () => {
           helper.enter('mMod3');
           helper.enter('sSes3c'); helper.enter('aAct3c1'); helper.completeActivity();
           helper.enter('mMod3');
-          expect(helper.getProgressAdvice()).toBe('Du hast 🗂️ Modul "Modul Drei" erfolgreich abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
+          expect(helper.getProgressAdvice()).toBe('Du hast Modul "🗂️ Modul Drei" erfolgreich abgeschlossen — und das gilt auch für alle anderen Module. Die enthaltenen Sessions kannst du jederzeit erneut besuchen.');
         });
       });
     });
@@ -812,28 +822,28 @@ describe('ReactStateHelper', () => {
       it('returns a start-with message when no activity has been entered yet', () => {
         helper.enter('mMod1');
         helper.enter('sSes1a');
-        expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 🎯 Aktivitäten in 📑 Session "Session Eins A".');
+        expect(helper.getProgressAdvice()).toBe('Beginne mit einer der verfügbaren 🎯 Aktivitäten in Session "📑 Session Eins A".');
       });
 
       it('returns a keep-going message when an activity is done but below threshold (sSes2b: threshold 2)', () => {
         helper.enter('mMod2');
         helper.enter('sSes2b');
         helper.enter('aAct2b1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Mach weiter in 📑 Session "Session Zwei B" — zum Beispiel mit 🎯 Aktivität "Aktivität 2b-2".');
+        expect(helper.getProgressAdvice()).toBe('Mach weiter in Session "📑 Session Zwei B" — zum Beispiel mit Aktivität "🎯 Aktivität 2b-2".');
       });
 
       it('returns an adequate-progress message once the threshold is met but not all activities are done (sSes1a: threshold 1, 2 activities)', () => {
         helper.enter('mMod1');
         helper.enter('sSes1a');
         helper.enter('aAct1a1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Du hast in 📑 Session "Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder zu 🗂️ Modul "Modul Eins" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast in Session "📑 Session Eins A" ausreichend Fortschritt gemacht. Du kannst bleiben und weitere 🎯 Aktivitäten abschliessen, oder eine andere 📑 Session bzw. ein anderes 🗂️ Modul wählen.');
       });
 
       it('returns a session-complete message when all activities are done (sSes3a: threshold 1, 1 activity)', () => {
         helper.enter('mMod3');
         helper.enter('sSes3a');
         helper.enter('aAct3a1'); helper.completeActivity();
-        expect(helper.getProgressAdvice()).toBe('Du hast 📑 Session "Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder zu 🗂️ Modul "Modul Drei" zurückgehen.');
+        expect(helper.getProgressAdvice()).toBe('Du hast Session "📑 Session Drei A" erfolgreich abgeschlossen. Die enthaltenen Aktivitäten kannst du jederzeit erneut besuchen, oder eine andere 📑 Session bzw. ein anderes 🗂️ Modul wählen.');
       });
     });
   });
@@ -930,6 +940,18 @@ describe('ReactStateHelper', () => {
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id mBou_Mgt must start with "m" followed by an uppercase letter, and contain only letters and numbers');
     });
 
+    it('throws a dedicated error when a state id uses the reserved allModulesMenu dialog id', () => {
+      const state = minimalValidState();
+      state.modules[0].id = 'allModulesMenu';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id allModulesMenu is reserved for the dialog showing the module-selection menu and cannot be used as a state id');
+    });
+
+    it('throws a dedicated error when a state id uses the reserved allSessionsOfCurrentModuleMenu dialog id', () => {
+      const state = minimalValidState();
+      state.modules[0].id = 'allSessionsOfCurrentModuleMenu';
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Id allSessionsOfCurrentModuleMenu is reserved for the dialog showing the session-selection menu of the current module and cannot be used as a state id');
+    });
+
     it('throws when a module threshold exceeds its own session count', () => {
       const state = minimalValidState();
       state.modules[0].sessions_needed_for_adequate_progress = 2;
@@ -1014,10 +1036,10 @@ describe('ReactStateHelper', () => {
       expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Module mM1 has 9 sessions, but at most 8 are supported (one menu slot is reserved for the back entry)');
     });
 
-    it('throws when a session has more than 8 activities (one menu slot is reserved for the back entry)', () => {
+    it('throws when a session has more than 7 activities (two menu slots are reserved for the back entries)', () => {
       const state = minimalValidState();
-      state.modules[0].sessions[0].activities = Array.from({ length: 9 }, (_, i) => ({ id: `aA${i}`, title: `A${i}` }));
-      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session sS1 has 9 activities, but at most 8 are supported (one menu slot is reserved for the back entry)');
+      state.modules[0].sessions[0].activities = Array.from({ length: 8 }, (_, i) => ({ id: `aA${i}`, title: `A${i}` }));
+      expect(() => ReactStateHelper.loadExistingState(JSON.stringify(state))).toThrow('Session sS1 has 8 activities, but at most 7 are supported (two menu slots are reserved for the back entries)');
     });
 
     it('throws when a module title contains a colon', () => {
