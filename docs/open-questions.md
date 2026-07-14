@@ -18,6 +18,14 @@ MobileCoach splits menu entries on the raw definition text before variable inter
 - **Why open:** dropping it is a behavior change that deserves its own decision (and maybe titles with colons are undesirable for readability anyway); also, the observation used a lone variable without an id part, so a confirming live test with the full `label:id` construct wouldn't hurt.
 - **Resolved by:** deciding keep-vs-drop, logging it via `/log-decision`, and (if dropped) removing `validateTitle()` and its tests.
 
+## Should back entries carry a level prefix / status emoji?
+
+Back-entry labels are currently fixed plain text (`Ein anderes 🗂️ Modul wählen`, `Eine andere 📑 Session wählen`) — unlike regular menu items, they get no level-emoji prefix and no ✅/👈 status emoji.
+
+- **Placeholder:** keep the labels fixed and unadorned.
+- **Why open:** it is unclear whether a visual marker (e.g. a back arrow, or the target level's emoji as prefix) would help participants distinguish back entries from content entries, or just add noise.
+- **Resolved by:** deciding a label format for back entries (possibly after observing participants), logging it via `/log-decision`, and adjusting the label constants and tests if it changes.
+
 ## Rename the default branch `master` → `main`
 
 The repo was initialized locally (git's own default is still `master`; GitHub's `main` default only applies to repos created on github.com). Purely cosmetic, but `main` is the current convention, and the rename gets more expensive as automation accretes around the name.

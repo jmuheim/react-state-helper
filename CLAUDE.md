@@ -10,7 +10,8 @@ A plain JavaScript library for managing hierarchical app state (modules → sess
 
 Detailed documentation lives in `docs/`, published via GitHub Pages at https://jmuheim.github.io/react-state-helper/ — **the docs site is the source of truth**; this file and the README only keep essentials plus links. When a change makes a docs page stale, update the page.
 
-- `docs/developer-guide.md` — architecture, data model, state validation, MobileCoach setup (doer commands, menu/routing setup), flow-logic (query) commands, test setup, full MobileCoach platform constraints; contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/developer-guide.md` — architecture, data model, state validation, MobileCoach setup (doer commands, menu/routing setup), test setup; contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/mobilecoach-platform-constraints.md` — the full MobileCoach platform constraints that drive most design decisions.
 - `docs/content-editor-guide.md` — currently a stub pointing to the developer guide; a new, focused content editor guide is planned.
 - `docs/mobilecoach-field-notes.md` — hands-on MobileCoach platform knowledge (coach selection, debug coaches, rule regex behavior); **append new platform insights here** as they are learned, don't keep them only in conversation.
 
@@ -58,7 +59,7 @@ Test setup: `vitest.config.js` lists `src/ReactStateHelper.js` as a `setupFile`,
 
 ## MobileCoach constraints (essentials)
 
-Full section in `docs/developer-guide.md` — these constraints drive most design decisions:
+Full page in `docs/mobilecoach-platform-constraints.md` — these constraints drive most design decisions:
 
 - The deployed artifact is one self-contained script: no `import`/`export`, no Node.js globals (`process` is used to detect Node vs. MobileCoach).
 - Every `$variable` the script might write must be pre-declared in MobileCoach (default `0`, access "manageable by service") — a missing one makes the script **fail silently mid-flow**.
