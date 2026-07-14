@@ -30,6 +30,7 @@ Project-specific slash commands, defined in [`.claude/commands/`](.claude/comman
 
 | Command | What it does | When to use |
 |---|---|---|
+| `/alt-text` | Writes concise alt text for the image reference on the currently selected line and moves the image into `docs/images/` | After pasting a screenshot into a docs page — select its line first |
 | `/commit` | Runs the tests, commits, and on a PR branch brings the PR title and description up to date in the same pass | Every commit (also triggered by asking for a commit in plain words) |
 | `/log-decision` | Appends a numbered entry to [`docs/decisions.md`](docs/decisions.md) and propagates it to affected docs | Whenever a design decision is made — before it gets lost in conversation |
 | `/push-to-master` | Pushes local master commits directly to origin by temporarily bypassing the `protect-master` ruleset, then restores protection | Small changes (typo/doc fixes) where a PR is overhead |
