@@ -73,6 +73,9 @@ They are issued the same way as every other command — set `$rsh_cmd`, run the 
 
 | Command (value of `$rsh_cmd`) | Preconditions | Returns |
 |---|---|---|
+| `getCurrentModuleTimesEntered()` | — | How many times the current module has been entered, or `null` while no module is entered. Also written automatically to `$rsh_moduleTimesEntered` on **every** run (`""` instead of `null`), so flows can branch on it without issuing the command |
+| `getCurrentSessionTimesEntered()` | — | Same for the current session (auto-written to `$rsh_sessionTimesEntered`); `null`/`""` while no session is current — entering a module clears the current session |
+| `getCurrentActivityTimesEntered()` | — | Same for the current activity (auto-written to `$rsh_activityTimesEntered`); `null`/`""` while no activity is current — entering a module or session clears the current activity |
 | `getModuleProgress('mBouMgt')` | — | That module's progress as a number between 0 and 1 |
 | `getProgressAdvice()` | module entered (session optional — advice adapts to the deepest entered level) | A ready-to-display Swiss German advice sentence about how to continue. Also written automatically to `$rsh_progressAdvice` on **every** run (`""` while no module is entered), so flows can display it without issuing the command |
 | `hasModuleAdequateProgress('mBouMgt')` | — | `true` once the module has adequate progress (threshold, not full completion) |

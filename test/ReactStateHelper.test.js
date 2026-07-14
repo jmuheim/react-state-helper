@@ -507,6 +507,50 @@ describe('ReactStateHelper', () => {
     });
   });
 
+  describe('getCurrentModuleTimesEntered / getCurrentSessionTimesEntered / getCurrentActivityTimesEntered', () => {
+    it('returns null on all levels before anything is entered', () => {
+      expect(helper.getCurrentModuleTimesEntered()).toBeNull();
+      expect(helper.getCurrentSessionTimesEntered()).toBeNull();
+      expect(helper.getCurrentActivityTimesEntered()).toBeNull();
+    });
+
+    it('returns the count for each entered level and null below the deepest entered level', () => {
+      helper.enter('mMod1');
+      expect(helper.getCurrentModuleTimesEntered()).toBe(1);
+      expect(helper.getCurrentSessionTimesEntered()).toBeNull();
+      expect(helper.getCurrentActivityTimesEntered()).toBeNull();
+      helper.enter('sSes1a');
+      expect(helper.getCurrentSessionTimesEntered()).toBe(1);
+      expect(helper.getCurrentActivityTimesEntered()).toBeNull();
+      helper.enter('aAct1a1');
+      expect(helper.getCurrentActivityTimesEntered()).toBe(1);
+    });
+
+    it('counts repeated enters of the same item', () => {
+      helper.enter('mMod1');
+      helper.enter('mMod1');
+      helper.enter('mMod1');
+      expect(helper.getCurrentModuleTimesEntered()).toBe(3);
+    });
+
+    it('returns the new current item\'s own count after switching, not the previous one\'s', () => {
+      helper.enter('mMod1');
+      helper.enter('mMod1');
+      helper.enter('mMod2');
+      expect(helper.getCurrentModuleTimesEntered()).toBe(1);
+    });
+
+    it('returns null for session and activity again after re-entering a module (which clears them)', () => {
+      helper.enter('mMod1');
+      helper.enter('sSes1a');
+      helper.enter('aAct1a1');
+      helper.enter('mMod1');
+      expect(helper.getCurrentModuleTimesEntered()).toBe(2);
+      expect(helper.getCurrentSessionTimesEntered()).toBeNull();
+      expect(helper.getCurrentActivityTimesEntered()).toBeNull();
+    });
+  });
+
   describe('entering an activity', () => {
     beforeEach(() => {
       helper.enter('mMod1');
