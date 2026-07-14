@@ -496,6 +496,24 @@ class ReactStateHelper {
     return this.#findActivity(this.#state.currentActivityId).times_entered;
   }
 
+  // Whether the participant's current module is completed — null while no module is entered
+  // (same null pattern as the times-entered getters above, so the deployment wrapper can call
+  // it on every run without a guard). Same pattern for the session and activity variants below.
+  isCurrentModuleCompleted() {
+    if (!this.#state.currentModuleId) return null;
+    return this.#findModule(this.#state.currentModuleId).isCompleted();
+  }
+
+  isCurrentSessionCompleted() {
+    if (!this.#state.currentSessionId) return null;
+    return this.#findSession(this.#state.currentSessionId).isCompleted();
+  }
+
+  isCurrentActivityCompleted() {
+    if (!this.#state.currentActivityId) return null;
+    return this.#findActivity(this.#state.currentActivityId).isCompleted();
+  }
+
   // One-line snapshot of the whole completion state, meant for quick inspection inside MobileCoach:
   // each module wraps its sessions in [ ], each non-intro session wraps its activities in ( ), every
   // id carries its level emoji directly in front (no space, unlike menu labels — the ids are compact
@@ -747,6 +765,12 @@ if (typeof process === 'undefined') {
   let sessionTimesEntered = helper ? helper.getCurrentSessionTimesEntered() : null;
   let activityTimesEntered = helper ? helper.getCurrentActivityTimesEntered() : null;
 
+  // Whether the participant's current module/session/activity is completed — null while the
+  // corresponding level has no current item (never entered, or reset by entering a higher level).
+  let moduleCompleted = helper ? helper.isCurrentModuleCompleted() : null;
+  let sessionCompleted = helper ? helper.isCurrentSessionCompleted() : null;
+  let activityCompleted = helper ? helper.isCurrentActivityCompleted() : null;
+
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
@@ -760,6 +784,10 @@ if (typeof process === 'undefined') {
     rsh_moduleTimesEntered:   moduleTimesEntered === null ? '' : moduleTimesEntered,
     rsh_sessionTimesEntered:  sessionTimesEntered === null ? '' : sessionTimesEntered,
     rsh_activityTimesEntered: activityTimesEntered === null ? '' : activityTimesEntered,
+    // '' while there is no current item on that level, so a flow rule never reads a stale completed flag.
+    rsh_moduleCompleted:      moduleCompleted === null ? '' : moduleCompleted,
+    rsh_sessionCompleted:     sessionCompleted === null ? '' : sessionCompleted,
+    rsh_activityCompleted:    activityCompleted === null ? '' : activityCompleted,
     participantGroup:         participantGroup
   };
 
