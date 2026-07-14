@@ -472,10 +472,16 @@ class ReactStateHelper {
     }
   }
 
+  // Each id carries its level emoji directly in front (no space — same convention as
+  // getCompletionOverview below), e.g. "🗂️mMod1: 📑sSes1a: 🎯aAct1a1".
   getParticipantLocation() {
+    const { module: moduleEmoji, session: sessionEmoji, activity: activityEmoji } = ReactStateHelper.#EMOJIS;
     const { current_module_id, current_session_id, current_activity_id } = this.#state;
     if (!current_module_id) return null;
-    return [current_module_id, current_session_id, current_activity_id].filter(Boolean).join(': ');
+    const parts = [moduleEmoji + current_module_id];
+    if (current_session_id) parts.push(sessionEmoji + current_session_id);
+    if (current_activity_id) parts.push(activityEmoji + current_activity_id);
+    return parts.join(': ');
   }
 
   // How many times the participant's current module has been entered — null while no module is
