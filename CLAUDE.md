@@ -52,7 +52,7 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 | `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
 | `ReactStateHelper` | Public API; holds `#state` (private); navigated via `current_module_id / current_session_id / current_activity_id` |
 
-Details (id conventions, state validation, navigation model, serialization) are in `docs/developer-guide.md`.
+Details (id conventions, state validation, navigation model) are in `docs/developer-guide.md` — which describes only outward-facing behavior (commands, `$rsh_` variables, errors, limits), not code internals; internals are documented in the source itself.
 
 Test setup: `vitest.config.js` lists `src/ReactStateHelper.js` as a `setupFile`, which registers `ReactStateHelper` as `globalThis.ReactStateHelper` — tests import nothing, mirroring MobileCoach's plain-script environment.
 
