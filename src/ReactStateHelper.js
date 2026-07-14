@@ -479,27 +479,28 @@ class ReactStateHelper {
   }
 
   // One-line snapshot of the whole completion state, meant for quick inspection inside MobileCoach:
-  // each module wraps its sessions in [ ], each non-intro session wraps its activities in ( ), and
-  // every completed item carries the completed emoji right after its id — so the rollup from
-  // completed activities to their session and module is visible at a glance, e.g.
-  // "mMod1[sSes1intro✅ sSes1a✅(aAct1a1✅ aAct1a2✅) sSes1b(aAct1b1)] mMod2[…]".
+  // each module wraps its sessions in [ ], each non-intro session wraps its activities in ( ), every
+  // id carries its level emoji directly in front (no space, unlike menu labels — the ids are compact
+  // enough), and every completed item carries the completed emoji right after its id — so the rollup
+  // from completed activities to their session and module is visible at a glance, e.g.
+  // "🗂️mMod1[📑sSes1intro✅ 📑sSes1a✅(🎯aAct1a1✅ 🎯aAct1a2✅) 📑sSes1b(🎯aAct1b1)] 🗂️mMod2[…]".
   getCompletionOverview() {
-    const completedEmoji = ReactStateHelper.#EMOJIS.completed;
+    const { completed, module: moduleEmoji, session: sessionEmoji, activity: activityEmoji } = ReactStateHelper.#EMOJIS;
     const moduleParts = [];
     for (const module of this.#state.modules) {
       const sessionParts = [];
       for (const session of module.sessions) {
-        let sessionPart = session.id + (session.isCompleted() ? completedEmoji : '');
+        let sessionPart = sessionEmoji + session.id + (session.isCompleted() ? completed : '');
         if (session.activities.length > 0) {
           const activityParts = [];
           for (const activity of session.activities) {
-            activityParts.push(activity.id + (activity.isCompleted() ? completedEmoji : ''));
+            activityParts.push(activityEmoji + activity.id + (activity.isCompleted() ? completed : ''));
           }
           sessionPart += '(' + activityParts.join(' ') + ')';
         }
         sessionParts.push(sessionPart);
       }
-      moduleParts.push(module.id + (module.isCompleted() ? completedEmoji : '') + '[' + sessionParts.join(' ') + ']');
+      moduleParts.push(moduleEmoji + module.id + (module.isCompleted() ? completed : '') + '[' + sessionParts.join(' ') + ']');
     }
     return moduleParts.join(' ');
   }

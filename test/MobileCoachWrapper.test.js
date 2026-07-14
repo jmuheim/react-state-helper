@@ -75,7 +75,7 @@ describe('MobileCoach deployment wrapper', () => {
   it('writes location and completion overview to participantGroup once a module is entered', () => {
     const o = runWrapper({ cmd: "enter('mBouMgt')" });
     expect(o.rsh_status).toBe('success');
-    expect(o.participantGroup).toBe('Participant location: mBouMgt | Completion overview: mBouMgt[sBouIntro sGesGre(aRolGes aAbgKon) sPaus(aMikPau)] mEmoReg[sEmoIntro sAkzep(aAkzep) sNeuBew(aNeuBew) sUmgEmo(aEmoSit) sUmgSup(aUmgSup)]');
+    expect(o.participantGroup).toBe('Participant location: mBouMgt | Completion overview: 🗂️mBouMgt[📑sBouIntro 📑sGesGre(🎯aRolGes 🎯aAbgKon) 📑sPaus(🎯aMikPau)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep(🎯aAkzep) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
   });
 
   it('extends the participantGroup location while navigating deeper and rolls completed activities up into session and module marks', () => {
@@ -90,13 +90,13 @@ describe('MobileCoach deployment wrapper', () => {
       run = runWrapper({ cmd, json: run.rsh_json });
       expect(run.rsh_status).toBe('success');
     }
-    expect(run.participantGroup).toBe('Participant location: mEmoReg: sAkzep: aAkzep | Completion overview: mBouMgt✅[sBouIntro✅ sGesGre✅(aRolGes✅ aAbgKon✅) sPaus✅(aMikPau✅)] mEmoReg[sEmoIntro sAkzep✅(aAkzep✅) sNeuBew(aNeuBew) sUmgEmo(aEmoSit) sUmgSup(aUmgSup)]');
+    expect(run.participantGroup).toBe('Participant location: mEmoReg: sAkzep: aAkzep | Completion overview: 🗂️mBouMgt✅[📑sBouIntro✅ 📑sGesGre✅(🎯aRolGes✅ 🎯aAbgKon✅) 📑sPaus✅(🎯aMikPau✅)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep✅(🎯aAkzep✅) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
   });
 
   it('writes the completion overview alone to participantGroup while no module is entered (there is no location yet)', () => {
     const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
     expect(o.rsh_status).toBe('success');
-    expect(o.participantGroup).toBe('Completion overview: mBouMgt[sBouIntro sGesGre(aRolGes aAbgKon) sPaus(aMikPau)] mEmoReg[sEmoIntro sAkzep(aAkzep) sNeuBew(aNeuBew) sUmgEmo(aEmoSit) sUmgSup(aUmgSup)]');
+    expect(o.participantGroup).toBe('Completion overview: 🗂️mBouMgt[📑sBouIntro 📑sGesGre(🎯aRolGes 🎯aAbgKon) 📑sPaus(🎯aMikPau)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep(🎯aAkzep) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
   });
 
   it('reports command errors via rsh_status/-Error instead of crashing', () => {
