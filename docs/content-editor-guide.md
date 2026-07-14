@@ -43,7 +43,7 @@ Structural limits, checked when state loads: at most **9** modules (that's how m
    | `$rsh_moduleTimesEntered` | How many times the participant's current module has been entered, refreshed on **every** run; `""` while no module has been entered yet |
    | `$rsh_sessionTimesEntered` | Same for the current session; `""` while no session is current (entering a module clears the current session) |
    | `$rsh_activityTimesEntered` | Same for the current activity; `""` while no activity is current (entering a module or session clears the current activity) |
-   | `$rsh_moduleCompleted` | Whether the participant's current module is completed (`true`/`false`), refreshed on **every** run; `""` while no module has been entered yet |
+   | `$rsh_moduleCompleted` | Whether the participant's current module is completed, refreshed on **every** run — always exactly the text `true` or `false`, so rules can compare against these two values directly; `""` while no module has been entered yet |
    | `$rsh_sessionCompleted` | Same for the current session; `""` while no session is current (entering a module clears the current session) |
    | `$rsh_activityCompleted` | Same for the current activity; `""` while no activity is current (entering a module or session clears the current activity) |
    | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<level emoji> <title>[ <status emoji>]"`) populated by `populateMenuWithModules()` / `populateMenuWithSessions()` / `populateMenuWithActivities()`; written on **every** run — any other command resets all slots to `""` |

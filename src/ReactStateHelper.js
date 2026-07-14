@@ -784,10 +784,12 @@ if (typeof process === 'undefined') {
     rsh_moduleTimesEntered:   moduleTimesEntered === null ? '' : moduleTimesEntered,
     rsh_sessionTimesEntered:  sessionTimesEntered === null ? '' : sessionTimesEntered,
     rsh_activityTimesEntered: activityTimesEntered === null ? '' : activityTimesEntered,
-    // '' while there is no current item on that level, so a flow rule never reads a stale completed flag.
-    rsh_moduleCompleted:      moduleCompleted === null ? '' : moduleCompleted,
-    rsh_sessionCompleted:     sessionCompleted === null ? '' : sessionCompleted,
-    rsh_activityCompleted:    activityCompleted === null ? '' : activityCompleted,
+    // '' while there is no current item on that level, so a flow rule never reads a stale completed
+    // flag. Written as the plain strings 'true'/'false' (not booleans), so the variable content that
+    // MobileCoach rules compare against is exactly these two texts.
+    rsh_moduleCompleted:      moduleCompleted === null ? '' : (moduleCompleted ? 'true' : 'false'),
+    rsh_sessionCompleted:     sessionCompleted === null ? '' : (sessionCompleted ? 'true' : 'false'),
+    rsh_activityCompleted:    activityCompleted === null ? '' : (activityCompleted ? 'true' : 'false'),
     participantGroup:         participantGroup
   };
 

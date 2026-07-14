@@ -132,17 +132,17 @@ describe('MobileCoach deployment wrapper', () => {
     expect(o.rsh_activityCompleted).toBe('');
   });
 
-  it('writes the current items\' completed flags and "" for levels cleared by re-entering the module', () => {
+  it('writes the current items\' completed flags as the strings "true"/"false" (MobileCoach rules compare text) and "" for levels cleared by re-entering the module', () => {
     let run = runWrapper({ cmd: "enter('mBouMgt')" });
-    expect(run.rsh_moduleCompleted).toBe(false);
+    expect(run.rsh_moduleCompleted).toBe('false');
     expect(run.rsh_sessionCompleted).toBe('');
     for (const cmd of ["enter('sGesGre')", "enter('aRolGes')", 'completeActivity()']) {
       run = runWrapper({ cmd, json: run.rsh_json });
       expect(run.rsh_status).toBe('success');
     }
-    expect(run.rsh_moduleCompleted).toBe(false);
-    expect(run.rsh_sessionCompleted).toBe(false); // aAbgKon still open
-    expect(run.rsh_activityCompleted).toBe(true); // aRolGes was just completed
+    expect(run.rsh_moduleCompleted).toBe('false');
+    expect(run.rsh_sessionCompleted).toBe('false'); // aAbgKon still open
+    expect(run.rsh_activityCompleted).toBe('true'); // aRolGes was just completed
     run = runWrapper({ cmd: "enter('mBouMgt')", json: run.rsh_json });
     expect(run.rsh_sessionCompleted).toBe(''); // re-entering the module cleared session and activity
     expect(run.rsh_activityCompleted).toBe('');
