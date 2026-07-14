@@ -23,3 +23,13 @@ Full documentation is published at **<https://jmuheim.github.io/react-state-help
 npm test              # run all tests once
 npm run test:watch    # re-run on file changes
 ```
+
+### Claude Code commands
+
+Project-specific slash commands, defined in [`.claude/commands/`](.claude/commands/):
+
+| Command | What it does | When to use |
+|---|---|---|
+| `/commit` | Runs the tests, commits, and on a PR branch brings the PR title and description up to date in the same pass | Every commit (also triggered by asking for a commit in plain words) |
+| `/log-decision` | Appends a numbered entry to [`docs/decisions.md`](docs/decisions.md) and propagates it to affected docs | Whenever a design decision is made — before it gets lost in conversation |
+| `/push-to-master` | Pushes local master commits directly to origin by temporarily bypassing the `protect-master` ruleset, then restores protection | Small changes (typo/doc fixes) where a PR is overhead |
