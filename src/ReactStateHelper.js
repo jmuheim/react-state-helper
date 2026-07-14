@@ -711,17 +711,26 @@ if (typeof process === 'undefined') {
     }
   }
 
+  // $participantGroup carries both quick-inspection values in one variable, each prefixed with a
+  // short label: the participant's location, then the completion overview, separated by " | ".
+  // Before the first module is entered there is no location, so it holds the overview alone.
+  let participantGroup = null;
+  if (helper) {
+    const location = helper.getParticipantLocation();
+    const overview = 'Completion overview: ' + helper.getCompletionOverview();
+    participantGroup = location ? 'Participant location: ' + location + ' | ' + overview : overview;
+  }
+
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
-    rsh_json:               helper ? helper.toString() : rsh_json,
+    rsh_json:           helper ? helper.toString() : rsh_json,
     // '' when the command returned nothing (enter…, complete…, populate…), so the variable never holds a stale value from an earlier run.
-    rsh_result:             result === undefined ? '' : result,
-    rsh_status:             status,
-    rsh_error:              error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    rsh_completionOverview: helper ? helper.getCompletionOverview() : '',
-    rsh_progressAdvice:     progressAdvice,
-    participantGroup:       helper ? helper.getParticipantLocation() : null
+    rsh_result:         result === undefined ? '' : result,
+    rsh_status:         status,
+    rsh_error:          error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    rsh_progressAdvice: progressAdvice,
+    participantGroup:   participantGroup
   };
 
   // All 9 menu labels and their 9 ids are written back to MobileCoach as individual variables,

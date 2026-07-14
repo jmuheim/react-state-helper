@@ -34,7 +34,6 @@ describe('MobileCoach platform constraints', () => {
         'rsh_result',
         'rsh_status',
         'rsh_error',
-        'rsh_completionOverview',
         'rsh_menuLabel',
         'rsh_menuId',
         'participantGroup',
