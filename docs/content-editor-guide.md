@@ -39,11 +39,10 @@ Structural limits, checked when state loads: at most **9** modules (that's how m
    | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuWith…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
-   | `$rsh_completionOverview` | One-line snapshot of the whole completion state, for quick inspection: each module wraps its sessions in `[ ]`, each session its activities in `( )`, and every completed item carries ✅ right after its id — e.g. `mBouMgt[sBouIntro✅ sGesGre✅(aRolGes✅ aAbgKon✅) sPaus(aMikPau)]` |
    | `$rsh_progressAdvice` | Ready-to-display advice sentence about how to continue (see [`getProgressAdvice()`](developer-guide.md#flow-logic-commands)), refreshed on **every** run; `""` until a module has been entered |
    | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<level emoji> <title>[ <status emoji>]"`) populated by `populateMenuWithModules()` / `populateMenuWithSessions()` / `populateMenuWithActivities()`; written on **every** run — any other command resets all slots to `""` |
    | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenate the two yourself in the menu definition: `$rsh_menuLabel1:$rsh_menuId1`. Written on **every** run, same reset behavior as the labels |
-   | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** `null` until a module is entered; then `currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper — updated automatically after every run (we "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
+   | `$participantGroup` | **Already exists by default in MobileCoach — do not create it.** Carries both quick-inspection values, each behind a short label and updated automatically after every run: the participant's location (`currentModuleId`, with `": <currentSessionId>"` and `": <currentActivityId>"` appended as the participant navigates deeper), then ` \| `, then a one-line snapshot of the whole completion state — each module wraps its sessions in `[ ]`, each session its activities in `( )`, every id carries its level emoji directly in front, and every completed item carries ✅ right after its id. E.g. `Participant location: mBouMgt: sGesGre \| Completion overview: 🗂️mBouMgt[📑sBouIntro✅ 📑sGesGre✅(🎯aRolGes✅ 🎯aAbgKon✅) 📑sPaus(🎯aMikPau)]`. Until a module is entered there is no location, so it holds the snapshot alone. (We "mis-use" this built-in variable, as it is one of the few easily inspectable variables from within MobileCoach) |
 
 3. Also declare `$debugBanner` — the one variable whose default is **not** `0`: its default value is the marker `⚠️ DEBUGGER INFO ⚠️`. The script never touches it; flows prepend it to every DEBUGGER-facing message (see the [debug coaches field note](mobilecoach-field-notes.md#coach-selection-and-debug-coaches)).
 
@@ -57,7 +56,7 @@ MobileCoach cannot call JavaScript functions directly. Instead, each script run 
 2. Execute the script (the pasted `ReactStateHelper.js`).
 3. Read the results: the command's return value is in `$rsh_result` (`""` for commands that return nothing), `$rsh_status` is `success` or `error`, and `$rsh_error` holds the error message (or `none`).
 
-On the very first run, `$rsh_json` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$rsh_json` (the persisted state), `$rsh_completionOverview`, `$rsh_progressAdvice`, `$participantGroup`, and all nine `$rsh_menuLabel` and nine `$rsh_menuId` variables (empty unless the run's command was a `populateMenuWith…()` one) — you never have to write these yourself.
+On the very first run, `$rsh_json` still has its default value `0`; the script detects this and initialises fresh default state automatically. After every run the script also updates `$rsh_json` (the persisted state), `$rsh_progressAdvice`, `$participantGroup`, and all nine `$rsh_menuLabel` and nine `$rsh_menuId` variables (empty unless the run's command was a `populateMenuWith…()` one) — you never have to write these yourself.
 
 ## Command cheat-sheet
 
@@ -89,10 +88,10 @@ Every menu label starts with the emoji of its level (`🗂️ <module title>`, `
 
 | Key | Emoji | Used for |
 |---|---|---|
-| `module` | 🗂️ | prefixed to every modules-menu label, to quoted module titles in `getProgressAdvice()` (`Modul "🗂️ Modul Eins"` — inside the quotes, matching the menu-label format), and used in the sessions and activities menus' back entries |
-| `session` | 📑 | prefixed to every sessions-menu label, to quoted session titles in `getProgressAdvice()`, and used in the activities menu's back entry |
-| `activity` | 🎯 | prefixed to every activities-menu label and to quoted activity titles in `getProgressAdvice()` |
-| `completed` | ✅ | appended to a completed item in a menu, and to a completed item's id in `$rsh_completionOverview` |
+| `module` | 🗂️ | prefixed to every modules-menu label, to quoted module titles in `getProgressAdvice()` (`Modul "🗂️ Modul Eins"` — inside the quotes, matching the menu-label format), to module ids in the completion snapshot inside `$participantGroup` (there without a space), and used in the sessions and activities menus' back entries |
+| `session` | 📑 | prefixed to every sessions-menu label, to quoted session titles in `getProgressAdvice()`, to session ids in the completion snapshot (no space), and used in the activities menu's back entry |
+| `activity` | 🎯 | prefixed to every activities-menu label, to quoted activity titles in `getProgressAdvice()`, and to activity ids in the completion snapshot (no space) |
+| `completed` | ✅ | appended to a completed item in a menu, and to a completed item's id in the completion snapshot inside `$participantGroup` |
 | `next` | 👈 | appended to the first not-yet-completed item in a menu (menus only) |
 
 Menu items that are neither completed nor the next one get no status emoji — just the level prefix.
@@ -110,4 +109,4 @@ A back tap needs no library command of its own — `enter('allModulesMenu')` and
 
 - **The flow just stops, no error anywhere** → almost always an undeclared or misconfigured variable. Re-check every row of the [variable table](#one-time-mobilecoach-setup): default `0`, access "manageable by service".
 - **Something misbehaves but the flow continues** → inspect `$rsh_error` first (and `$rsh_status`). Load errors name the offending id; command errors usually mean a typo in `$rsh_cmd` or a missing `enter(…)` precondition (module before session, session before activity).
-- **Where is the participant right now?** → `$participantGroup` shows the current location (module, session, activity) and is easy to inspect from within MobileCoach.
+- **Where is the participant right now, and what have they completed?** → `$participantGroup` shows the current location (module, session, activity) followed by the completion snapshot, and is easy to inspect from within MobileCoach.

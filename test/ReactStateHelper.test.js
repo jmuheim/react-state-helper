@@ -307,14 +307,14 @@ describe('ReactStateHelper', () => {
 
   describe('getCompletionOverview', () => {
     it('lists every module, session and activity id without completion marks in the default state', () => {
-      expect(helper.getCompletionOverview()).toBe('mMod1[sSes1intro sSes1a(aAct1a1 aAct1a2) sSes1b(aAct1b1)] mMod2[sSes2intro sSes2a(aAct2a1) sSes2b(aAct2b1 aAct2b2 aAct2b3)] mMod3[sSes3intro sSes3a(aAct3a1) sSes3b(aAct3b1) sSes3c(aAct3c1)]');
+      expect(helper.getCompletionOverview()).toBe('🗂️mMod1[📑sSes1intro 📑sSes1a(🎯aAct1a1 🎯aAct1a2) 📑sSes1b(🎯aAct1b1)] 🗂️mMod2[📑sSes2intro 📑sSes2a(🎯aAct2a1) 📑sSes2b(🎯aAct2b1 🎯aAct2b2 🎯aAct2b3)] 🗂️mMod3[📑sSes3intro 📑sSes3a(🎯aAct3a1) 📑sSes3b(🎯aAct3b1) 📑sSes3c(🎯aAct3c1)]');
     });
 
     it('marks a completed activity without marking its partially completed session', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
       helper.enter('aAct1a1'); helper.completeActivity();
-      expect(helper.getCompletionOverview()).toContain('sSes1a(aAct1a1✅ aAct1a2)');
+      expect(helper.getCompletionOverview()).toContain('📑sSes1a(🎯aAct1a1✅ 🎯aAct1a2)');
     });
 
     it('marks a session once all its activities are completed', () => {
@@ -322,13 +322,13 @@ describe('ReactStateHelper', () => {
       helper.enter('sSes1a');
       helper.enter('aAct1a1'); helper.completeActivity();
       helper.enter('aAct1a2'); helper.completeActivity();
-      expect(helper.getCompletionOverview()).toContain('sSes1a✅(aAct1a1✅ aAct1a2✅)');
+      expect(helper.getCompletionOverview()).toContain('📑sSes1a✅(🎯aAct1a1✅ 🎯aAct1a2✅)');
     });
 
     it('marks an intro session once it has been entered', () => {
       helper.enter('mMod1');
       helper.enter('sSes1intro');
-      expect(helper.getCompletionOverview()).toContain('sSes1intro✅');
+      expect(helper.getCompletionOverview()).toContain('📑sSes1intro✅');
     });
 
     it('marks a module once all its sessions (intro included) are completed', () => {
@@ -339,7 +339,7 @@ describe('ReactStateHelper', () => {
       helper.enter('aAct1a2'); helper.completeActivity();
       helper.enter('sSes1b');
       helper.enter('aAct1b1'); helper.completeActivity();
-      expect(helper.getCompletionOverview()).toBe('mMod1✅[sSes1intro✅ sSes1a✅(aAct1a1✅ aAct1a2✅) sSes1b✅(aAct1b1✅)] mMod2[sSes2intro sSes2a(aAct2a1) sSes2b(aAct2b1 aAct2b2 aAct2b3)] mMod3[sSes3intro sSes3a(aAct3a1) sSes3b(aAct3b1) sSes3c(aAct3c1)]');
+      expect(helper.getCompletionOverview()).toBe('🗂️mMod1✅[📑sSes1intro✅ 📑sSes1a✅(🎯aAct1a1✅ 🎯aAct1a2✅) 📑sSes1b✅(🎯aAct1b1✅)] 🗂️mMod2[📑sSes2intro 📑sSes2a(🎯aAct2a1) 📑sSes2b(🎯aAct2b1 🎯aAct2b2 🎯aAct2b3)] 🗂️mMod3[📑sSes3intro 📑sSes3a(🎯aAct3a1) 📑sSes3b(🎯aAct3b1) 📑sSes3c(🎯aAct3c1)]');
     });
   });
 

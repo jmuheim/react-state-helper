@@ -72,6 +72,33 @@ describe('MobileCoach deployment wrapper', () => {
     expect(o.rsh_progressAdvice).toBe('');
   });
 
+  it('writes location and completion overview to participantGroup once a module is entered', () => {
+    const o = runWrapper({ cmd: "enter('mBouMgt')" });
+    expect(o.rsh_status).toBe('success');
+    expect(o.participantGroup).toBe('Participant location: mBouMgt | Completion overview: 🗂️mBouMgt[📑sBouIntro 📑sGesGre(🎯aRolGes 🎯aAbgKon) 📑sPaus(🎯aMikPau)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep(🎯aAkzep) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
+  });
+
+  it('extends the participantGroup location while navigating deeper and rolls completed activities up into session and module marks', () => {
+    let run = runWrapper({ cmd: "enter('mBouMgt')" });
+    for (const cmd of [
+      "enter('sBouIntro')", // an intro session has no activities, so it completes on enter
+      "enter('sGesGre')", "enter('aRolGes')", 'completeActivity()',
+      "enter('aAbgKon')", 'completeActivity()', // last activity of sGesGre → session completes
+      "enter('sPaus')", "enter('aMikPau')", 'completeActivity()', // last session of mBouMgt → module completes
+      "enter('mEmoReg')", "enter('sAkzep')", "enter('aAkzep')", 'completeActivity()', // sAkzep completes, mEmoReg stays uncompleted
+    ]) {
+      run = runWrapper({ cmd, json: run.rsh_json });
+      expect(run.rsh_status).toBe('success');
+    }
+    expect(run.participantGroup).toBe('Participant location: mEmoReg: sAkzep: aAkzep | Completion overview: 🗂️mBouMgt✅[📑sBouIntro✅ 📑sGesGre✅(🎯aRolGes✅ 🎯aAbgKon✅) 📑sPaus✅(🎯aMikPau✅)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep✅(🎯aAkzep✅) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
+  });
+
+  it('writes the completion overview alone to participantGroup while no module is entered (there is no location yet)', () => {
+    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    expect(o.rsh_status).toBe('success');
+    expect(o.participantGroup).toBe('Completion overview: 🗂️mBouMgt[📑sBouIntro 📑sGesGre(🎯aRolGes 🎯aAbgKon) 📑sPaus(🎯aMikPau)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep(🎯aAkzep) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
+  });
+
   it('reports command errors via rsh_status/-Error instead of crashing', () => {
     const o = runWrapper({ cmd: 'populateMenuWithSessions()' }); // no module entered yet
     expect(o.rsh_status).toBe('error');
