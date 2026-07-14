@@ -31,7 +31,7 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 | `Activity` | Bottom of the hierarchy — tracks `completed`, `times_entered`, timestamps |
 | `Session` | Contains activities; `isCompleted()` if all activities completed (or, for an intro session, once entered) |
 | `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
-| `ReactStateHelper` | Public API; holds `#state` (private); navigated via `currentModuleId / currentSessionId / currentActivityId` |
+| `ReactStateHelper` | Public API; holds `#state` (private); navigated via `current_module_id / current_session_id / current_activity_id` |
 
 ### ID conventions
 
@@ -51,7 +51,7 @@ Every module needs at least one session, and every session needs at least one ac
 
 ### Navigation model
 
-Navigation happens through a single `enter(id)` method: the id's level letter (`m`/`s`/`a` followed by an uppercase letter, guaranteed by `registerId`) determines whether a module, session, or activity is entered — one command therefore works after any menu tap, regardless of the menu's level. Before calling most methods the caller must enter module → session → activity in order (entering a session looks it up within the current module, an activity within the current session). These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `hasSessionAdequateProgress`, etc.) implicitly use the `currentModuleId` stored in state.
+Navigation happens through a single `enter(id)` method: the id's level letter (`m`/`s`/`a` followed by an uppercase letter, guaranteed by `registerId`) determines whether a module, session, or activity is entered — one command therefore works after any menu tap, regardless of the menu's level. Before calling most methods the caller must enter module → session → activity in order (entering a session looks it up within the current module, an activity within the current session). These calls record timestamps and increment `times_entered`. Most query methods (`isSessionCompleted`, `hasSessionAdequateProgress`, etc.) implicitly use the `current_module_id` stored in state.
 
 Two ids the menus emit are *not* enterable: `allModulesMenu` (the target of the sessions and activities menus' module-overview back entries) and `allSessionsOfCurrentModuleMenu` (the target of the activities menu's session back entry) — see [Menus](#menus) below. No flow ever calls `enter()` with either id: dialogs enter themselves after navigation, and while a menu reached via a back entry is displayed the participant's tracked location deliberately stays in the previous context — it changes only when the tapped item's dialog runs `enter('<own id>')`. Dedicated guards at the top of `enter()` reject each id with an explanatory error ("… must never be entered: …") rather than the generic malformed-id message, which would mislead — these are ids the library itself emits into the menu variables. They cannot collide with a state id: `registerId` rejects each by name with its own dedicated error, and the naming convention (uppercase letter after the level letter) would reject them anyway.
 

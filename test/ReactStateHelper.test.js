@@ -117,9 +117,9 @@ const testState = {
       ],
     },
   ],
-  currentModuleId: null,
-  currentSessionId: null,
-  currentActivityId: null,
+  current_module_id: null,
+  current_session_id: null,
+  current_activity_id: null,
 };
 
 describe('ReactStateHelper', () => {
@@ -480,14 +480,14 @@ describe('ReactStateHelper', () => {
       expect(() => helper.enter('sSes2a')).toThrow('Session sSes2a not found in module mMod1');
     });
 
-    it('entering a module resets currentSessionId and currentActivityId', () => {
+    it('entering a module resets current_session_id and current_activity_id', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
       helper.enter('mMod2');
       const state = JSON.parse(helper.toString());
-      expect(state.currentSessionId).toBeNull();
-      expect(state.currentActivityId).toBeNull();
+      expect(state.current_session_id).toBeNull();
+      expect(state.current_activity_id).toBeNull();
     });
 
     it('throws a dedicated error for the allModulesMenu back-entry id — it is a pure routing target, dialogs enter themselves', () => {
@@ -498,12 +498,12 @@ describe('ReactStateHelper', () => {
       expect(() => helper.enter('allSessionsOfCurrentModuleMenu')).toThrow('allSessionsOfCurrentModuleMenu must never be entered: it only routes to the dialog that shows the session-selection menu of the current module, which leaves the location unchanged — the location changes when the participant taps a session and that dialog runs enter with its own id');
     });
 
-    it('entering a session resets currentActivityId', () => {
+    it('entering a session resets current_activity_id', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
       helper.enter('sSes1b');
-      expect(JSON.parse(helper.toString()).currentActivityId).toBeNull();
+      expect(JSON.parse(helper.toString()).current_activity_id).toBeNull();
     });
   });
 
@@ -608,7 +608,7 @@ describe('ReactStateHelper', () => {
     it('sets the current activity', () => {
       helper.enter('sSes1a');
       helper.enter('aAct1a1');
-      expect(JSON.parse(helper.toString()).currentActivityId).toBe('aAct1a1');
+      expect(JSON.parse(helper.toString()).current_activity_id).toBe('aAct1a1');
     });
 
     it('throws if an activity is entered without a current session', () => {
@@ -982,9 +982,9 @@ describe('ReactStateHelper', () => {
           ],
         },
       ],
-      currentModuleId: null,
-      currentSessionId: null,
-      currentActivityId: null,
+      current_module_id: null,
+      current_session_id: null,
+      current_activity_id: null,
     });
 
     it('loads a minimal valid state without throwing', () => {

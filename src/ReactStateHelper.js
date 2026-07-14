@@ -404,9 +404,9 @@ class ReactStateHelper {
           ],
         },
       ],
-      currentModuleId: null,
-      currentSessionId: null,
-      currentActivityId: null,
+      current_module_id: null,
+      current_session_id: null,
+      current_activity_id: null,
     };
   }
 
@@ -415,8 +415,8 @@ class ReactStateHelper {
   }
 
   completeActivity() {
-    if (!this.#state.currentActivityId) throw new Error('No activity entered yet');
-    this.#findActivity(this.#state.currentActivityId).markCompleted();
+    if (!this.#state.current_activity_id) throw new Error('No activity entered yet');
+    this.#findActivity(this.#state.current_activity_id).markCompleted();
   }
 
   isModuleCompleted(moduleId) {
@@ -424,13 +424,13 @@ class ReactStateHelper {
   }
 
   isSessionCompleted(sessionId) {
-    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    return this.#findModule(this.#state.currentModuleId).findSession(sessionId).isCompleted();
+    if (!this.#state.current_module_id) throw new Error('No module entered yet');
+    return this.#findModule(this.#state.current_module_id).findSession(sessionId).isCompleted();
   }
 
   hasSessionAdequateProgress(sessionId) {
-    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    return this.#findModule(this.#state.currentModuleId).findSession(sessionId).hasAdequateProgress();
+    if (!this.#state.current_module_id) throw new Error('No module entered yet');
+    return this.#findModule(this.#state.current_module_id).findSession(sessionId).hasAdequateProgress();
   }
 
   // Returns a value between 0 and 1 for the given module
@@ -454,18 +454,18 @@ class ReactStateHelper {
     if (/^m[A-Z]/.test(id)) {
       const module = this.#findModule(id);
       if (!module) throw new Error('Module ' + id + ' not found');
-      this.#state.currentModuleId = id;
-      this.#state.currentSessionId = null;
-      this.#state.currentActivityId = null;
+      this.#state.current_module_id = id;
+      this.#state.current_session_id = null;
+      this.#state.current_activity_id = null;
       module.enter();
     } else if (/^s[A-Z]/.test(id)) {
       const session = this.#findSession(id);
-      this.#state.currentSessionId = session.id;
-      this.#state.currentActivityId = null;
+      this.#state.current_session_id = session.id;
+      this.#state.current_activity_id = null;
       session.enter();
     } else if (/^a[A-Z]/.test(id)) {
       const activity = this.#findActivity(id);
-      this.#state.currentActivityId = activity.id;
+      this.#state.current_activity_id = activity.id;
       activity.enter();
     } else {
       throw new Error('Cannot enter id ' + id + ': it must start with "m", "s" or "a" followed by an uppercase letter');
@@ -473,45 +473,45 @@ class ReactStateHelper {
   }
 
   getParticipantLocation() {
-    const { currentModuleId, currentSessionId, currentActivityId } = this.#state;
-    if (!currentModuleId) return null;
-    return [currentModuleId, currentSessionId, currentActivityId].filter(Boolean).join(': ');
+    const { current_module_id, current_session_id, current_activity_id } = this.#state;
+    if (!current_module_id) return null;
+    return [current_module_id, current_session_id, current_activity_id].filter(Boolean).join(': ');
   }
 
   // How many times the participant's current module has been entered — null while no module is
   // entered (like getParticipantLocation, so the deployment wrapper can call it on every run
   // without a guard). Same pattern for the session and activity variants below.
   getCurrentModuleTimesEntered() {
-    if (!this.#state.currentModuleId) return null;
-    return this.#findModule(this.#state.currentModuleId).times_entered;
+    if (!this.#state.current_module_id) return null;
+    return this.#findModule(this.#state.current_module_id).times_entered;
   }
 
   getCurrentSessionTimesEntered() {
-    if (!this.#state.currentSessionId) return null;
-    return this.#findSession(this.#state.currentSessionId).times_entered;
+    if (!this.#state.current_session_id) return null;
+    return this.#findSession(this.#state.current_session_id).times_entered;
   }
 
   getCurrentActivityTimesEntered() {
-    if (!this.#state.currentActivityId) return null;
-    return this.#findActivity(this.#state.currentActivityId).times_entered;
+    if (!this.#state.current_activity_id) return null;
+    return this.#findActivity(this.#state.current_activity_id).times_entered;
   }
 
   // Whether the participant's current module is completed — null while no module is entered
   // (same null pattern as the times-entered getters above, so the deployment wrapper can call
   // it on every run without a guard). Same pattern for the session and activity variants below.
   isCurrentModuleCompleted() {
-    if (!this.#state.currentModuleId) return null;
-    return this.#findModule(this.#state.currentModuleId).isCompleted();
+    if (!this.#state.current_module_id) return null;
+    return this.#findModule(this.#state.current_module_id).isCompleted();
   }
 
   isCurrentSessionCompleted() {
-    if (!this.#state.currentSessionId) return null;
-    return this.#findSession(this.#state.currentSessionId).isCompleted();
+    if (!this.#state.current_session_id) return null;
+    return this.#findSession(this.#state.current_session_id).isCompleted();
   }
 
   isCurrentActivityCompleted() {
-    if (!this.#state.currentActivityId) return null;
-    return this.#findActivity(this.#state.currentActivityId).isCompleted();
+    if (!this.#state.current_activity_id) return null;
+    return this.#findActivity(this.#state.current_activity_id).isCompleted();
   }
 
   // One-line snapshot of the whole completion state, meant for quick inspection inside MobileCoach:
@@ -551,9 +551,9 @@ class ReactStateHelper {
 
   getProgressAdvice() {
     const { module: m, session: s, activity: a } = ReactStateHelper.#EMOJIS;
-    if (this.#state.currentSessionId) {
-      const session = this.#findSession(this.#state.currentSessionId);
-      const activity = this.#state.currentActivityId ? this.#findActivity(this.#state.currentActivityId) : null;
+    if (this.#state.current_session_id) {
+      const session = this.#findSession(this.#state.current_session_id);
+      const activity = this.#state.current_activity_id ? this.#findActivity(this.#state.current_activity_id) : null;
       const nextActivity = session.activities.find(act => !act.isCompleted());
       return this.#buildProgressAdviceString({
         labelSingular: 'Session', labelPlural: 'Sessions', emoji: s, title: session.title,
@@ -563,8 +563,8 @@ class ReactStateHelper {
         skipPart: ', oder eine andere ' + s + ' Session bzw. ein anderes ' + m + ' Modul wählen',
       });
     }
-    if (this.#state.currentModuleId) {
-      const module = this.#findModule(this.#state.currentModuleId);
+    if (this.#state.current_module_id) {
+      const module = this.#findModule(this.#state.current_module_id);
       const idx = this.#state.modules.findIndex(mm => mm.id === module.id);
       const completableSessions = module.sessions.filter(s => s.activities.length > 0);
       const nextUncompletedSession = completableSessions.find(s => !s.isCompleted());
@@ -597,17 +597,17 @@ class ReactStateHelper {
   }
 
   populateMenuWithSessions() {
-    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    const sessions = this.#findModule(this.#state.currentModuleId).sessions;
+    if (!this.#state.current_module_id) throw new Error('No module entered yet');
+    const sessions = this.#findModule(this.#state.current_module_id).sessions;
     this.#menuLabels = this.#buildMenuLabels(sessions, ReactStateHelper.#EMOJIS.session);
     this.#menuIds = this.#buildMenuIds(sessions);
     this.#addBackEntry(sessions.length, 'Ein anderes ' + ReactStateHelper.#EMOJIS.module + ' Modul wählen', ALL_MODULES_MENU_DIALOG_ID);
   }
 
   populateMenuWithActivities() {
-    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    const activities = this.#findSession(this.#state.currentSessionId).activities;
+    if (!this.#state.current_module_id) throw new Error('No module entered yet');
+    if (!this.#state.current_session_id) throw new Error('No session entered yet');
+    const activities = this.#findSession(this.#state.current_session_id).activities;
     this.#menuLabels = this.#buildMenuLabels(activities, ReactStateHelper.#EMOJIS.activity);
     this.#menuIds = this.#buildMenuIds(activities);
     this.#addBackEntry(activities.length, 'Eine andere ' + ReactStateHelper.#EMOJIS.session + ' Session wählen', ALL_SESSIONS_OF_CURRENT_MODULE_MENU_DIALOG_ID);
@@ -672,17 +672,17 @@ class ReactStateHelper {
   }
 
   #findSession(sessionId) {
-    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    const session = this.#findModule(this.#state.currentModuleId).findSession(sessionId);
-    if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + this.#state.currentModuleId);
+    if (!this.#state.current_module_id) throw new Error('No module entered yet');
+    const session = this.#findModule(this.#state.current_module_id).findSession(sessionId);
+    if (!session) throw new Error('Session ' + sessionId + ' not found in module ' + this.#state.current_module_id);
     return session;
   }
 
   #findActivity(activityId) {
-    if (!this.#state.currentModuleId) throw new Error('No module entered yet');
-    if (!this.#state.currentSessionId) throw new Error('No session entered yet');
-    const activity = this.#findSession(this.#state.currentSessionId).findActivity(activityId);
-    if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + this.#state.currentSessionId);
+    if (!this.#state.current_module_id) throw new Error('No module entered yet');
+    if (!this.#state.current_session_id) throw new Error('No session entered yet');
+    const activity = this.#findSession(this.#state.current_session_id).findActivity(activityId);
+    if (!activity) throw new Error('Activity ' + activityId + ' not found in session ' + this.#state.current_session_id);
     return activity;
   }
 
