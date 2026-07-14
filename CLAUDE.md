@@ -28,6 +28,8 @@ npx vitest run -t "returns true when all activities are completed"
 
 Small changes (typo/doc fixes) can skip the PR flow via the `/push-to-master` command: it runs the tests locally, temporarily adds an admin bypass to the `protect-master` ruleset, pushes, and restores protection.
 
+Commits are made via the `/commit` command (also when the user just says "commit" in plain words): it runs the tests and, on a PR branch, brings the PR title and description up to date in the same pass — backed up by a PostToolUse hook that fires after any `git commit`/`git push` on a non-master branch.
+
 ## Decision log, open questions & backlog
 
 Design decisions and their rationale (including rejected alternatives) live in `docs/decisions.md` — append-only and numbered. Check it before re-opening a settled question; add entries via the `/log-decision` command, which also propagates the decision to affected docs. Unresolved items live in `docs/open-questions.md`; when one is settled, graduate it into the decision log and delete it there. Intended-but-not-started work lives in `docs/backlog.md` (roughly in sequence; items graduate into the decision log when they ship). The dividing line: an open question is something we *don't know enough about to decide*; a backlog item is work we *have decided we want to do* — file future-work ideas there, not in open questions.

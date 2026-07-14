@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -e '.tool_input.command | test(\"git push\")' >/dev/null || exit 0; [ \"$(git -C \"$CLAUDE_PROJECT_DIR\" branch --show-current)\" = \"master\" ] && exit 0; echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"A git push just ran on a non-master branch. Before ending the turn, check whether this branch has an open PR (gh pr view) and whether the push made the PR description stale (content, scope, commit list); if so, update it with gh pr edit.\"}}'"
+            "command": "jq -e '.tool_input.command | test(\"git (push|commit)\")' >/dev/null || exit 0; [ \"$(git -C \"$CLAUDE_PROJECT_DIR\" branch --show-current)\" = \"master\" ] && exit 0; echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"A git commit or push just ran on a non-master branch. Before ending the turn, check whether this branch has an open PR (gh pr view) and whether the change made the PR title or description stale (content, scope, commit list); if so, update them with gh pr edit. Do not wait for a push — commits can reach origin without one.\"}}'"
           }
         ]
       }
