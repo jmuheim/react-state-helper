@@ -478,6 +478,42 @@ class ReactStateHelper {
     return [currentModuleId, currentSessionId, currentActivityId].filter(Boolean).join(': ');
   }
 
+  // How many times the participant's current module has been entered — null while no module is
+  // entered (like getParticipantLocation, so the deployment wrapper can call it on every run
+  // without a guard). Same pattern for the session and activity variants below.
+  getCurrentModuleTimesEntered() {
+    if (!this.#state.currentModuleId) return null;
+    return this.#findModule(this.#state.currentModuleId).times_entered;
+  }
+
+  getCurrentSessionTimesEntered() {
+    if (!this.#state.currentSessionId) return null;
+    return this.#findSession(this.#state.currentSessionId).times_entered;
+  }
+
+  getCurrentActivityTimesEntered() {
+    if (!this.#state.currentActivityId) return null;
+    return this.#findActivity(this.#state.currentActivityId).times_entered;
+  }
+
+  // Whether the participant's current module is completed — null while no module is entered
+  // (same null pattern as the times-entered getters above, so the deployment wrapper can call
+  // it on every run without a guard). Same pattern for the session and activity variants below.
+  isCurrentModuleCompleted() {
+    if (!this.#state.currentModuleId) return null;
+    return this.#findModule(this.#state.currentModuleId).isCompleted();
+  }
+
+  isCurrentSessionCompleted() {
+    if (!this.#state.currentSessionId) return null;
+    return this.#findSession(this.#state.currentSessionId).isCompleted();
+  }
+
+  isCurrentActivityCompleted() {
+    if (!this.#state.currentActivityId) return null;
+    return this.#findActivity(this.#state.currentActivityId).isCompleted();
+  }
+
   // One-line snapshot of the whole completion state, meant for quick inspection inside MobileCoach:
   // each module wraps its sessions in [ ], each non-intro session wraps its activities in ( ), every
   // id carries its level emoji directly in front (no space, unlike menu labels — the ids are compact
@@ -722,16 +758,39 @@ if (typeof process === 'undefined') {
     participantGroup = location ? 'Participant location: ' + location + ' | ' + overview : overview;
   }
 
+  // How many times the participant's current module/session/activity has been entered — null
+  // while the corresponding level has no current item (never entered, or reset by entering a
+  // higher level).
+  let moduleTimesEntered = helper ? helper.getCurrentModuleTimesEntered() : null;
+  let sessionTimesEntered = helper ? helper.getCurrentSessionTimesEntered() : null;
+  let activityTimesEntered = helper ? helper.getCurrentActivityTimesEntered() : null;
+
+  // Whether the participant's current module/session/activity is completed — null while the
+  // corresponding level has no current item (never entered, or reset by entering a higher level).
+  let moduleCompleted = helper ? helper.isCurrentModuleCompleted() : null;
+  let sessionCompleted = helper ? helper.isCurrentSessionCompleted() : null;
+  let activityCompleted = helper ? helper.isCurrentActivityCompleted() : null;
+
   let o = {
     // MobileCoach will save these elements to corresponding variables,
     // i.e. rsh_json becomes $rsh_json.
-    rsh_json:           helper ? helper.toString() : rsh_json,
+    rsh_json:                 helper ? helper.toString() : rsh_json,
     // '' when the command returned nothing (enter…, complete…, populate…), so the variable never holds a stale value from an earlier run.
-    rsh_result:         result === undefined ? '' : result,
-    rsh_status:         status,
-    rsh_error:          error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
-    rsh_progressAdvice: progressAdvice,
-    participantGroup:   participantGroup
+    rsh_result:               result === undefined ? '' : result,
+    rsh_status:               status,
+    rsh_error:                error || 'none', // TODO: Möglichst viel weitere nützliche Infos rein-dumpen!
+    rsh_progressAdvice:       progressAdvice,
+    // '' while there is no current item on that level, so a flow rule never reads a stale count.
+    rsh_moduleTimesEntered:   moduleTimesEntered === null ? '' : moduleTimesEntered,
+    rsh_sessionTimesEntered:  sessionTimesEntered === null ? '' : sessionTimesEntered,
+    rsh_activityTimesEntered: activityTimesEntered === null ? '' : activityTimesEntered,
+    // '' while there is no current item on that level, so a flow rule never reads a stale completed
+    // flag. Written as the plain strings 'true'/'false' (not booleans), so the variable content that
+    // MobileCoach rules compare against is exactly these two texts.
+    rsh_moduleCompleted:      moduleCompleted === null ? '' : (moduleCompleted ? 'true' : 'false'),
+    rsh_sessionCompleted:     sessionCompleted === null ? '' : (sessionCompleted ? 'true' : 'false'),
+    rsh_activityCompleted:    activityCompleted === null ? '' : (activityCompleted ? 'true' : 'false'),
+    participantGroup:         participantGroup
   };
 
   // All 9 menu labels and their 9 ids are written back to MobileCoach as individual variables,

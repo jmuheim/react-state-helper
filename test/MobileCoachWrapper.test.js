@@ -99,6 +99,55 @@ describe('MobileCoach deployment wrapper', () => {
     expect(o.participantGroup).toBe('Completion overview: 🗂️mBouMgt[📑sBouIntro 📑sGesGre(🎯aRolGes 🎯aAbgKon) 📑sPaus(🎯aMikPau)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep(🎯aAkzep) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
   });
 
+  it('writes "" to all three times-entered variables while nothing is entered', () => {
+    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_moduleTimesEntered).toBe('');
+    expect(o.rsh_sessionTimesEntered).toBe('');
+    expect(o.rsh_activityTimesEntered).toBe('');
+  });
+
+  it('writes the current items\' times-entered counts and "" for levels cleared by re-entering the module', () => {
+    let run = runWrapper({ cmd: "enter('mBouMgt')" });
+    expect(run.rsh_moduleTimesEntered).toBe(1);
+    expect(run.rsh_sessionTimesEntered).toBe('');
+    for (const cmd of ["enter('sGesGre')", "enter('aRolGes')", "enter('aRolGes')"]) {
+      run = runWrapper({ cmd, json: run.rsh_json });
+      expect(run.rsh_status).toBe('success');
+    }
+    expect(run.rsh_moduleTimesEntered).toBe(1);
+    expect(run.rsh_sessionTimesEntered).toBe(1);
+    expect(run.rsh_activityTimesEntered).toBe(2); // aRolGes was entered twice
+    run = runWrapper({ cmd: "enter('mBouMgt')", json: run.rsh_json });
+    expect(run.rsh_moduleTimesEntered).toBe(2);
+    expect(run.rsh_sessionTimesEntered).toBe(''); // re-entering the module cleared session and activity
+    expect(run.rsh_activityTimesEntered).toBe('');
+  });
+
+  it('writes "" to all three completed variables while nothing is entered', () => {
+    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    expect(o.rsh_status).toBe('success');
+    expect(o.rsh_moduleCompleted).toBe('');
+    expect(o.rsh_sessionCompleted).toBe('');
+    expect(o.rsh_activityCompleted).toBe('');
+  });
+
+  it('writes the current items\' completed flags as the strings "true"/"false" (MobileCoach rules compare text) and "" for levels cleared by re-entering the module', () => {
+    let run = runWrapper({ cmd: "enter('mBouMgt')" });
+    expect(run.rsh_moduleCompleted).toBe('false');
+    expect(run.rsh_sessionCompleted).toBe('');
+    for (const cmd of ["enter('sGesGre')", "enter('aRolGes')", 'completeActivity()']) {
+      run = runWrapper({ cmd, json: run.rsh_json });
+      expect(run.rsh_status).toBe('success');
+    }
+    expect(run.rsh_moduleCompleted).toBe('false');
+    expect(run.rsh_sessionCompleted).toBe('false'); // aAbgKon still open
+    expect(run.rsh_activityCompleted).toBe('true'); // aRolGes was just completed
+    run = runWrapper({ cmd: "enter('mBouMgt')", json: run.rsh_json });
+    expect(run.rsh_sessionCompleted).toBe(''); // re-entering the module cleared session and activity
+    expect(run.rsh_activityCompleted).toBe('');
+  });
+
   it('reports command errors via rsh_status/-Error instead of crashing', () => {
     const o = runWrapper({ cmd: 'populateMenuWithSessions()' }); // no module entered yet
     expect(o.rsh_status).toBe('error');
