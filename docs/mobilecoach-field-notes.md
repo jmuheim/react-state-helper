@@ -15,7 +15,7 @@ Flows branch on `$coachName` to decide whether to display debugging output, usin
 
 ![Rule editing dialog with regular expression match for DEBUGGER.*](images/micro-dialog-message-rule-debugger.jpg)
 
-Every DEBUGGER-facing message starts with the shared banner variable `$debugBanner` ([decision #48](decisions.md)): declared in MobileCoach with the marker `⚠️ DEBUGGER INFO ⚠️` as its **default value** (not `0`), and prepended to debug text elements on the flow side. The script does not write or read it. The marker string exists only in that MobileCoach default value, nowhere in the repo — if the wording ever changes, update this note too.
+Every DEBUGGER-facing message starts with the shared banner variable `$debugBanner` ([decision #48](decisions.md)): declared in MobileCoach with the marker `⚠️ DEBUGGER INFO ⚠️` as its **default value** (not `0`), and prepended to debug text elements on the flow side. Its sibling `$errorBanner` (default value `🚨 ERROR INFO 🚨`, [decision #50](decisions.md)) works the same way but prefixes every **error-reporting** message regardless of coach — participants see it too. The script writes and reads neither. Both marker strings exist only in those MobileCoach default values, nowhere in the repo — if the wording ever changes, update this note too.
 
 ## Saving scripts: every `$` must start a declared variable name
 
