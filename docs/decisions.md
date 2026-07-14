@@ -121,6 +121,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 > Refined by #35: the repurposing is permanent — `$participantGroup` is a MobileCoach built-in that will never carry real group assignment in this project.
 
+> Refined by #52: the location ids now carry their level emojis (`🗂️mBouMgt: 📑sGesGre`).
+
 **Decision:** `getParticipantLocation()` writes `moduleId[: sessionId[: activityId]]` into `$participantGroup` (`e656913`).
 
 **Why:** it is one of the few variables easily inspectable from within MobileCoach — an accepted "mis-use" (README's own word) trading naming purity for observability.
@@ -437,6 +439,8 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 
 ## 49. The completion overview rides inside `$participantGroup`; `$rsh_completionOverview` is dropped
 
+> Refined by #52: "`getParticipantLocation()` is unchanged" no longer holds — the location ids now carry their level emojis too.
+
 **Decision:** The wrapper writes the participant's location and the completion overview into `$participantGroup` as one string, each part behind a short label: `Participant location: <location> | Completion overview: <overview>` (e.g. `Participant location: mBouMgt: sGesGre | Completion overview: 🗂️mBouMgt[📑sBouIntro✅ 📑sGesGre✅(🎯aRolGes✅ 🎯aAbgKon✅) 📑sPaus(🎯aMikPau)]`); before the first module is entered there is no location, so the variable holds the labelled overview alone. The dedicated `$rsh_completionOverview` output variable (#34) is dropped; `getCompletionOverview()` stays as a method, now prefixing every id with its level emoji (#41's menu-label emojis, here without a space — ids are compact enough); `getParticipantLocation()` is unchanged. Extends the #16/#35 repurposing of the built-in.
 
 **Why:** both values exist purely for quick human inspection, and `$participantGroup` is the one easily inspectable MobileCoach built-in — the whole reason #16 repurposed it. Splitting the inspection payload across a built-in and a declared variable meant one more row in the setup table and one more chance to hit the silent-failure trap of an undeclared variable, for no gain: nobody branches a flow on the overview string. **Rejected:** keeping both variables (a declared variable whose only consumer is the same human eyeball already looking at `$participantGroup`); merging in the other direction into `$rsh_completionOverview` (loses the built-in's no-declaration inspectability, which is the point); marking the current location inside the overview with an emoji instead of prefixing it (harder to read at a glance and overloads the emoji vocabulary).
@@ -458,3 +462,11 @@ Entries 1–16 were **reconstructed** on 2026-07-08 from the code, CLAUDE.md, an
 **Why:** MobileCoach rules branch on variable *content as text*, and how the platform stringifies a raw JavaScript boolean written back from the script is unverified — if it rendered as anything other than `true`/`false`, a rule comparing against those texts would silently never fire. Converting in the wrapper removes that unknown: the variable content is guaranteed to be one of exactly two known strings. **Rejected:** writing raw booleans and trusting the platform's stringification (bets a silent flow failure on unverified behavior); making the `isCurrent…Completed()` methods return strings themselves (breaks the library-API convention that `is…`/`has…` commands return booleans, and would leak the MobileCoach text concern into the Node-tested API).
 
 **Watch for:** the conversion is deliberately asymmetric — booleans returned by commands issued via `$rsh_cmd` (e.g. `isModuleCompleted('mBouMgt')`) still reach `$rsh_result` unconverted. A live check of how `$rsh_result` renders a raw boolean belongs in the field notes; if it is anything other than `true`/`false`, the same conversion belongs in the `rsh_result` assembly.
+
+## 52. Location ids in `$participantGroup` carry their level emojis
+
+**Decision:** `getParticipantLocation()` prefixes each id with its level emoji, directly in front with no space — the same convention #49 gave `getCompletionOverview()` — so the location part of `$participantGroup` reads `🗂️mBouMgt: 📑sGesGre` instead of `mBouMgt: sGesGre` (`ccafde9`, pushed directly to master). Refines #16's bare-id format and #49's "`getParticipantLocation()` is unchanged".
+
+**Why:** both halves of the merged `$participantGroup` value exist for the same quick human inspection (#49), yet the location showed bare ids while the overview right next to it was emoji-prefixed — one variable speaking two dialects. The developer guide's `$participantGroup` example already showed the emoji-prefixed location, so code and docs had drifted; the emojis reuse #41's level vocabulary, making each id's level readable at a glance instead of via its first letter. **Rejected:** correcting the docs down to the bare-id format instead — the at-a-glance legibility that justified the overview's emojis in #49 applies equally to the location; a space between emoji and id (menu-label style) — #49 already settled no-space for compact ids inside this variable.
+
+**Watch for:** nothing branches on the location string today; if a flow ever does, it must match the emoji-prefixed format. The deployed MobileCoach copy keeps writing bare ids until the next copy-over.
