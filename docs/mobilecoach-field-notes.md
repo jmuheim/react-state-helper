@@ -21,6 +21,12 @@ The script editor is a plain text field; when confirming it with "Ok", MobileCoa
 
 For our script this means no `` ${…} `` template interpolation and no `$`-decorated pseudo-names in comments — the full rule and its enforcing test live in the [developer guide](developer-guide.md#script-editor-validation-on-save--only-before-declared-variable-names) (decision #27).
 
+## Deleting a variable gives no warning about remaining references
+
+The unknown-variable check above is the *only* guard MobileCoach has against dangling `$variable` references, and it runs only when a text or code field is **saved**. The reverse direction is unguarded: a variable can be deleted from the system without any notice like "this variable is still referenced here and there" — every text and code field that mentions it keeps its now-dangling reference silently. Since the scan re-runs only on the next save of each individual field, such stale references surface one field at a time, whenever a field happens to be edited again.
+
+So before deleting a variable, search the dialogs for its uses manually — MobileCoach won't. Together with the raw-text `$` scan (comments included, no `${…}` interpolation) this makes the whole variable handling a naive, asymmetric affair: strict to the point of nuisance when writing, and completely hands-off when deleting.
+
 ## Menu entries split on the raw definition text, not on variable content
 
 When a menu entry is defined as `$rsh_menuLabel1:$rsh_menuId1`, MobileCoach performs the `:`-split on the **raw definition text, before variables are interpolated** — colons that arrive inside variable values are never treated as separators.
@@ -59,3 +65,18 @@ At the top level of the dialog structure, the *real* modules (those in the JSON 
 - **Abschluss** — the counterpart at the end: participants re-take the same questionnaire (post). Like the Einführung, it is not in the JSON model and cannot be reached through the library's menus.
 
 Besides these, MobileCoach also contains an `allActivitiesOfCurrentSessionMenu` dialog — the activities-menu counterpart to `allModulesMenu` and `allSessionsOfCurrentModuleMenu`. No menu entry currently emits its id, so it is unreachable and effectively unused; it is noted here (and in a comment next to the dialog-id constants in the source) so its presence in the editor isn't mistaken for wiring.
+
+## Copying or deleting a dialog does not include its sub-dialogs
+
+Structural operations on a dialog act on that dialog alone — contained sub-dialogs never follow their parent:
+
+- **Copy + paste** copies only the dialog itself with its messages, decision points, etc. — not any sub-dialogs nested inside it. After pasting, sub-dialogs must be recreated (or copied one by one) under the new parent.
+- **Delete** likewise removes only the dialog itself. Its sub-dialogs are *not* deleted; they are re-aligned next to where their now-deleted parent used to be, i.e. they survive as siblings at the parent's former level.
+
+So neither operation can be used to move or remove a whole subtree in one step — each nesting level has to be handled individually. The delete behavior also means orphaned ex-sub-dialogs can linger in the structure unnoticed after a cleanup; when deleting a parent, check its former position for surviving children.
+
+## Pasting a decision point into another dialog forgets its "jump to other dialog" field
+
+When a decision point is copy+pasted, the **"jump to other dialog"** field is "forgotten" — the pasted copy has no value set anymore. This happens only when pasting into a *different* dialog; pasting within the same dialog keeps the value. The very similar **"cascade to other dialog"** field is unaffected and survives the cross-dialog paste intact.
+
+So after pasting decision points across dialogs, re-check and re-set their "jump to other dialog" fields. Two related fields — **"jump to other message"** and **"cascade to other message"** — haven't been inspected yet; whether they survive a cross-dialog paste is unknown.
