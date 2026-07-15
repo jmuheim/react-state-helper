@@ -8,6 +8,8 @@ Be sure to also read the hands-on platform knowledge picked up while working in 
 
 The dialog structure mirrors the state JSON (`defaultStateTemplate()` in [`src/ReactStateHelper.js:227`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js#L227)): every id in the state gets its own MobileCoach dialog.
 
+**Note:** If the state JSON needs to be changed—for example, because a new 🗂️ module, 📑 session, or 🎯 activity is being added, or an existing one needs to be adapted—you cannot do this yourself as a MobileCoach Author. Please contact a [MobileCoach Admin](mobilecoach-admin-guide.md) and ask them to update the state JSON accordingly.
+
 ### Module dialogs
 
 **Module dialogs sit on the root level** of the intervention, as siblings of the "👾 RSH" dialog that holds the script — here "🗂️ Boundary Management" is the active module tab, alongside "🗂️ Emotionsregulation", and "👾 RSH":
