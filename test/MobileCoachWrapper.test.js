@@ -18,10 +18,10 @@ function runWrapper({ cmd, json = '0' }) {
 }
 
 describe('MobileCoach deployment wrapper', () => {
-  it('writes scalar command results to rsh_result', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+  it('writes value-returning command results to rsh_result', () => {
+    const o = runWrapper({ cmd: 'getCompletionOverview()' });
     expect(o.rsh_status).toBe('success');
-    expect(o.rsh_result).toBe(0);
+    expect(o.rsh_result).toContain('🗂️mBouMgt');
     expect(o.rsh_error).toBe('none');
   });
 
@@ -44,7 +44,7 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes all 9 menu label and id slots as "" on runs that do not populate a menu (no stale entries)', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    const o = runWrapper({ cmd: 'getCompletionOverview()' });
     expect(o.rsh_status).toBe('success');
     for (let i = 1; i <= 9; i++) {
       expect(o[`rsh_menuLabel${i}`]).toBe('');
@@ -67,7 +67,7 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes "" to rsh_progressAdvice while no module is entered (advice would throw)', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    const o = runWrapper({ cmd: 'getCompletionOverview()' });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_progressAdvice).toBe('');
   });
@@ -94,13 +94,13 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes the completion overview alone to participantGroup while no module is entered (there is no location yet)', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    const o = runWrapper({ cmd: 'getCompletionOverview()' });
     expect(o.rsh_status).toBe('success');
     expect(o.participantGroup).toBe('Completion overview: 🗂️mBouMgt[📑sBouIntro 📑sGesGre(🎯aRolGes 🎯aAbgKon) 📑sPaus(🎯aMikPau)] 🗂️mEmoReg[📑sEmoIntro 📑sAkzep(🎯aAkzep) 📑sNeuBew(🎯aNeuBew) 📑sUmgEmo(🎯aEmoSit) 📑sUmgSup(🎯aUmgSup)]');
   });
 
   it('writes "" to all three times-entered variables while nothing is entered', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    const o = runWrapper({ cmd: 'getCompletionOverview()' });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_moduleTimesEntered).toBe('');
     expect(o.rsh_sessionTimesEntered).toBe('');
@@ -125,7 +125,7 @@ describe('MobileCoach deployment wrapper', () => {
   });
 
   it('writes "" to all three completed variables while nothing is entered', () => {
-    const o = runWrapper({ cmd: "getModuleProgress('mBouMgt')" });
+    const o = runWrapper({ cmd: 'getCompletionOverview()' });
     expect(o.rsh_status).toBe('success');
     expect(o.rsh_moduleCompleted).toBe('');
     expect(o.rsh_sessionCompleted).toBe('');

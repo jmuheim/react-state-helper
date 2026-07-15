@@ -52,7 +52,7 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 |---|---|
 | `Activity` | Bottom of the hierarchy (contains no children) — tracks `completed`, `times_entered`, timestamps |
 | `Session` | Contains activities; `isCompleted()` iff all activities completed |
-| `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
+| `Module` | Contains sessions; exposes `countCompletedSessions` |
 | `ReactStateHelper` | Public API; holds `#state` (private); navigated via `current_module_id / current_session_id / current_activity_id` |
 
 Details (id conventions, state validation, navigation model) are in `docs/developer-guide.md` — which describes only outward-facing behavior (commands, `$rsh_` variables, errors, limits), not code internals; internals are documented in the source itself.

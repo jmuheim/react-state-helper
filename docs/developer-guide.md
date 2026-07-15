@@ -30,7 +30,7 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 |---|---|---|
 | `Activity` | 🎯 | Bottom of the hierarchy — tracks `completed`, `times_entered`, timestamps |
 | `Session` | 📑 | Contains activities; `isCompleted()` if all activities completed (or, for an intro session, once entered) |
-| `Module` | 🗂️ | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
+| `Module` | 🗂️ | Contains sessions; exposes `countCompletedSessions` |
 | `ReactStateHelper` | 👾 | Public API; holds `#state` (private); navigated via `current_module_id / current_session_id / current_activity_id`. The ubiquitous **rsh** abbreviation (e.g. the `$rsh_json` variable prefix) is its initials |
 
 ### ID conventions
@@ -120,7 +120,7 @@ Day to day, flows drive the library with three kinds of **doer** commands: **ent
 | `populateMenuWithSessions()` | module entered | Fills the labels and ids with the current module's sessions, plus a back entry (`Ein anderes 🗂️ Modul wählen` — see [Back entries](#back-entries)) |
 | `populateMenuWithActivities()` | module + session entered | Fills the labels and ids with the current session's activities, plus two back entries (`Eine andere 📑 Session wählen`, then `Ein anderes 🗂️ Modul wählen` — see [Back entries](#back-entries)) |
 
-For decisions in a flow (e.g. showing a different message once the current module is completed) and for displaying the participant's status (e.g. the progress advice), no command is needed: the completion flags, times-entered counters, and the advice text are auto-written to `$rsh_` variables on every run — see the [variable table](#one-time-mobilecoach-setup). It is absolutely possible to call other, "internal" commands through `$rsh_cmd` as well (e.g. `isModuleCompleted('mBouMgt')` — see [the source](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js)), but this should not be necessary at all.
+For decisions in a flow (e.g. showing a different message once the current module is completed) and for displaying the participant's status (e.g. the progress advice), no command is needed: the completion flags, times-entered counters, and the advice text are auto-written to `$rsh_` variables on every run — see the [variable table](#one-time-mobilecoach-setup). The cheat-sheet above is the complete set of commands a flow should ever issue — everything else the script computes reaches flows through those auto-written variables.
 
 ## Menus
 
