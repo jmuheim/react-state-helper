@@ -1,6 +1,6 @@
-# Maintainer guide
+# MobileCoach Admin guide
 
-This guide is for **maintainers** — the people who change the app content (the state JSON), copy the script into MobileCoach, and create/update the dialog structures and variables there, without touching the library's code logic. Content editors, who only fill the created dialogs with their content, will get their own focused [content editor guide](content-editor-guide.md) (currently a stub). Developers changing the code logic itself find the internals documented in the source; the platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
+This guide is for **MobileCoach Admins** — the people who change the app content (the state JSON), copy the script into MobileCoach, and create/update the dialog structures and variables there, without touching the library's code logic. MobileCoach Authors, who only fill the created dialogs with their content, will get their own focused [MobileCoach Author guide](mobilecoach-author-guide.md) (currently a stub). JavaScript Developers changing the code logic itself find the internals documented in the source; the platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
 
 ## Data model
 
@@ -98,7 +98,7 @@ Good to know: `master` is protected by the `protect-master` [GitHub ruleset](htt
 
 ## Common tasks
 
-Recipes for the changes a maintainer makes most often. Whatever the task, the loop is the same: edit → `npm test` → land the change via a PR (see [Working with Claude Code](#working-with-claude-code)) → [deploy](#deploying-a-change).
+Recipes for the changes a MobileCoach Admin makes most often. Whatever the task, the loop is the same: edit → `npm test` → land the change via a PR (see [Working with Claude Code](#working-with-claude-code)) → [deploy](#deploying-a-change).
 
 ### Changing the app content (the state JSON)
 
@@ -112,7 +112,7 @@ All content — the modules, sessions, and activities with their titles — live
 
 ### Changing behavior
 
-Strictly speaking developer territory — this is the one task that goes beyond maintaining and touches the code logic. All logic lives in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js), the tests in `test/ReactStateHelper.test.js`. Add or adjust a test alongside every behavior change, and keep the script self-contained — no `import`/`export`, no Node.js APIs, no stray `$` signs even in comments — `test/MobileCoachPlatformConstraints.test.js` enforces this (see [the platform constraints](mobilecoach-platform-constraints.md) for why).
+Strictly speaking JavaScript Developer territory — this is the one task that goes beyond MobileCoach administration and touches the code logic. All logic lives in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js), the tests in `test/ReactStateHelper.test.js`. Add or adjust a test alongside every behavior change, and keep the script self-contained — no `import`/`export`, no Node.js APIs, no stray `$` signs even in comments — `test/MobileCoachPlatformConstraints.test.js` enforces this (see [the platform constraints](mobilecoach-platform-constraints.md) for why).
 
 If the change writes to a **new `$rsh_…` variable**: add it to the [variable table](#one-time-mobilecoach-setup) and declare it in MobileCoach (default `0`, access "manageable by service") **before** deploying. An edit-time hook and `npm test` catch a missing table entry — the MobileCoach declaration they cannot check, and forgetting it triggers the [silent-failure gotcha](#one-time-mobilecoach-setup).
 

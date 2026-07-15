@@ -13,9 +13,9 @@ ReactStateHelper
 
 Full documentation is published at **<https://jmuheim.github.io/react-state-helper/>** (source in [`docs/`](docs/), which is the single source of truth):
 
-- [Maintainer guide](docs/maintainer-guide.md) — architecture, data model, and MobileCoach setup (the variables to declare, the command cheat-sheet, menu/routing setup) for the people who maintain the app content and the MobileCoach project.
+- [MobileCoach Admin guide](docs/mobilecoach-admin-guide.md) — architecture, data model, and MobileCoach setup (the variables to declare, the command cheat-sheet, menu/routing setup) for the MobileCoach Admins maintaining the app content and the MobileCoach project.
 - [MobileCoach platform constraints](docs/mobilecoach-platform-constraints.md) — the platform restrictions that drive the design.
-- [Content editor guide](docs/content-editor-guide.md) — currently a stub pointing to the maintainer guide; a new, focused content editor guide is planned.
+- [MobileCoach Author guide](docs/mobilecoach-author-guide.md) — currently a stub pointing to the MobileCoach Admin guide; a new, focused guide for MobileCoach Authors is planned.
 - [Decision log](docs/decisions.md), [open questions](docs/open-questions.md), and [backlog](docs/backlog.md).
 
 ## Development
