@@ -1,8 +1,8 @@
 # MobileCoach Admin guide
 
-This guide is for **MobileCoach Admins** — the people who change the app content (the state JSON), copy the script into MobileCoach, and declare its variables there, without touching the library's code logic. MobileCoach Authors, who build the dialog structures in MobileCoach and fill them with content, have their own [MobileCoach Author guide](mobilecoach-author-guide.md).
+This guide is for **MobileCoach Admins** — the people who change the app content (the state JSON), copy the script into MobileCoach, and declare its variables there, without touching the library's code logic. 
 
-JavaScript Developers changing the code logic itself find the internals documented in the source; the platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
+Be sure to also read about the platform constraints that drive most design decisions: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
 
 ## Data model
 
