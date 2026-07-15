@@ -1,6 +1,6 @@
 # MobileCoach field notes
 
-Practical platform knowledge gathered while setting the library up in MobileCoach. Unlike the [platform constraints in the developer guide](developer-guide.md#mobilecoach--pathmate-platform-constraints) — which drive the library's design — these notes are hands-on observations about working in the MobileCoach editor itself. Append new insights as they come up.
+Practical platform knowledge gathered while setting the library up in MobileCoach. The dividing line vs. the [platform constraints](mobilecoach-platform-constraints.md): a *constraint* is platform behavior the library's code or design must obey (that page is curated and stable); a *field note* is a hands-on observation about working in the MobileCoach editor — workflows, gotchas, UI behavior. Append new insights here as they come up; when one turns out to constrain the library's design, add the constraint to the constraints page and keep the hands-on details here.
 
 ## Coach selection and debug coaches
 
@@ -17,11 +17,9 @@ Flows branch on `$coachName` to decide whether to display debugging output, usin
 
 Every DEBUGGER-facing message starts with the shared banner variable `$debugBanner` ([decision #48](decisions.md)): declared in MobileCoach with the marker `⚠️ DEBUGGER INFO ⚠️` as its **default value** (not `0`), and prepended to debug text elements on the flow side. Its sibling `$errorBanner` (default value `🚨 ERROR INFO 🚨`, [decision #50](decisions.md)) works the same way but prefixes every **error-reporting** message regardless of coach — participants see it too. The script writes and reads neither. Both marker strings exist only in those MobileCoach default values, nowhere in the repo — if the wording ever changes, update this note too.
 
-## Saving scripts: every `$` must start a declared variable name
+## Saving scripts: the editor doesn't say which `$` token it dislikes
 
-The script editor is a plain text field; when confirming it with "Ok", MobileCoach validates the text and rejects it with "The text contains unknown variables." if it contains a `$` that isn't immediately followed by the name of a declared variable. The scan covers the **raw text** — comments included — and isn't a JS parse: even the fragment "$-prefixed" inside a comment was rejected (`$` followed by a hyphen). The editor doesn't say which token it dislikes, so with several candidates it's a process of elimination.
-
-For our script this means no `` ${…} `` template interpolation and no `$`-decorated pseudo-names in comments — the full rule and its enforcing test live in the [developer guide](developer-guide.md#script-editor-validation-on-save--only-before-declared-variable-names) (decision #27).
+When saving a text or code field is rejected with "The text contains unknown variables." — the raw-text `$`-scan described on the [platform constraints page](mobilecoach-platform-constraints.md#script-editor-validation-on-save--only-before-declared-variable-names) (decision #27) — the editor gives no hint *which* token tripped it. With several candidate `$` occurrences in the text, finding the culprit is a process of elimination.
 
 ## Deleting a variable gives no warning about remaining references
 
@@ -60,7 +58,7 @@ Dialogs are containers of flow elements (messages, decision points, …), handle
 - **Cascading:** after the jumped-to dialog finishes, control returns to where it came from.
 - **Jumping:** one-way — control does *not* return.
 
-Unverified: what a **jump from within a cascade** does to the pending return chain — does the jump abandon the whole cascade (the stacked "go back" targets are dropped), or does the cascade's return still fire when the jumped-to dialog finishes? Needs a live test with a cascade at least two levels deep, jumping out of the innermost dialog.
+Unverified: what a **jump from within a cascade** does to the pending return chain — does the jump abandon the whole cascade (the stacked "go back" targets are dropped), or does the cascade's return still fire when the jumped-to dialog finishes? Needs a live test with a cascade at least two levels deep, jumping out of the innermost dialog. Working assumption meanwhile (2026-07-15): the jump abandons the whole chain — believed but not confirmed; the [frame-pattern sketch](#frame-pattern-sketch-dialogs-reduced-to-anfangende-all-logic-in-shared-rsh-helper-dialogs)'s cascade-everywhere wiring leans on it.
 
 (Stub — a fuller write-up of dialog internals, rule sequencing, variable writes, and if/else trees is planned; see the [flow-export backlog item](backlog.md#check-the-mobilecoach-flow-export-html-into-the-repo).)
 
@@ -97,8 +95,54 @@ Structural operations on a dialog act on that dialog alone — contained sub-dia
 
 So neither operation can be used to move or remove a whole subtree in one step — each nesting level has to be handled individually. The delete behavior also means orphaned ex-sub-dialogs can linger in the structure unnoticed after a cleanup; when deleting a parent, check its former position for surviving children.
 
+## Deleting a referenced dialog gives no warning — references are silently reset
+
+A dialog that other flow elements point to via **"jump to other dialog"** or **"cascade to other dialog"** can be deleted without any notice that references to it still exist. The references themselves are not left dangling but silently **reset to nothing** — every jump/cascade field that pointed to the deleted dialog is now simply empty.
+
+Note the contrast with [variable deletion](#deleting-a-variable-gives-no-warning-about-remaining-references): a deleted variable leaves its dangling `$name` references in place (where the next save of that field at least trips the unknown-variable check), whereas a deleted dialog *erases* its references — so there is no artifact left to stumble over later, only a decision point that quietly no longer goes anywhere. That makes this the most invisible member of the silent-failure family yet: the flow doesn't error, it just stops branching where it used to.
+
+So before deleting a dialog, search the flow for jump/cascade fields that target it and note them down — after the delete, there is no trace of what was lost. If a flow mysteriously stops moving on at a decision point, an emptied jump/cascade field from an earlier dialog deletion is a candidate.
+
 ## Pasting a decision point into another dialog forgets its "jump to other dialog" field
 
 When a decision point is copy+pasted, the **"jump to other dialog"** field is "forgotten" — the pasted copy has no value set anymore. This happens only when pasting into a *different* dialog; pasting within the same dialog keeps the value. The very similar **"cascade to other dialog"** field is unaffected and survives the cross-dialog paste intact.
 
 So after pasting decision points across dialogs, re-check and re-set their "jump to other dialog" fields. Two related fields — **"jump to other message"** and **"cascade to other message"** — haven't been inspected yet; whether they survive a cross-dialog paste is unknown.
+
+## Restarting the app creates a fresh participant
+
+Restarting the whole app registers a **new participant**, with every variable at its declared default — a fresh test run therefore always starts from the script's built-in default state, regardless of what earlier participants have accumulated in their `$rsh_json`. Testing a content or script change never requires resetting anyone's state: restart the app, get a new participant, see the new content.
+
+The old test participants are simply neglected: they linger in the participant list with their stale state until they are deleted — at the latest when the app is deployed to the real audience.
+
+## Frame-pattern sketch: dialogs reduced to Anfang/Ende, all logic in shared RSH helper dialogs
+
+Sketched in the editor on 2026-07-15 and **undone again before the summer break** — none of this exists in MobileCoach anymore; this note is the reconstruction recipe. Status: structure only, with dummy content, never verified end-to-end. It is a first structural sketch of the [helper-dialogs backlog item](backlog.md#helper-dialogs-outsource-enter-into-shared-black-box-dialogs), extended from just `enter(…)` to the whole dialog lifecycle.
+
+**The frame.** Every content dialog — module, session, activity alike — is reduced to a fixed skeleton: an **"Anfang" 🛫 decision point**, then the content, then an **"Ende" 🛬 decision point**. The frame decision points carry no logic of their own; all logic lives in shared helper dialogs they route to. Content dialogs stay pure content, and every dialog of a level gets the identical frame:
+
+![Module dialog with only an Anfang and an Ende decision point around a dummy message](images/frame-pattern-module-skeleton.jpg)
+
+![Session dialog with the same Anfang and Ende decision point frame](images/frame-pattern-session-skeleton.jpg)
+
+**The shared helpers** are collected under the 👾 RSH dialog group, one per level and lifecycle point. The "Gewähltes/Gewählte" naming is the point: each helper operates on whatever module/session/activity is *current*, which is why a single helper serves every dialog of its level:
+
+![RSH dialog group listing the shared helper dialogs per level and lifecycle point](images/frame-pattern-rsh-helpers.jpg)
+
+- **Menü** — presumably the "magic menu" dispatcher that the [dialog-skeleton note's TODO](#dialog-skeleton-non-module-dialogs-around-the-real-modules) wants `allModulesMenu` moved into (internals not captured).
+- **Gewähltes 🗂️ Modul: Anfang 🛫 / Ende 🛬**
+- **Gewählte 📑 Session: Anfang 🛫 / Ende 🛬**
+- **Gewählte 🎯 Aktivität: Anfang 🛫** — with no "Ende" counterpart: its closer is **🎯 Aktivität abschliessen ✅**, i.e. completing the activity *is* the end-of-activity logic.
+
+**Helper internals** — only "Gewähltes 🗂️ Modul: Anfang" was built out; the other helpers existed but were not yet filled in. The plan: build them analogously to this one at their level, adding new features to them as the need arises:
+
+![Modul-Anfang helper with debug message, enter decision point, variable reset, and sessions menu](images/frame-pattern-module-anfang-helper.jpg)
+
+1. A DEBUGGER-gated **message announcing the entry** (`$debugBanner` + "Du betrittst gerade 🗂️ Modul $participantNextMicroDialogIdentifier …").
+2. A decision point **entering the id held in `$participantNextMicroDialogIdentifier`**: its rule uses the operator "create text but result is always true" to build the literal text `enter('$participantNextMicroDialogIdentifier')` — the quotes are part of the rule text; MobileCoach interpolates the variable into it — and stores the result in `$rsh_cmd`; the decision point's dialog-target field points at the 👾 RSH dialog, whose script rule executes the command. So it is the standard command dispatch, except the id comes from [the tapped menu id the platform leaves behind](#the-tapped-menu-id-lands-in-participantnextmicrodialogidentifier) instead of a hardcoded `enter('mXy')` — which is exactly what makes one helper serve every module.
+
+   ![Rule editing windows of the enter decision point: rule text with the variable placeholder, result stored in the rsh_cmd variable, dialog target RSH](images/frame-pattern-enter-decision-point.jpg)
+3. A decision point **resetting `$participantNextMicroDialogIdentifier`** — manual cleanup, our countermeasure to the platform [never cleaning up variables](#variables-are-never-cleaned-up-stale-values-survive-forever). Its comment was truncated in the screenshot ("Reset participantNextMicroDialogIdentifier variable (must on…") — the full wording, apparently a constraint on when the reset may happen, was not captured.
+4. A decision point showing the **menu of all 📑 sessions of the current 🗂️ module** — entering a module flows straight into its sessions menu.
+
+**Wiring: cascade everywhere, jump only for menu navigation.** The frame decision points **cascade** to the helpers, never jump, for two reasons: the [cross-dialog paste bug](#pasting-a-decision-point-into-another-dialog-forgets-its-jump-to-other-dialog-field) hits only "jump to other dialog" fields, and jumping is assumed to abandon the whole pending cascade chain — the working assumption for the [still-unverified jump-inside-cascade question](#moving-between-dialogs-cascading-vs-jumping), believed but not 100% sure. The only jump anywhere is the platform's own navigation to the menu-tapped dialog. The open worry: whether this cascade-heavy wiring builds up return chains long enough to degrade performance or stability — see the [open question](open-questions.md#do-long-cascade-chains-degrade-mobilecoach).

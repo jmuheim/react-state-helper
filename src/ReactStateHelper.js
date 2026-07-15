@@ -85,16 +85,6 @@ class Module {
     return this.sessions.length > 0 && this.sessions.every(s => s.isCompleted());
   }
 
-  hasAdequateProgress() {
-    return this.countCompletedSessions() >= this.sessions_needed_for_adequate_progress;
-  }
-
-  getProgress() {
-    const completable = this.sessions.filter(s => s.activities.length > 0);
-    if (completable.length === 0) return 0;
-    return completable.filter(s => s.isCompleted()).length / completable.length;
-  }
-
   toJSON() {
     return {
       id: this.id,
@@ -150,10 +140,6 @@ class Session {
 
   countCompletedActivities() {
     return this.activities.filter(a => a.isCompleted()).length;
-  }
-
-  hasAdequateProgress() {
-    return this.countCompletedActivities() >= this.activities_needed_for_adequate_progress;
   }
 
   findActivity(activityId) {
@@ -417,29 +403,6 @@ class ReactStateHelper {
   completeActivity() {
     if (!this.#state.current_activity_id) throw new Error('No activity entered yet');
     this.#findActivity(this.#state.current_activity_id).markCompleted();
-  }
-
-  isModuleCompleted(moduleId) {
-    return this.#findModule(moduleId).isCompleted();
-  }
-
-  isSessionCompleted(sessionId) {
-    if (!this.#state.current_module_id) throw new Error('No module entered yet');
-    return this.#findModule(this.#state.current_module_id).findSession(sessionId).isCompleted();
-  }
-
-  hasSessionAdequateProgress(sessionId) {
-    if (!this.#state.current_module_id) throw new Error('No module entered yet');
-    return this.#findModule(this.#state.current_module_id).findSession(sessionId).hasAdequateProgress();
-  }
-
-  // Returns a value between 0 and 1 for the given module
-  getModuleProgress(moduleId) {
-    return this.#findModule(moduleId).getProgress();
-  }
-
-  hasModuleAdequateProgress(moduleId) {
-    return this.#findModule(moduleId).hasAdequateProgress();
   }
 
   // The level to enter is read off the id's level letter (m/s/a followed by an uppercase letter,
@@ -725,10 +688,9 @@ if (typeof process === 'undefined') {
   }
 
   // Inside MobileCoach, before calling ReactStateHelper, set $rsh_cmd to the command you'd like to execute, e.g.
-  // - $rsh_cmd = "isSessionCompleted('sGesGre')"
+  // - $rsh_cmd = "enter('mBouMgt')"
   // - $rsh_cmd = "completeActivity()"
-  // - $rsh_cmd = "hasModuleAdequateProgress('mBouMgt')"
-  // - $rsh_cmd = "getModuleProgress('mBouMgt')"
+  // - $rsh_cmd = "populateMenuWithModules()"
   // Please be extra careful! Typos or syntax errors will break this!
   let result, status;
   if (error) {

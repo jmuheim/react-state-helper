@@ -10,9 +10,12 @@ A plain JavaScript library for managing hierarchical app state (modules → sess
 
 Detailed documentation lives in `docs/`, published via GitHub Pages at https://jmuheim.github.io/react-state-helper/ — **the docs site is the source of truth**; this file and the README only keep essentials plus links. When a change makes a docs page stale, update the page.
 
-- `docs/developer-guide.md` — architecture, data model, state validation, flow-logic (query) commands, test setup, full MobileCoach platform constraints.
-- `docs/content-editor-guide.md` — MobileCoach setup for content editors (doer commands only: enter, complete, populate menus); contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/mobilecoach-admin-guide.md` — for **MobileCoach Admins**: people who change the state JSON, copy the script into MobileCoach, and declare its variables there, without touching code logic. Architecture, data model, state validation, MobileCoach setup (doer commands, menu/routing setup), common tasks; contains the canonical **wrapper variable table** (checked by the edit-time hook and `npm test`).
+- `docs/mobilecoach-platform-constraints.md` — the full MobileCoach platform constraints that drive most design decisions.
+- `docs/mobilecoach-author-guide.md` — for **MobileCoach Authors**: people who build the dialog structures in MobileCoach and fill them with content; still growing, more sections planned.
 - `docs/mobilecoach-field-notes.md` — hands-on MobileCoach platform knowledge (coach selection, debug coaches, rule regex behavior); **append new platform insights here** as they are learned, don't keep them only in conversation.
+
+The dividing line between the last two: a *constraint* is platform behavior the library's code or design must obey (curated page, keep it short); a *field note* is a hands-on observation about working in the MobileCoach editor (append-only journal). New insights land in the field notes; if one constrains the library's design, add the constraint to the constraints page and keep the hands-on details in the notes. Don't duplicate a rule on both pages — link instead.
 
 ## Commands
 
@@ -37,7 +40,7 @@ Design decisions and their rationale (including rejected alternatives) live in `
 ## Pre-merge checklist
 
 - New/changed behavior has tests; `npm test` is green.
-- Any new wrapper variable is added to the variable table in `docs/content-editor-guide.md` **and** declared in MobileCoach (default `0`, access "manageable by service") before deploy.
+- Any new wrapper variable is added to the variable table in `docs/mobilecoach-admin-guide.md` **and** declared in MobileCoach (default `0`, access "manageable by service") before deploy.
 - `src/ReactStateHelper.js` is still one self-contained script — enforced by `test/MobileCoachPlatformConstraints.test.js`.
 - README / CLAUDE.md / docs pages / `docs/decisions.md` are updated wherever the change makes them stale.
 
@@ -49,16 +52,16 @@ All logic lives in `src/ReactStateHelper.js`. There are four classes:
 |---|---|
 | `Activity` | Bottom of the hierarchy (contains no children) — tracks `completed`, `times_entered`, timestamps |
 | `Session` | Contains activities; `isCompleted()` iff all activities completed |
-| `Module` | Contains sessions; exposes `countCompletedSessions`, `getProgress` |
+| `Module` | Contains sessions; exposes `countCompletedSessions` |
 | `ReactStateHelper` | Public API; holds `#state` (private); navigated via `current_module_id / current_session_id / current_activity_id` |
 
-Details (id conventions, state validation, navigation model, serialization) are in `docs/developer-guide.md`.
+Details (id conventions, state validation, navigation model) are in `docs/mobilecoach-admin-guide.md` — which describes only outward-facing behavior (commands, `$rsh_` variables, errors, limits), not code internals; internals are documented in the source itself.
 
 Test setup: `vitest.config.js` lists `src/ReactStateHelper.js` as a `setupFile`, which registers `ReactStateHelper` as `globalThis.ReactStateHelper` — tests import nothing, mirroring MobileCoach's plain-script environment.
 
 ## MobileCoach constraints (essentials)
 
-Full section in `docs/developer-guide.md` — these constraints drive most design decisions:
+Full page in `docs/mobilecoach-platform-constraints.md` — these constraints drive most design decisions:
 
 - The deployed artifact is one self-contained script: no `import`/`export`, no Node.js globals (`process` is used to detect Node vs. MobileCoach).
 - Every `$variable` the script might write must be pre-declared in MobileCoach (default `0`, access "manageable by service") — a missing one makes the script **fail silently mid-flow**.

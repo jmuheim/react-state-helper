@@ -140,168 +140,11 @@ describe('ReactStateHelper', () => {
     it('loads persisted state from JSON', () => {
       helper.enter('mMod1');
       helper.enter('sSes1a');
-      expect(helper.isSessionCompleted('sSes1a')).toBe(false);
+      expect(helper.isCurrentSessionCompleted()).toBe(false);
       helper.enter('aAct1a1'); helper.completeActivity();
       helper.enter('aAct1a2'); helper.completeActivity();
       const restored = ReactStateHelper.loadExistingState(helper.toString());
-      expect(restored.isSessionCompleted('sSes1a')).toBe(true);
-    });
-  });
-
-  describe('isSessionCompleted', () => {
-    beforeEach(() => {
-      helper.enter('mMod1');
-    });
-
-    it('returns false for all sessions in the default state', () => {
-      expect(helper.isSessionCompleted('sSes1a')).toBe(false);
-      expect(helper.isSessionCompleted('sSes1b')).toBe(false);
-      helper.enter('mMod2');
-      expect(helper.isSessionCompleted('sSes2a')).toBe(false);
-    });
-
-    it('returns false when only some activities are completed', () => {
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      expect(helper.isSessionCompleted('sSes1a')).toBe(false);
-    });
-
-    it('returns true when all activities are completed', () => {
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      helper.enter('aAct1a2'); helper.completeActivity();
-      expect(helper.isSessionCompleted('sSes1a')).toBe(true);
-    });
-
-    it('throws if no module has been entered', () => {
-      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
-      expect(() => helper.isSessionCompleted('sSes1a')).toThrow('No module entered yet');
-    });
-  });
-
-  describe('hasSessionAdequateProgress', () => {
-    beforeEach(() => {
-      helper.enter('mMod1');
-    });
-
-    it('returns false for all sessions in the default state', () => {
-      expect(helper.hasSessionAdequateProgress('sSes1a')).toBe(false);
-      expect(helper.hasSessionAdequateProgress('sSes1b')).toBe(false);
-    });
-
-    it('returns true once completed activities meet the threshold (sSes1a threshold=1)', () => {
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      expect(helper.hasSessionAdequateProgress('sSes1a')).toBe(true);
-    });
-
-    it('unlike isSessionCompleted, stays true even if not all activities are done', () => {
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      expect(helper.isSessionCompleted('sSes1a')).toBe(false);
-      expect(helper.hasSessionAdequateProgress('sSes1a')).toBe(true);
-    });
-
-    it('throws if no module has been entered', () => {
-      helper = ReactStateHelper.loadExistingState(JSON.stringify(testState));
-      expect(() => helper.hasSessionAdequateProgress('sSes1a')).toThrow('No module entered yet');
-    });
-  });
-
-  describe('isModuleCompleted', () => {
-    it('returns false for all modules in the default state', () => {
-      expect(helper.isModuleCompleted('mMod1')).toBe(false);
-      expect(helper.isModuleCompleted('mMod2')).toBe(false);
-    });
-
-    it('returns false when only some sessions are completed', () => {
-      helper.enter('mMod1');
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      helper.enter('aAct1a2'); helper.completeActivity();
-      expect(helper.isModuleCompleted('mMod1')).toBe(false);
-    });
-
-    it('returns true when all sessions are completed (including the intro)', () => {
-      helper.enter('mMod1');
-      const mod1Data = testState.modules.find(m => m.id === 'mMod1');
-      for (const ses of mod1Data.sessions) {
-        helper.enter(ses.id);
-        for (const act of ses.activities) {
-          helper.enter(act.id); helper.completeActivity();
-        }
-      }
-      expect(helper.isModuleCompleted('mMod1')).toBe(true);
-    });
-
-    it('does not count sessions from other modules', () => {
-      helper.enter('mMod2');
-      const mod2Data = testState.modules.find(m => m.id === 'mMod2');
-      for (const ses of mod2Data.sessions) {
-        helper.enter(ses.id);
-        for (const act of ses.activities) {
-          helper.enter(act.id); helper.completeActivity();
-        }
-      }
-      expect(helper.isModuleCompleted('mMod1')).toBe(false);
-    });
-  });
-
-  describe('getModuleProgress', () => {
-    it('returns 0 for all modules in the default state', () => {
-      expect(helper.getModuleProgress('mMod1')).toBe(0);
-      expect(helper.getModuleProgress('mMod2')).toBe(0);
-    });
-
-    it('returns the fraction of completed sessions within the module (1 of 2 completable)', () => {
-      helper.enter('mMod1');
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      helper.enter('aAct1a2'); helper.completeActivity();
-      expect(helper.getModuleProgress('mMod1')).toBeCloseTo(1 / 2);
-    });
-
-    it('does not count sessions from other modules', () => {
-      helper.enter('mMod2');
-      helper.enter('sSes2a');
-      helper.enter('aAct2a1'); helper.completeActivity();
-      expect(helper.getModuleProgress('mMod1')).toBe(0);
-    });
-
-    it('returns 1 when all sessions in the module are completed', () => {
-      helper.enter('mMod1');
-      const mod1Data = testState.modules.find(m => m.id === 'mMod1');
-      for (const ses of mod1Data.sessions) {
-        helper.enter(ses.id);
-        for (const act of ses.activities) {
-          helper.enter(act.id); helper.completeActivity();
-        }
-      }
-      expect(helper.getModuleProgress('mMod1')).toBe(1);
-    });
-  });
-
-  describe('hasModuleAdequateProgress', () => {
-    beforeEach(() => {
-      helper.enter('mMod1');
-    });
-
-    it('returns false with no completed sessions', () => {
-      expect(helper.hasModuleAdequateProgress('mMod1')).toBe(false);
-    });
-
-    it('returns true once the module threshold is met (mMod1 threshold=1)', () => {
-      helper.enter('sSes1a');
-      helper.enter('aAct1a1'); helper.completeActivity();
-      helper.enter('aAct1a2'); helper.completeActivity();
-      expect(helper.hasModuleAdequateProgress('mMod1')).toBe(true);
-    });
-
-    it('does not count sessions from other modules', () => {
-      helper.enter('mMod2');
-      helper.enter('sSes2a');
-      helper.enter('aAct2a1'); helper.completeActivity();
-      expect(helper.hasModuleAdequateProgress('mMod1')).toBe(false);
+      expect(restored.isCurrentSessionCompleted()).toBe(true);
     });
   });
 
@@ -959,8 +802,9 @@ describe('ReactStateHelper', () => {
           }
         }
       }
+      const overview = p.getCompletionOverview();
       for (const mod of state.modules) {
-        expect(p.isModuleCompleted(mod.id)).toBe(true);
+        expect(overview).toContain('🗂️' + mod.id + '✅');
       }
     });
   });
