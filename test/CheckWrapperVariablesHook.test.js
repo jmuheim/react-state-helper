@@ -99,7 +99,7 @@ describe('check-wrapper-variables hook', () => {
       expect(result.status).toBe(0);
     });
 
-    it('passes on the real source and developer guide (repo currently has no undocumented variable)', () => {
+    it('passes on the real source and maintainer guide (repo currently has no undocumented variable)', () => {
       const result = runHook(JSON.stringify({ tool_input: { file_path: realSrcPath } }));
       expect(result.stderr).toBe('');
       expect(result.status).toBe(0);

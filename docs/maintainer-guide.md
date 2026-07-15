@@ -1,6 +1,6 @@
-# Developer guide
+# Maintainer guide
 
-Architecture, platform internals, and MobileCoach setup of ReactStateHelper. The platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
+This guide is for **maintainers** — the people who change the app content (the state JSON), copy the script into MobileCoach, and create/update the dialog structures and variables there, without touching the library's code logic. Content editors, who only fill the created dialogs with their content, will get their own focused [content editor guide](content-editor-guide.md) (currently a stub). Developers changing the code logic itself find the internals documented in the source; the platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
 
 ## Data model
 
@@ -39,13 +39,13 @@ Module, session, and activity ids must be unique across the *entire* state, not 
 
 ![MobileCoach dialog settings with the id mBouMgt as identifier and variable prefix](images/boundary-management-mobilecoach.jpg)
 
-Every id starts with its level letter — `m` for modules, `s` for sessions, `a` for activities — followed by an uppercase letter, and contains only letters and numbers (e.g. `mBouMgt`, `sAkzep`, `aRolGes`). Each id also works as the MobileCoach dialog's **variable prefix** (with an underscore appended, e.g. `$mBouMgt_`). No other format rules are enforced, except uniqueness.
+Every id starts with its level letter — `m` for modules, `s` for sessions, `a` for activities — followed by an uppercase letter, and contains only letters and numbers (e.g. `mBouMgt`, `sAkzep`, `aRolGes`). The uppercase letter is what keeps the level marker recognizable without a separator; keep the rest short and mnemonic. Each id also works as the MobileCoach dialog's **variable prefix** (with an underscore appended, e.g. `$mBouMgt_`) — which is why nothing but letters and numbers is allowed: MobileCoach rejects prefixes containing anything else before the trailing underscore. No other format rules are enforced, except uniqueness.
 
 ### State validation
 
 State — the id rules above included — is validated as it loads: a violation makes loading fail immediately, surfaced through [`$rsh_error`](#one-time-mobilecoach-setup) instead of crashing the whole script silently — see [Command dispatch](mobilecoach-platform-constraints.md#command-dispatch).
 
-Checked at load, besides the id rules: the size minimums from the [data model](#data-model) above (every non-intro session needs at least one activity, every module at least one session with activities) and the structural caps — at most **9** modules, **8** sessions per module, **7** activities per session — which fall out of the menu slot layout (see [Back entries](#back-entries)).
+Checked at load, besides the id rules: the size minimums from the [data model](#data-model) above (every non-intro session needs at least one activity, every module at least one session *with* activities — a module made up entirely of intro sessions could be "completed" without the participant doing anything) and the structural caps — at most **9** modules, **8** sessions per module, **7** activities per session — which fall out of the menu slot layout (see [Back entries](#back-entries)).
 
 ### Navigation model
 
@@ -81,7 +81,7 @@ Good to know: `master` is protected by the `protect-master` [GitHub ruleset](htt
    | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuWith…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
-   | `$rsh_progressAdvice` | Ready-to-display (Swiss German) advice sentence about how to continue, refreshed on **every** run; `""` until a module has been entered |
+   | `$rsh_progressAdvice` | Ready-to-display (Swiss German) advice sentence about how to continue, adapting to the deepest entered level (module-level advice while only a module is entered, session-level advice once a session is entered), refreshed on **every** run; `""` until a module has been entered |
    | `$rsh_moduleTimesEntered` | How many times the participant's current module has been entered, refreshed on **every** run; `""` while no module has been entered yet |
    | `$rsh_sessionTimesEntered` | Same for the current session; `""` while no session is current (entering a module clears the current session) |
    | `$rsh_activityTimesEntered` | Same for the current activity; `""` while no activity is current (entering a module or session clears the current activity) |
@@ -90,7 +90,7 @@ Good to know: `master` is protected by the `protect-master` [GitHub ruleset](htt
    | `$rsh_activityCompleted` | Same for the current activity; `""` while no activity is current (entering a module or session clears the current activity) |
    | `$rsh_menuLabel1` – `$rsh_menuLabel9` | Dynamic menu entry labels (`"<level emoji> <title>[ <status emoji>]"`, e.g. `🗂️ Emotionsregulation ✅`, `📑 Gesunde Grenzen setzen 👈`, `🎯 Rollenwechsel bewusst gestalten`) populated by `populateMenuWithModules()` / `populateMenuWithSessions()` / `populateMenuWithActivities()`. Any other command resets all slots to `""` |
    | `$rsh_menuId1` – `$rsh_menuId9` | The id belonging to the label in the same slot (e.g. `mEmoReg`); concatenated with its label in the menu definition (see [Menus](#menus)). Same reset behavior as the labels |
-   | `$participantGroup` | **Already exists by default in MobileCoach — do not create it** (we "mis-use" it, as it is one of the few easily inspectable variables from within MobileCoach). Carries the participant's location  and a one-line snapshot of the whole completion state, e.g. `Participant location: 🗂️mBouMgt: 📑sGesGre \| Completion overview: 🗂️mBouMgt[📑sBouIntro✅ 📑sGesGre✅(🎯aRolGes✅ 🎯aAbgKon✅) 📑sPaus(🎯aMikPau)]` |
+   | `$participantGroup` | **Already exists by default in MobileCoach — do not create it** (we "mis-use" it, as it is one of the few easily inspectable variables from within MobileCoach). Carries the participant's location (the current module id, with the session and activity ids appended as the participant navigates deeper) and a one-line snapshot of the whole completion state (each module wraps its sessions in `[ ]`, each session its activities in `( )`; until a module is entered the variable holds the snapshot alone), e.g. `Participant location: 🗂️mBouMgt: 📑sGesGre \| Completion overview: 🗂️mBouMgt[📑sBouIntro✅ 📑sGesGre✅(🎯aRolGes✅ 🎯aAbgKon✅) 📑sPaus(🎯aMikPau)]` |
 
 3. Also declare the two banner variables — the only ones whose default is **not** `0`: `$debugBanner` with default value `⚠️ DEBUGGER INFO ⚠️`, and `$errorBanner` with default value `🚨 ERROR INFO 🚨`. The script never touches them; flows prepend `$debugBanner` to every DEBUGGER-facing message and `$errorBanner` to every error message — participants see the latter too (see the [banner field note](mobilecoach-field-notes.md#coach-selection-and-debug-coaches)).
 
@@ -98,7 +98,7 @@ Good to know: `master` is protected by the `protect-master` [GitHub ruleset](htt
 
 ## Common tasks
 
-Recipes for the changes a developer makes most often. Whatever the task, the loop is the same: edit → `npm test` → land the change via a PR (see [Working with Claude Code](#working-with-claude-code)) → [deploy](#deploying-a-change).
+Recipes for the changes a maintainer makes most often. Whatever the task, the loop is the same: edit → `npm test` → land the change via a PR (see [Working with Claude Code](#working-with-claude-code)) → [deploy](#deploying-a-change).
 
 ### Changing the app content (the state JSON)
 
@@ -112,7 +112,7 @@ All content — the modules, sessions, and activities with their titles — live
 
 ### Changing behavior
 
-All logic lives in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js), the tests in `test/ReactStateHelper.test.js`. Add or adjust a test alongside every behavior change, and keep the script self-contained — no `import`/`export`, no Node.js APIs, no stray `$` signs even in comments — `test/MobileCoachPlatformConstraints.test.js` enforces this (see [the platform constraints](mobilecoach-platform-constraints.md) for why).
+Strictly speaking developer territory — this is the one task that goes beyond maintaining and touches the code logic. All logic lives in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js), the tests in `test/ReactStateHelper.test.js`. Add or adjust a test alongside every behavior change, and keep the script self-contained — no `import`/`export`, no Node.js APIs, no stray `$` signs even in comments — `test/MobileCoachPlatformConstraints.test.js` enforces this (see [the platform constraints](mobilecoach-platform-constraints.md) for why).
 
 If the change writes to a **new `$rsh_…` variable**: add it to the [variable table](#one-time-mobilecoach-setup) and declare it in MobileCoach (default `0`, access "manageable by service") **before** deploying. An edit-time hook and `npm test` catch a missing table entry — the MobileCoach declaration they cannot check, and forgetting it triggers the [silent-failure gotcha](#one-time-mobilecoach-setup).
 
@@ -124,7 +124,7 @@ A merged change reaches the app only by repeating step 1 of the [one-time Mobile
 
 MobileCoach cannot call JavaScript functions directly. Instead, each script run works like this:
 
-1. Set `$rsh_cmd` to the command you want, e.g. `completeActivity()` — exactly as written in the cheat-sheet below.
+1. Set `$rsh_cmd` to the command you want, e.g. `completeActivity()` — exactly as written in the cheat-sheet below; typos or syntax errors break the run.
 2. Execute the script (cascade to "👾 RSH" dialog, see [One-time MobileCoach setup](#one-time-mobilecoach-setup)).
 3. Read the results: the command's return value is in `$rsh_result` (`""` for commands that return nothing), `$rsh_status` is `success` or `error` (inspect `$rsh_error` for a detailed error message).
 
@@ -154,16 +154,26 @@ MobileCoach has no dynamic list/loop constructs for building menus — menu entr
 2. In the menu definition, concatenate label and id per slot with a colon: `$rsh_menuLabel1:$rsh_menuId1` (for menu item 1). MobileCoach splits on `:` when the button is tapped — the **left** side is displayed to the participant, the **right** side (the id) is stored to the reserved variable `$participantNextMicroDialogIdentifier` ([field note](mobilecoach-field-notes.md#the-tapped-menu-id-lands-in-participantnextmicrodialogidentifier)).
 3. MobileCoach reads that variable and navigates directly to the dialog with that id (which must exist under exactly that name — see [ID conventions](#id-conventions)).
 
+There are deliberately three populate commands rather than one auto-detecting `populateMenu()`: a flow can display a higher-level menu while the participant is navigated deeper (e.g. a go-back screen), and the explicit names keep `$rsh_cmd` self-documenting.
+
 At the time being, titles must not contain a colon — state loading rejects them ([field note](mobilecoach-field-notes.md#menu-entries-split-on-the-raw-definition-text-not-on-variable-content); whether to drop this validation is an [open question](open-questions.md#drop-the-title-colon-validation)).
 
-Each label is formatted as `"<level emoji> <title>[ <status emoji>]"` — the level emoji (🗂️/📑/🎯) always prefixes the title, and a status emoji (✅ completed, 👈 next up) is appended after it where applicable (e.g. `"🗂️ Emotionsregulation ✅"`). The same emojis also appear in the progress advice (`$rsh_progressAdvice`) and in the `$participantGroup` snapshot (see the [variable table](#one-time-mobilecoach-setup)).
+Each label is formatted as `"<level emoji> <title>[ <status emoji>]"` — the level emoji always prefixes the title, and a status emoji is appended after it where applicable (e.g. `"🗂️ Emotionsregulation ✅"`); items that are neither completed nor next up get no status emoji:
+
+| Emoji | Meaning | Appears |
+|---|---|---|
+| 🗂️ / 📑 / 🎯 | Level marker: module / session / activity | Prefixes every menu label's title and every quoted title in the progress advice (`$rsh_progressAdvice`); glued without a space to the ids in the `$participantGroup` location and snapshot |
+| ✅ | Completed | Appended to completed items in menus, and directly after a completed item's id in the `$participantGroup` snapshot |
+| 👈 | Next up — the first not-yet-completed item | Menus only |
 
 ### Back entries
 
 The sessions and activities menus automatically append **back entries**:
 
-- Sessions menu: `Ein anderes 🗂️ Modul wählen`, routing to the dialog id `allModulesMenu`.
-- Activities menu: `Eine andere 📑 Session wählen`, routing to the dialog id `allSessionsOfCurrentModuleMenu` — followed by `Ein anderes 🗂️ Modul wählen` just like the sessions menu's entry, so a participant can switch modules without hopping through the sessions menu first.
+- Sessions menu: `Ein anderes 🗂️ Modul wählen`, routing to the dialog id `allModulesMenu` — **name the dialog that shows the module-selection menu (the one calling `populateMenuWithModules()`) exactly `allModulesMenu`**, or the back entry leads nowhere: a tap on an id without a matching dialog pauses the flow silently ([field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)). Where that dialog lives in MobileCoach doesn't matter — only its id does.
+- Activities menu: `Eine andere 📑 Session wählen`, routing to the dialog id `allSessionsOfCurrentModuleMenu` — **name the dialog calling `populateMenuWithSessions()` exactly like that** (same silent-failure trap) — followed by `Ein anderes 🗂️ Modul wählen` just like the sessions menu's entry, so a participant can switch modules without hopping through the sessions menu first.
+
+Back-entry labels are fixed — they get neither a level prefix nor a status emoji. A back tap also involves no library command: `enter('allModulesMenu')` and `enter('allSessionsOfCurrentModuleMenu')` are **never** called — doing so by mistake puts a dedicated "… must never be entered" message into `$rsh_error`, and both reserved ids are equally rejected as *state* ids when state loads. While a menu reached via a back entry is displayed, the participant's tracked location simply stays in the previous context; it changes when the tapped entry's dialog runs its own `enter(…)`.
 
 The modules menu has no back entry — it is already the top level.
 
@@ -174,4 +184,4 @@ To guarantee the back entries always have free slots, [state validation](#state-
 - **The flow just stops, no error anywhere** → almost always an undeclared or misconfigured variable. Re-check every row of the [variable table](#one-time-mobilecoach-setup): default `0`, access "manageable by service". After a menu tap, it can also be a tapped id without a dialog of exactly that name ([field note](mobilecoach-field-notes.md#a-participantnextmicrodialogidentifier-without-a-matching-dialog-pauses-the-flow-silently)).
 - **Where is the participant right now, and what have they completed?** → `$participantGroup` shows the current location (module, session, activity) followed by the completion snapshot, and is easy to inspect from within MobileCoach.
 - **See what happens under the hood** → run the app with a coach whose name starts with `DEBUGGER` (the general debug coach, or a personal one like `DEBUGGER_J`) to get verbose debug messages during the flow (see the [field note on debug coaches](mobilecoach-field-notes.md#coach-selection-and-debug-coaches)).
-- **Something misbehaves but the flow continues** → whenever executing a `$rsh_cmd` throws an error, the flow displays `$rsh_error` automatically.
+- **Something misbehaves but the flow continues** → whenever executing a `$rsh_cmd` throws an error, the flow displays `$rsh_error` automatically. Load errors name the offending id; command errors usually mean a typo in `$rsh_cmd` or a missing `enter(…)` precondition (module before session, session before activity).
