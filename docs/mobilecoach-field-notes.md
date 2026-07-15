@@ -97,6 +97,14 @@ Structural operations on a dialog act on that dialog alone — contained sub-dia
 
 So neither operation can be used to move or remove a whole subtree in one step — each nesting level has to be handled individually. The delete behavior also means orphaned ex-sub-dialogs can linger in the structure unnoticed after a cleanup; when deleting a parent, check its former position for surviving children.
 
+## Deleting a referenced dialog gives no warning — references are silently reset
+
+A dialog that other flow elements point to via **"jump to other dialog"** or **"cascade to other dialog"** can be deleted without any notice that references to it still exist. The references themselves are not left dangling but silently **reset to nothing** — every jump/cascade field that pointed to the deleted dialog is now simply empty.
+
+Note the contrast with [variable deletion](#deleting-a-variable-gives-no-warning-about-remaining-references): a deleted variable leaves its dangling `$name` references in place (where the next save of that field at least trips the unknown-variable check), whereas a deleted dialog *erases* its references — so there is no artifact left to stumble over later, only a decision point that quietly no longer goes anywhere. That makes this the most invisible member of the silent-failure family yet: the flow doesn't error, it just stops branching where it used to.
+
+So before deleting a dialog, search the flow for jump/cascade fields that target it and note them down — after the delete, there is no trace of what was lost. If a flow mysteriously stops moving on at a decision point, an emptied jump/cascade field from an earlier dialog deletion is a candidate.
+
 ## Pasting a decision point into another dialog forgets its "jump to other dialog" field
 
 When a decision point is copy+pasted, the **"jump to other dialog"** field is "forgotten" — the pasted copy has no value set anymore. This happens only when pasting into a *different* dialog; pasting within the same dialog keeps the value. The very similar **"cascade to other dialog"** field is unaffected and survives the cross-dialog paste intact.
