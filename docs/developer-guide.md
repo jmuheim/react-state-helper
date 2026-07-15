@@ -77,7 +77,7 @@ Good to know: `master` is protected by the `protect-master` [GitHub ruleset](htt
    | Variable | Purpose |
    |---|---|
    | `$rsh_cmd` | Command to execute, e.g. `completeActivity()` (see [Running a command](#running-a-command)) |
-   | `$rsh_json` | Full serialized state, persisted between runs; initialised automatically on the very first run (see [State persistence](mobilecoach-platform-constraints.md#state-persistence)) |
+   | `$rsh_json` | Full serialized state, persisted between runs; initialised automatically on the very first run. Declaring it with a full state JSON as its default value instead of `0` would also work, but is untried — see [State persistence](mobilecoach-platform-constraints.md#state-persistence) for the details and caveats |
    | `$rsh_result` | Return value of the last command; `""` when the command returns nothing (`enter(…)`, `completeActivity()`, the `populateMenuWith…()` commands, …) |
    | `$rsh_status` | `success` or `error` |
    | `$rsh_error` | Error message if status is `error`, otherwise `none` |
