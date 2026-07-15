@@ -1,6 +1,8 @@
 # MobileCoach Admin guide
 
-This guide is for **MobileCoach Admins** — the people who change the app content (the state JSON), copy the script into MobileCoach, and create/update the dialog structures and variables there, without touching the library's code logic. MobileCoach Authors, who only fill the created dialogs with their content, will get their own focused [MobileCoach Author guide](mobilecoach-author-guide.md) (currently a stub). JavaScript Developers changing the code logic itself find the internals documented in the source; the platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
+This guide is for **MobileCoach Admins** — the people who change the app content (the state JSON), copy the script into MobileCoach, and declare its variables there, without touching the library's code logic. MobileCoach Authors, who build the dialog structures in MobileCoach and fill them with content, have their own [MobileCoach Author guide](mobilecoach-author-guide.md).
+
+JavaScript Developers changing the code logic itself find the internals documented in the source; the platform constraints that drive most design decisions live on their own page: [MobileCoach / Pathmate platform constraints](mobilecoach-platform-constraints.md).
 
 ## Data model
 
@@ -107,7 +109,7 @@ All content — the modules, sessions, and activities with their titles — live
 1. Edit the object in `defaultStateTemplate()` — easiest by copying an existing sibling and adjusting it.
 2. Give new elements ids following the [ID conventions](#id-conventions), and stay within the [validation rules](#state-validation).
 3. Run `npm test` — the suite checks these structural rules against the production data, so mistakes surface here instead of failing silently inside MobileCoach.
-4. Mirror the change in MobileCoach: every added or renamed id needs a dialog of exactly that name, with the id plus `$` and `_` as its variable prefix (see [ID conventions](#id-conventions)). Then [deploy the script](#deploying-a-change).
+4. Mirror the change in MobileCoach: every added or renamed id needs a dialog with exactly that identifier, with the id plus `$` and `_` as its variable prefix (see [Creating the dialog structure](mobilecoach-author-guide.md#creating-the-dialog-structure)). Then [deploy the script](#deploying-a-change).
 5. Participants who have already run the app keep seeing the **old** content: their state persists in `$rsh_json` (see [State persistence](mobilecoach-platform-constraints.md#state-persistence)), and the built-in default is only loaded while `$rsh_json` is still `0`. While developing this is never a problem in practice: restarting the whole app creates a fresh participant, who starts from the new content — old test participants are simply neglected and eventually deleted (see the [field note](mobilecoach-field-notes.md#restarting-the-app-creates-a-fresh-participant)). Only to make an *existing* participant start over would you reset their `$rsh_json` to `0`.
 
 ### Changing behavior
