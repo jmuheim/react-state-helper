@@ -10,9 +10,9 @@ A plain JavaScript helper for managing hierarchical app state. It helps:
 
 Designed to be copy-pasted verbatim into [MobileCoach](https://mobile-coach.eu/), a mobile health platform.
 
-The source lives at [github.com/jmuheim/react-state-helper](https://github.com/jmuheim/react-state-helper).
+Developed by Josua Muheim (during module "F14 - Projektbezogenes Arbeiten"), supported by [Claude.ai](https://claude.ai/). The source lives at [github.com/jmuheim/react-state-helper](https://github.com/jmuheim/react-state-helper).
 
-Project owner: Sandra Ulrich, ZHAW.
+REACT project owners: Sandra Ulrich and Pascal Streule, ZHAW.
 
 ## Reasoning
 
