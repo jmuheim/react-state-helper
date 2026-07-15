@@ -1,6 +1,6 @@
 # MobileCoach field notes
 
-Practical platform knowledge gathered while setting the library up in MobileCoach. Unlike the [platform constraints](mobilecoach-platform-constraints.md) — which drive the library's design — these notes are hands-on observations about working in the MobileCoach editor itself. Append new insights as they come up.
+Practical platform knowledge gathered while setting the library up in MobileCoach. The dividing line vs. the [platform constraints](mobilecoach-platform-constraints.md): a *constraint* is platform behavior the library's code or design must obey (that page is curated and stable); a *field note* is a hands-on observation about working in the MobileCoach editor — workflows, gotchas, UI behavior. Append new insights here as they come up; when one turns out to constrain the library's design, add the constraint to the constraints page and keep the hands-on details here.
 
 ## Coach selection and debug coaches
 
@@ -17,11 +17,9 @@ Flows branch on `$coachName` to decide whether to display debugging output, usin
 
 Every DEBUGGER-facing message starts with the shared banner variable `$debugBanner` ([decision #48](decisions.md)): declared in MobileCoach with the marker `⚠️ DEBUGGER INFO ⚠️` as its **default value** (not `0`), and prepended to debug text elements on the flow side. Its sibling `$errorBanner` (default value `🚨 ERROR INFO 🚨`, [decision #50](decisions.md)) works the same way but prefixes every **error-reporting** message regardless of coach — participants see it too. The script writes and reads neither. Both marker strings exist only in those MobileCoach default values, nowhere in the repo — if the wording ever changes, update this note too.
 
-## Saving scripts: every `$` must start a declared variable name
+## Saving scripts: the editor doesn't say which `$` token it dislikes
 
-The script editor is a plain text field; when confirming it with "Ok", MobileCoach validates the text and rejects it with "The text contains unknown variables." if it contains a `$` that isn't immediately followed by the name of a declared variable. The scan covers the **raw text** — comments included — and isn't a JS parse: even the fragment "$-prefixed" inside a comment was rejected (`$` followed by a hyphen). The editor doesn't say which token it dislikes, so with several candidates it's a process of elimination.
-
-For our script this means no `` ${…} `` template interpolation and no `$`-decorated pseudo-names in comments — the full rule and its enforcing test live on the [platform constraints page](mobilecoach-platform-constraints.md#script-editor-validation-on-save--only-before-declared-variable-names) (decision #27).
+When saving a text or code field is rejected with "The text contains unknown variables." — the raw-text `$`-scan described on the [platform constraints page](mobilecoach-platform-constraints.md#script-editor-validation-on-save--only-before-declared-variable-names) (decision #27) — the editor gives no hint *which* token tripped it. With several candidate `$` occurrences in the text, finding the culprit is a process of elimination.
 
 ## Deleting a variable gives no warning about remaining references
 

@@ -1,6 +1,8 @@
 # MobileCoach / Pathmate platform constraints
 
-Understanding these constraints is essential — they drive most design decisions in this library. How to work *within* them (setup, commands, menus) is described in the [developer guide](developer-guide.md); hands-on editor observations live in the [field notes](mobilecoach-field-notes.md).
+Understanding these constraints is essential — they drive most design decisions in this library. How to work *within* them (setup, commands, menus) is described in the [developer guide](developer-guide.md).
+
+A section belongs on this page only if the library's code or design must obey it — the page is curated and meant to stay short and stable. Everything that is merely useful to know while working in the MobileCoach editor (workflows, gotchas, UI behavior) goes into the append-only [field notes](mobilecoach-field-notes.md) instead.
 
 ## Execution model
 

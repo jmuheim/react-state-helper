@@ -15,6 +15,8 @@ Detailed documentation lives in `docs/`, published via GitHub Pages at https://j
 - `docs/content-editor-guide.md` — currently a stub pointing to the developer guide; a new, focused content editor guide is planned.
 - `docs/mobilecoach-field-notes.md` — hands-on MobileCoach platform knowledge (coach selection, debug coaches, rule regex behavior); **append new platform insights here** as they are learned, don't keep them only in conversation.
 
+The dividing line between the last two: a *constraint* is platform behavior the library's code or design must obey (curated page, keep it short); a *field note* is a hands-on observation about working in the MobileCoach editor (append-only journal). New insights land in the field notes; if one constrains the library's design, add the constraint to the constraints page and keep the hands-on details in the notes. Don't duplicate a rule on both pages — link instead.
+
 ## Commands
 
 ```bash
