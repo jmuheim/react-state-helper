@@ -74,7 +74,7 @@ Recipes for the changes a developer makes most often. Whatever the task, the loo
 
 All content — the modules, sessions, and activities with their titles — lives as one JSON-shaped object in `defaultStateTemplate()` in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js). To add, remove, rename, or reorder something:
 
-1. Edit the object in `defaultStateTemplate()` — easiest by copying an existing sibling and adjusting it. New elements start untouched: both timestamps `null`, `times_entered: 0`, `completed: false` for activities, and `is_intro: false` unless the session is an intro.
+1. Edit the object in `defaultStateTemplate()` — easiest by copying an existing sibling and adjusting it.
 2. Give new elements ids following the [ID conventions](#id-conventions), and stay within the [validation rules](#state-validation): at most 9 modules / 8 sessions per module / 7 activities per session, an intro session must be its module's first, every non-intro session needs at least one activity, and titles must not contain a colon.
 3. Run `npm test` — the suite checks these structural rules against the production data, so mistakes surface here instead of failing silently inside MobileCoach.
 4. Mirror the change in MobileCoach: every added or renamed id needs a dialog of exactly that name, with the id plus `_` as its variable prefix (see [ID conventions](#id-conventions)). Then [deploy the script](#deploying-a-change).
