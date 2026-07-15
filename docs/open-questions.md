@@ -26,6 +26,14 @@ Back-entry labels are currently fixed plain text (`Ein anderes 🗂️ Modul wä
 - **Why open:** it is unclear whether a visual marker (e.g. a back arrow, or the target level's emoji as prefix) would help participants distinguish back entries from content entries, or just add noise.
 - **Resolved by:** deciding a label format for back entries (possibly after observing participants), logging it via `/log-decision`, and adjusting the label constants and tests if it changes.
 
+## Should the id-taking query commands be callable from MobileCoach at all?
+
+The query commands that take an explicit id — `isModuleCompleted('mBouMgt')`, `isSessionCompleted(…)`, `hasSessionAdequateProgress(…)`, `getModuleProgress(…)`, `hasModuleAdequateProgress(…)` — exist purely as a `$rsh_cmd` escape hatch: they have no internal callers in the script, no MobileCoach flow uses them, and their only output channel is `$rsh_result` (which is never meaningfully populated today — see the batch-commands backlog item). Decision #53 settled that they get no `_` prefix; whether they should be reachable from flows at all is a separate question.
+
+- **Placeholder:** they stay public and callable via `$rsh_cmd`, documented as "should not be necessary" in the developer guide.
+- **Why open:** removing or `#`-privatizing them hinges on two backlog items that reshape the output contract: **batch commands** (which may remove `$rsh_result`, their only channel) and **invert the output flow** (commands writing results directly, after which unreferenced queries could become `#`-private or be deleted). Until those land, it is unclear whether flows will ever need to branch on a *non-current* item's completion — the one scenario the escape hatch covers.
+- **Resolved by:** settling the `$rsh_result` question inside the batch-commands item; then either deleting/`#`-privatizing the query commands or promoting them to documented cheat-sheet commands with a real output channel, logged via `/log-decision`.
+
 ## Rename the default branch `master` → `main`
 
 The repo was initialized locally (git's own default is still `master`; GitHub's `main` default only applies to repos created on github.com). Purely cosmetic, but `main` is the current convention, and the rename gets more expensive as automation accretes around the name.
