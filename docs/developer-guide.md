@@ -66,30 +66,6 @@ The repo is set up for [Claude Code](https://claude.com/claude-code) ([CLI](http
 
 Good to know: `master` is protected by the `protect-master` [GitHub ruleset](https://github.com/jmuheim/react-state-helper/settings/rules) — changes normally only land via a [pull request (PR)](https://github.com/jmuheim/react-state-helper/pulls) with a passing "test" status check ([continuous integration (CI)](https://github.com/jmuheim/react-state-helper/actions) runs `npm test` on every PR). For small changes (typo/doc fixes) where a PR is overhead, the `/push-to-master` command pushes master directly, temporarily bypassing the protection.
 
-## Common tasks
-
-Recipes for the changes a developer makes most often. Whatever the task, the loop is the same: edit → `npm test` → land the change via a PR (see [Working with Claude Code](#working-with-claude-code)) → [deploy](#deploying-a-change).
-
-### Changing the app content (the state JSON)
-
-All content — the modules, sessions, and activities with their titles — lives as one JSON-shaped object in `defaultStateTemplate()` in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js). To add, remove, rename, or reorder something:
-
-1. Edit the object in `defaultStateTemplate()` — easiest by copying an existing sibling and adjusting it.
-2. Give new elements ids following the [ID conventions](#id-conventions), and stay within the [validation rules](#state-validation): at most 9 modules / 8 sessions per module / 7 activities per session, an intro session must be its module's first, every non-intro session needs at least one activity, and titles must not contain a colon.
-3. Run `npm test` — the suite checks these structural rules against the production data, so mistakes surface here instead of failing silently inside MobileCoach.
-4. Mirror the change in MobileCoach: every added or renamed id needs a dialog of exactly that name, with the id plus `_` as its variable prefix (see [ID conventions](#id-conventions)). Then [deploy the script](#deploying-a-change).
-5. Participants who have already run the app keep seeing the **old** content: their state persists in `$rsh_json` (see [State persistence](mobilecoach-platform-constraints.md#state-persistence)), and the built-in default is only loaded while `$rsh_json` is still `0`. To let a test participant start over with the new content, reset their `$rsh_json` to `0`.
-
-### Changing behavior
-
-All logic lives in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js), the tests in `test/ReactStateHelper.test.js`. Add or adjust a test alongside every behavior change, and keep the script self-contained — no `import`/`export`, no Node.js APIs, no stray `$` signs even in comments — `test/MobileCoachPlatformConstraints.test.js` enforces this (see [the platform constraints](mobilecoach-platform-constraints.md) for why).
-
-If the change writes to a **new `$rsh_…` variable**: add it to the [variable table](#one-time-mobilecoach-setup) and declare it in MobileCoach (default `0`, access "manageable by service") **before** deploying. An edit-time hook and `npm test` catch a missing table entry — the MobileCoach declaration they cannot check, and forgetting it triggers the [silent-failure gotcha](#one-time-mobilecoach-setup).
-
-### Deploying a change
-
-A merged change reaches the app only by repeating step 1 of the [one-time MobileCoach setup](#one-time-mobilecoach-setup): copy the **entire** [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js) over the previous script text in the "👾 RSH" decision point — there are no partial updates. If the change added variables or content, declare the variables and create the dialogs first (see above).
-
 ## One-time MobileCoach setup
 
 1. Copy the full contents of [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js) **as-is** into MobileCoach:
@@ -119,6 +95,30 @@ A merged change reaches the app only by repeating step 1 of the [one-time Mobile
 3. Also declare the two banner variables — the only ones whose default is **not** `0`: `$debugBanner` with default value `⚠️ DEBUGGER INFO ⚠️`, and `$errorBanner` with default value `🚨 ERROR INFO 🚨`. The script never touches them; flows prepend `$debugBanner` to every DEBUGGER-facing message and `$errorBanner` to every error message — participants see the latter too (see the [banner field note](mobilecoach-field-notes.md#coach-selection-and-debug-coaches)).
 
 **⚠️ The silent-failure gotcha:** If any variable is missing or has the wrong access setting, the script fails silently and halts the flow mid-conversation — with **no error output** whatsoever. This is extremely painful to debug. Before testing anything, double-check that *every* variable in the table above is declared correctly.
+
+## Common tasks
+
+Recipes for the changes a developer makes most often. Whatever the task, the loop is the same: edit → `npm test` → land the change via a PR (see [Working with Claude Code](#working-with-claude-code)) → [deploy](#deploying-a-change).
+
+### Changing the app content (the state JSON)
+
+All content — the modules, sessions, and activities with their titles — lives as one JSON-shaped object in `defaultStateTemplate()` in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js). To add, remove, rename, or reorder something:
+
+1. Edit the object in `defaultStateTemplate()` — easiest by copying an existing sibling and adjusting it.
+2. Give new elements ids following the [ID conventions](#id-conventions), and stay within the [validation rules](#state-validation).
+3. Run `npm test` — the suite checks these structural rules against the production data, so mistakes surface here instead of failing silently inside MobileCoach.
+4. Mirror the change in MobileCoach: every added or renamed id needs a dialog of exactly that name, with the id plus `$` and `_` as its variable prefix (see [ID conventions](#id-conventions)). Then [deploy the script](#deploying-a-change).
+5. Participants who have already run the app keep seeing the **old** content: their state persists in `$rsh_json` (see [State persistence](mobilecoach-platform-constraints.md#state-persistence)), and the built-in default is only loaded while `$rsh_json` is still `0`. While developing this is never a problem in practice: restarting the whole app creates a fresh participant, who starts from the new content — old test participants are simply neglected and eventually deleted (see the [field note](mobilecoach-field-notes.md#restarting-the-app-creates-a-fresh-participant)). Only to make an *existing* participant start over would you reset their `$rsh_json` to `0`.
+
+### Changing behavior
+
+All logic lives in [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js), the tests in `test/ReactStateHelper.test.js`. Add or adjust a test alongside every behavior change, and keep the script self-contained — no `import`/`export`, no Node.js APIs, no stray `$` signs even in comments — `test/MobileCoachPlatformConstraints.test.js` enforces this (see [the platform constraints](mobilecoach-platform-constraints.md) for why).
+
+If the change writes to a **new `$rsh_…` variable**: add it to the [variable table](#one-time-mobilecoach-setup) and declare it in MobileCoach (default `0`, access "manageable by service") **before** deploying. An edit-time hook and `npm test` catch a missing table entry — the MobileCoach declaration they cannot check, and forgetting it triggers the [silent-failure gotcha](#one-time-mobilecoach-setup).
+
+### Deploying a change
+
+A merged change reaches the app only by repeating step 1 of the [one-time MobileCoach setup](#one-time-mobilecoach-setup): copy the **entire** [`src/ReactStateHelper.js`](https://github.com/jmuheim/react-state-helper/blob/master/src/ReactStateHelper.js) over the previous script text in the "👾 RSH" decision point — there are no partial updates. If the change added variables or content, declare the variables and create the dialogs first (see above).
 
 ## Running a command
 

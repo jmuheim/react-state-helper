@@ -108,3 +108,9 @@ So before deleting a dialog, search the flow for jump/cascade fields that target
 When a decision point is copy+pasted, the **"jump to other dialog"** field is "forgotten" — the pasted copy has no value set anymore. This happens only when pasting into a *different* dialog; pasting within the same dialog keeps the value. The very similar **"cascade to other dialog"** field is unaffected and survives the cross-dialog paste intact.
 
 So after pasting decision points across dialogs, re-check and re-set their "jump to other dialog" fields. Two related fields — **"jump to other message"** and **"cascade to other message"** — haven't been inspected yet; whether they survive a cross-dialog paste is unknown.
+
+## Restarting the app creates a fresh participant
+
+Restarting the whole app registers a **new participant**, with every variable at its declared default — a fresh test run therefore always starts from the script's built-in default state, regardless of what earlier participants have accumulated in their `$rsh_json`. Testing a content or script change never requires resetting anyone's state: restart the app, get a new participant, see the new content.
+
+The old test participants are simply neglected: they linger in the participant list with their stale state until they are deleted — at the latest when the app is deployed to the real audience.
