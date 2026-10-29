@@ -146,3 +146,18 @@ Sketched in the editor on 2026-07-15 and **undone again before the summer break*
 4. A decision point showing the **menu of all 📑 sessions of the current 🗂️ module** — entering a module flows straight into its sessions menu.
 
 **Wiring: cascade everywhere, jump only for menu navigation.** The frame decision points **cascade** to the helpers, never jump, for two reasons: the [cross-dialog paste bug](#pasting-a-decision-point-into-another-dialog-forgets-its-jump-to-other-dialog-field) hits only "jump to other dialog" fields, and jumping is assumed to abandon the whole pending cascade chain — the working assumption for the [still-unverified jump-inside-cascade question](#moving-between-dialogs-cascading-vs-jumping), believed but not 100% sure. The only jump anywhere is the platform's own navigation to the menu-tapped dialog. The open worry: whether this cascade-heavy wiring builds up return chains long enough to degrade performance or stability — see the [open question](open-questions.md#do-long-cascade-chains-degrade-mobilecoach).
+
+## The MobileCoach source code: an open-source original, a commercial platform today
+
+Checked 2026-10-29. The original MobileCoach is open source, under the Apache License 2.0 (© 2013–2018 Center for Digital Health Interventions, ETH Zurich and University of St. Gallen). The code lives on Bitbucket, not GitHub: [bitbucket.org/mobilecoach](https://bitbucket.org/mobilecoach/). The relevant repositories:
+
+- `mobilecoach-dev-core` — the server (Java); last commit 2023-06-15.
+- `mobilecoach-server` — Docker-based server setup; last updated 2023-12.
+- `mobilecoach-mobile-app` — the mobile client (JavaScript); last updated 2024-07.
+- `mobilecoach-documentation` — an old wiki (2019).
+
+The platform we use is run by Pathmate Technologies AG, who publish the current app and describe the platform as their commercial product. Whether their server code is closed source is **not confirmed** — nothing public says either way. The public code has been quiet for about two years, so treat it as a *clue*, never as proof of how our instance behaves: anything we learn from it needs a check in the editor (or a debug coach) before it becomes a [constraint](mobilecoach-platform-constraints.md).
+
+Useful for answering open questions: the public core contains the same concepts we work with (`participantNextMicroDialogIdentifier`, micro-dialog decision points, the rule evaluator that runs scripts), so e.g. the [jump-inside-cascade question](#moving-between-dialogs-cascading-vs-jumping) and the [cascade-depth question](open-questions.md#do-long-cascade-chains-degrade-mobilecoach) can be investigated there first.
+
+**Evidence that Pathmate's version has moved on.** The public rule evaluator runs scripts through Java's built-in `ScriptEngineManager` (`getEngineByName("JavaScript")`), and its Docker images use JDK 8 (`tomcat:8-jdk8-temurin`) — the JavaScript engine there is Nashorn, which supports only ES5.1 (no `class`, no `#private` fields). `ReactStateHelper` uses both and runs on our instance, so the engine must have been replaced since. This is an inference from the public code, not something we have tested; which JavaScript features our instance supports is not yet documented anywhere.

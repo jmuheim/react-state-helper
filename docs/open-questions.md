@@ -57,3 +57,11 @@ The repo was initialized locally (git's own default is still `master`; GitHub's 
 - **Placeholder:** stay on `master`.
 - **Why open:** low priority; needs one deliberate pass rather than a piecemeal change.
 - **Resolved by:** using GitHub's branch rename (retargets PRs, redirects URLs, updates the Pages source), then in the same pass: update `branches: [master]` in `.github/workflows/test.yml`, verify/rename the `protect-master` ruleset, rewrite `.claude/commands/push-to-master.md` (→ `/push-to-main`), update `blob/master/` links in `docs/mobilecoach-admin-guide.md` and `docs/mobilecoach-author-guide.md` plus `master` mentions in CLAUDE.md (decision-log entries stay as historical record), rename local branches, and verify CI, Pages, and the ruleset still work. Logged via `/log-decision` either way (rename or deliberate keep).
+
+## Which JavaScript features does the MobileCoach instance support?
+
+`ReactStateHelper` already uses `class`, `#private` fields and `eval`, and it runs on our instance — yet the [public MobileCoach code](mobilecoach-field-notes.md#the-mobilecoach-source-code-an-open-source-original-a-commercial-platform-today) points to an ES5.1-only engine, so Pathmate's version must differ. Which language features and built-ins the engine actually supports is not documented anywhere.
+
+- **Placeholder:** keep to the features the script already uses; assume nothing beyond them.
+- **Why open:** the answer decides how freely the "lighten the script" and "batch commands" backlog items can use newer syntax (template literals are out anyway — see the `$` constraint), and what a JITAI-related script may rely on.
+- **Resolved by:** running a small probe script in a debug coach (`const`/`let`, arrow functions, optional chaining, `Array.prototype.flat`, `Object.fromEntries`, `structuredClone`, `Date` parsing, …), noting the results in the field notes, and — for anything that constrains the library — the constraints page.
